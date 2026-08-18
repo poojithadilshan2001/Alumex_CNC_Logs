@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CNC Profiles Cycle Time - Alumex PLC</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- SheetJS for Excel Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- jsPDF & autoTable for PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto space-y-6">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">CNC Profiles Cycle Time</h1>
+        <p class="text-sm font-medium text-blue-700">Alumex PLC — Machine Parameters & Cycle Logs</p>
+      </div>
+      <div class="mt-4 md:mt-0 flex flex-wrap gap-3">
+        <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+          Download Excel (.xlsx)
+        </button>
+        <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+          Download PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form id="logForm" onsubmit="saveEntry(event)" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Main Profile / Name</label>
+        <input type="text" id="profile" placeholder="e.g., AL 527" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feature / Description</label>
+        <input type="text" id="description" placeholder="e.g., Float plane blade (Side 01)" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Length / Dim</label>
+        <input type="text" id="length" placeholder="e.g., 2437.4 mm" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feed Rate Override</label>
+        <input type="text" id="feed_override" placeholder="e.g., 70%" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Cycle Time (Seconds)</label>
+        <input type="number" id="cycle_seconds" placeholder="e.g., 83" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feed Speed (mm/min)</label>
+        <input type="text" id="feed_speeds" placeholder="e.g., Feed 600" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tooling Configuration</label>
+        <input type="text" id="tooling" placeholder="e.g., Single tool" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Remarks</label>
+        <input type="text" id="remarks" placeholder="e.g., Side 01" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+      <div class="col-span-full flex justify-end">
+        <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition">
+          Save to Database
+        </button>
+      </div>
+    </form>
+
+    <!-- Data Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase">
+            <tr>
+              <th class="p-3">#</th>
+              <th class="p-3">Main Profile</th>
+              <th class="p-3">Feature / Description</th>
+              <th class="p-3">Length / Dim</th>
+              <th class="p-3">Override</th>
+              <th class="p-3">Sec</th>
+              <th class="p-3">Duration</th>
+              <th class="p-3">Feed Speed</th>
+              <th class="p-3">Tooling</th>
+              <th class="p-3">Remarks</th>
+              <th class="p-3 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-gray-200">
+            <tr><td colspan="11" class="p-4 text-center text-gray-400">Loading records...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Supabase Configuration
+    const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_s8wnE3RfwJRQxO2NyPdWTg_YBssVkbM";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let records = [];
+
+    function formatDuration(sec) {
+      const s = parseInt(sec, 10);
+      if (isNaN(s)) return '-';
+      const hrs = Math.floor(s / 3600);
+      const mins = Math.floor((s % 3600) / 60);
+      const remSec = s % 60;
+      let out = '';
+      if (hrs > 0) out += `${hrs} hr `;
+      if (mins > 0 || hrs > 0) out += `${mins} min `;
+      out += `${remSec} sec`;
+      return out;
+    }
+
+    async function fetchRecords() {
+      const { data, error } = await supabaseClient
+        .from('cnc_cycle_times')
+        .select('*')
+        .order('id', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching data:', error);
+        return;
+      }
+
+      records = data || [];
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      if (records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-gray-500">No records found. Add an entry above.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      records.forEach((r, idx) => {
+        const row = `
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-3 font-semibold text-gray-400">${idx + 1}</td>
+            <td class="p-3 font-medium text-gray-900">${r.profile}</td>
+            <td class="p-3">${r.description || '-'}</td>
+            <td class="p-3">${r.length || '-'}</td>
+            <td class="p-3">${r.feed_override || '-'}</td>
+            <td class="p-3 font-mono font-medium">${r.cycle_seconds}</td>
+            <td class="p-3">${formatDuration(r.cycle_seconds)}</td>
+            <td class="p-3">${r.feed_speeds || '-'}</td>
+            <td class="p-3">${r.tooling || '-'}</td>
+            <td class="p-3 text-gray-500">${r.remarks || '-'}</td>
+            <td class="p-3 text-center">
+              <button onclick="deleteEntry(${r.id})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold">Delete</button>
+            </td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', row);
+      });
+    }
+
+    async function saveEntry(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Saving...";
+
+      const newRecord = {
+        profile: document.getElementById('profile').value,
+        description: document.getElementById('description').value,
+        length: document.getElementById('length').value,
+        feed_override: document.getElementById('feed_override').value,
+        cycle_seconds: parseInt(document.getElementById('cycle_seconds').value, 10),
+        feed_speeds: document.getElementById('feed_speeds').value,
+        tooling: document.getElementById('tooling').value,
+        remarks: document.getElementById('remarks').value
+      };
+
+      const { error } = await supabaseClient.from('cnc_cycle_times').insert([newRecord]);
+
+      if (error) {
+        alert('Failed to save: ' + error.message);
+      } else {
+        document.getElementById('logForm').reset();
+        await fetchRecords();
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Save to Database";
+    }
+
+    async function deleteEntry(id) {
+      if (!confirm('Are you sure you want to delete this record?')) return;
+
+      const { error } = await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
+
+      if (error) {
+        alert('Failed to delete: ' + error.message);
+      } else {
+        await fetchRecords();
+      }
+    }
+
+    function exportToExcel() {
+      const exportData = records.map((r, i) => ({
+        "No.": i + 1,
+        "Main Profile": r.profile,
+        "Feature / Description": r.description || '',
+        "Length / Dim": r.length || '',
+        "Feed Rate Override": r.feed_override || '',
+        "Cycle Time (Seconds)": r.cycle_seconds,
+        "Cycle Time (Formatted)": formatDuration(r.cycle_seconds),
+        "Feed Speed": r.feed_speeds || '',
+        "Tooling": r.tooling || '',
+        "Remarks": r.remarks || ''
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Alumex Cycle Times");
+      XLSX.writeFile(wb, "Alumex_CNC_Cycle_Time_Log.xlsx");
+    }
+
+    function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('l', 'mm', 'a4');
+
+      doc.setFontSize(14);
+      doc.text("CNC Profiles Cycle Time Sheet - Alumex PLC", 14, 15);
+
+      const tableData = records.map((r, i) => [
+        i + 1,
+        r.profile,
+        r.description || '-',
+        r.length || '-',
+        r.feed_override || '-',
+        r.cycle_seconds,
+        formatDuration(r.cycle_seconds),
+        r.feed_speeds || '-',
+        r.tooling || '-',
+        r.remarks || '-'
+      ]);
+
+      doc.autoTable({
+        head: [['No.', 'Profile', 'Description', 'Length', 'Override', 'Sec', 'Duration', 'Feed Speed', 'Tooling', 'Remarks']],
+        body: tableData,
+        startY: 22,
+        theme: 'striped',
+        headStyles: { fillColor: [30, 64, 175] },
+        styles: { fontSize: 8 }
+      });
+
+      doc.save("Alumex_CNC_Cycle_Time_Log.pdf");
+    }
+
+    // Initial load
+    fetchRecords();
+  </script>
+</body>
+</html>
