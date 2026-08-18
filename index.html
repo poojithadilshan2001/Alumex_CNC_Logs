@@ -3,455 +3,715 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CNC Profiles Cycle Time - Alumex PLC</title>
+  <title>Alumex CNC Production Engineering Hub</title>
   
-  <!-- PWA & Mobile Web App Meta -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Alumex CNC">
   <meta name="theme-color" content="#1e40af">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- SheetJS for Excel Export & Import -->
+  <!-- SheetJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <!-- jsPDF & autoTable for PDF Export -->
+  <!-- jsPDF & AutoTable -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 p-3 md:p-8 font-sans antialiased">
-  <div class="max-w-7xl mx-auto space-y-6">
-    
-    <!-- Top Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-2xl font-black text-gray-900 tracking-tight">CNC Machining Cycle Time Log</h1>
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-            <span class="w-1.5 h-1.5 mr-1 bg-emerald-500 rounded-full animate-pulse"></span> Live Sync
-          </span>
-        </div>
-        <p class="text-sm font-semibold text-blue-700">Alumex PLC — Production Engineering Log</p>
-      </div>
-      <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
-        <label class="cursor-pointer bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-          Import Excel/CSV
-          <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="importSpreadsheet(event)">
-        </label>
-        <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow-sm">
-          Download Excel
-        </button>
-        <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow-sm">
-          Download PDF
-        </button>
-      </div>
-    </div>
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen font-sans antialiased transition-colors duration-200">
 
-    <!-- Summary KPI Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Profiles Logged</p>
-        <p id="kpiCount" class="text-3xl font-black text-blue-600 mt-1">0</p>
-      </div>
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Max Cycle Time</p>
-        <p id="kpiMax" class="text-3xl font-black text-rose-600 mt-1">-</p>
-      </div>
-    </div>
-
-    <!-- Multi-Part Job Assembly & Entry Form -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Multi-Part Job Assembly Calculator -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col justify-between">
+  <!-- Navigation Bar -->
+  <nav class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 md:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="bg-blue-600 text-white p-2 rounded-xl font-black text-lg">AL</div>
         <div>
-          <div class="flex justify-between items-center mb-1">
-            <h2 class="text-base font-bold text-gray-900">Multi-Part Job Order</h2>
-            <button onclick="clearJobCart()" class="text-xs font-semibold text-rose-600 hover:underline">Clear Cart</button>
+          <h1 class="text-base md:text-lg font-black text-slate-900 dark:text-white leading-tight tracking-tight">ALUMEX PLC</h1>
+          <p class="text-[11px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide">CNC Production & Process Engineering</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-700 p-1 rounded-xl text-xs font-semibold">
+        <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm">Dashboard</button>
+        <button onclick="switchTab('logs')" id="tabBtn-logs" class="px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900">CNC Logs</button>
+        <button onclick="switchTab('production')" id="tabBtn-production" class="px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900">Planning & Shifts</button>
+        <button onclick="switchTab('trash')" id="tabBtn-trash" class="px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900 flex items-center gap-1">
+          Bin <span id="trashCountBadge" class="hidden bg-rose-500 text-white px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+        </button>
+      </div>
+
+      <!-- Controls & Status -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center space-x-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-full text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="syncStatus">Online</span>
+        </div>
+        <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+
+    <!-- ========================================== -->
+    <!-- SECTION 1: DASHBOARD & ANALYTICS           -->
+    <!-- ========================================== -->
+    <section id="view-dashboard" class="space-y-6">
+      
+      <!-- KPI Metric Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Active Profiles</p>
+          <p id="kpiTotalProfiles" class="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1">0</p>
+          <p class="text-[11px] text-slate-500 mt-1">Active tooling recipes</p>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Average Cycle Time</p>
+          <p id="kpiAvgCycle" class="text-3xl font-black text-amber-600 dark:text-amber-400 mt-1">0s</p>
+          <p class="text-[11px] text-slate-500 mt-1">Across all profile runs</p>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Max Machine Cycle</p>
+          <p id="kpiMaxCycle" class="text-3xl font-black text-rose-600 dark:text-rose-400 mt-1">-</p>
+          <p id="kpiMaxProfileName" class="text-[11px] text-slate-500 mt-1 truncate">-</p>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Avg Shift Capacity</p>
+          <p id="kpiShiftCapacity" class="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0 pcs</p>
+          <p class="text-[11px] text-slate-500 mt-1">Per 10.5h net day shift</p>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wide">Cycle Time Analysis (Top Profiles)</h3>
+            <span class="text-xs text-slate-400">Seconds per profile run</span>
           </div>
-          <p class="text-xs text-gray-400 mb-4">Combine multiple profiles for mixed assembly batch estimation.</p>
-          
+          <div class="h-64">
+            <canvas id="chartCycleTime"></canvas>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wide">Tooling Distribution</h3>
+            <span class="text-xs text-slate-400">Tool configurations</span>
+          </div>
+          <div class="h-64 flex items-center justify-center">
+            <canvas id="chartTooling"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 2: CNC LOGS & DATA MANAGEMENT      -->
+    <!-- ========================================== -->
+    <section id="view-logs" class="hidden space-y-6">
+      
+      <!-- Top Action Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <span>+</span> Log New Profile
+          </button>
+          <label class="cursor-pointer bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <span>↑</span> Import Excel / CSV
+            <input type="file" id="bulkFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="previewSpreadsheet(event)">
+          </label>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm">Excel (.xlsx)</button>
+          <button onclick="generateEngineeringReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm">Formal PDF Report</button>
+        </div>
+      </div>
+
+      <!-- Filters and Table Container -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+          <div class="w-full md:w-80">
+            <input type="text" id="logSearchInput" oninput="applyFiltersAndRender()" placeholder="Search profile, machine, description..." class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+            <!-- Tool Count Filter -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-slate-400 uppercase">Tools:</span>
+              <select id="filterToolCount" onchange="applyFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none">
+                <option value="ALL">All Tools</option>
+                <option value="1">1 Tool</option>
+                <option value="2">2 Tools</option>
+                <option value="4">4 Tools</option>
+              </select>
+            </div>
+
+            <!-- Sort By -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-slate-400 uppercase">Sort:</span>
+              <select id="filterSort" onchange="applyFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none">
+                <option value="profile_asc">Profile (A-Z)</option>
+                <option value="profile_desc">Profile (Z-A)</option>
+                <option value="cycle_asc">Cycle (Shortest)</option>
+                <option value="cycle_desc">Cycle (Longest)</option>
+                <option value="date_desc">Latest Updated</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clean Responsive Main Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="p-3.5">#</th>
+                <th class="p-3.5">Profile Code</th>
+                <th class="p-3.5">Description</th>
+                <th class="p-3.5">Machine</th>
+                <th class="p-3.5">Cycle Time</th>
+                <th class="p-3.5">Feed (mm/min)</th>
+                <th class="p-3.5">Tooling</th>
+                <th class="p-3.5">Revision</th>
+                <th class="p-3.5 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs">
+              <tr><td colspan="9" class="p-6 text-center text-slate-400">Loading production records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3: PRODUCTION PLANNING & SHIFTS    -->
+    <!-- ========================================== -->
+    <section id="view-production" class="hidden space-y-6">
+      
+      <!-- Shift Rules Reference Header -->
+      <div class="bg-blue-900 text-white p-6 rounded-2xl shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <h3 class="font-black text-lg">Alumex Factory Shift Schedule</h3>
+          <p class="text-xs text-blue-200 mt-1">Calculations factor in mandatory tea, meal, and relief allowances.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-xs bg-blue-950/50 p-3 rounded-xl border border-blue-800">
+          <div>
+            <p class="font-bold text-blue-300">DAY SHIFT (6 AM - 6 PM)</p>
+            <p class="text-[11px] text-blue-200">12h total - 1.5h breaks = <span class="font-bold text-white">10.5h net run</span></p>
+          </div>
+          <div>
+            <p class="font-bold text-blue-300">NIGHT SHIFT (6 PM - 6 AM)</p>
+            <p class="text-[11px] text-blue-200">12h total - 2.25h breaks = <span class="font-bold text-white">9.75h net run</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Multi-Part Cart Input -->
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider">Assemble Job Order</h3>
+            <button onclick="clearPlanningCart()" class="text-xs text-rose-500 hover:underline font-semibold">Clear All</button>
+          </div>
+
           <div class="space-y-3">
             <div>
-              <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Select Profile</label>
-              <select id="cartProfile" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Target Profile</label>
+              <select id="planProfileSelect" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-medium outline-none">
                 <option value="">-- Choose Profile --</option>
               </select>
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Handling (s)</label>
-                <input type="number" id="cartHandling" value="30" min="0" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Handling (Sec)</label>
+                <input type="number" id="planHandlingSec" value="30" min="0" max="600" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-medium outline-none">
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Quantity</label>
-                <input type="number" id="cartQty" value="10" min="1" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Batch Qty (Pcs)</label>
+                <input type="number" id="planBatchQty" value="50" min="1" max="100000" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-medium outline-none">
               </div>
             </div>
-            <button onclick="addToJobCart()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2 rounded-lg text-xs transition">
-              + Add to Job Order
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Assumed Machine OEE / Utilization (%)</label>
+              <input type="number" id="planEfficiency" value="85" min="50" max="100" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-medium outline-none">
+            </div>
+            <button onclick="addProfileToPlanningCart()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-sm">
+              + Add to Production Run
             </button>
           </div>
+        </div>
 
-          <!-- Job Cart Items List -->
-          <div class="mt-4 border-t border-gray-100 pt-3">
-            <p class="text-xs font-bold uppercase text-gray-500 mb-2">Job Order Items</p>
-            <div id="cartItemsList" class="space-y-2 max-h-36 overflow-y-auto pr-1">
-              <p class="text-xs text-gray-400 italic">No profiles added yet.</p>
+        <!-- Assembly Cart & Shift Calculations -->
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider mb-3">Planned Profile Assembly Queue</h3>
+            <div id="planningCartList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p>
+            </div>
+          </div>
+
+          <!-- Total Forecast Box -->
+          <div class="mt-6 p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Total Parts</p>
+              <p id="calcTotalQty" class="text-xl font-black text-slate-800 dark:text-slate-100 mt-0.5">0 pcs</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Theoretical Time</p>
+              <p id="calcTheorTime" class="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">0h 0m</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">OEE Adjusted Time</p>
+              <p id="calcAdjustedTime" class="text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5">0h 0m</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Required Shifts</p>
+              <p id="calcShiftRequirement" class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">0.0</p>
             </div>
           </div>
         </div>
 
-        <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 mt-4 space-y-1">
-          <p class="text-xs font-semibold text-blue-700">Estimated Total Run Duration:</p>
-          <p id="cartTotalTime" class="text-xl font-black text-blue-900">0 sec</p>
-          <p id="cartShifts" class="text-xs text-blue-600 font-medium">0 full 8-hour shift(s)</p>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 4: TRASH BIN (SOFT DELETE)         -->
+    <!-- ========================================== -->
+    <section id="view-trash" class="hidden space-y-6">
+      <div class="bg-amber-50 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200 dark:border-amber-800 flex justify-between items-center">
+        <div>
+          <h3 class="font-bold text-sm text-amber-900 dark:text-amber-200">Soft-Delete Archive (30-Day Retention)</h3>
+          <p class="text-xs text-amber-700 dark:text-amber-300">Items remain recoverable here for 30 days before permanent cleanup.</p>
         </div>
       </div>
 
-      <!-- Add/Edit Record Form -->
-      <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-        <div class="flex justify-between items-center mb-4">
-          <h2 id="formTitle" class="text-base font-bold text-gray-900">Add CNC Record</h2>
-          <span id="editBadge" class="hidden bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-amber-300">Editing Mode</span>
+      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="p-3.5">Profile</th>
+                <th class="p-3.5">Description</th>
+                <th class="p-3.5">Cycle Time</th>
+                <th class="p-3.5">Deleted Date</th>
+                <th class="p-3.5 text-center">Restore</th>
+              </tr>
+            </thead>
+            <tbody id="trashTableBody" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs">
+              <tr><td colspan="5" class="p-6 text-center text-slate-400">Trash bin is empty.</td></tr>
+            </tbody>
+          </table>
         </div>
+      </div>
+    </section>
 
-        <form id="logForm" onsubmit="saveOrUpdateEntry(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <input type="hidden" id="editRowId" value="">
+  </main>
 
-          <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Profile / Name *</label>
-            <input type="text" id="profile" placeholder="e.g., AL 527" required class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feature / Description</label>
-            <input type="text" id="description" placeholder="e.g., Float plane blade (Side 01)" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Length / Dim</label>
-            <input type="text" id="length" placeholder="e.g., 2437.4 mm" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feed Override</label>
-            <input type="text" id="feed_override" placeholder="e.g., 70%" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Cycle Time (Seconds)</label>
-            <input type="number" id="cycle_seconds" placeholder="e.g., 83" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feed Speed</label>
-            <input type="text" id="feed_speeds" placeholder="e.g., Feed 600" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tool Configuration</label>
-            <input type="text" id="tooling" placeholder="e.g., Single tool" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Remarks</label>
-            <input type="text" id="remarks" placeholder="Optional notes" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-          </div>
-          
-          <div class="col-span-full flex justify-end gap-2 pt-2">
-            <button type="button" id="cancelBtn" onclick="resetFormState()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition">
-              Cancel
-            </button>
-            <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition">
-              Save to Database
-            </button>
-          </div>
-        </form>
+  <!-- ========================================== -->
+  <!-- MODAL: ADD / EDIT PRODUCTION LOG           -->
+  <!-- ========================================== -->
+  <div id="modalForm" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h3 id="modalFormTitle" class="text-lg font-black text-slate-900 dark:text-white">Log CNC Production Recipe</h3>
+          <p class="text-xs text-slate-400">Add or revise standard parameters in database.</p>
+        </div>
+        <button onclick="closeFormModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
       </div>
 
+      <form id="recordForm" onsubmit="submitForm(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+        <input type="hidden" id="formRowId" value="">
+
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Profile Code *</label>
+          <input type="text" id="formProfile" placeholder="e.g., AL 527" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Machine ID</label>
+          <select id="formMachine" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="CNC-01">CNC-01 (Milling Line 1)</option>
+            <option value="CNC-02">CNC-02 (Milling Line 2)</option>
+            <option value="CNC-03">CNC-03 (High Speed)</option>
+          </select>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Feature / Description</label>
+          <input type="text" id="formDescription" placeholder="e.g., Float plane blade (Side 01)" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Cycle Time (1 - 7200 Sec) *</label>
+          <input type="number" id="formCycleSeconds" min="1" max="7200" placeholder="e.g., 83" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Tool Count</label>
+          <select id="formToolCount" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="1">1 Tool (Single tool)</option>
+            <option value="2">2 Tools (Two tools)</option>
+            <option value="4">4 Tools (Four tools)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Feed Speed (mm/min)</label>
+          <input type="text" id="formFeedSpeeds" placeholder="e.g., Feed 600" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Feed Override (0 - 150%)</label>
+          <input type="text" id="formFeedOverride" placeholder="e.g., 70%" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Length / Dimensions</label>
+          <input type="text" id="formLength" placeholder="e.g., 2437.4 mm" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Revision Code</label>
+          <input type="text" id="formRevision" value="Rev 01" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Engineering Remarks</label>
+          <input type="text" id="formRemarks" placeholder="Optional setup details or test notes" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div class="sm:col-span-2 flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <button type="button" onclick="closeFormModal()" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-xl font-bold">Cancel</button>
+          <button type="submit" id="formSubmitBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-sm">Save Recipe</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- Data Table Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-      
-      <!-- Filters & Sort Bar -->
-      <div class="p-4 bg-gray-50 border-b border-gray-200 space-y-3">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-          
-          <!-- Search Filter -->
-          <div class="w-full md:w-72">
-            <input type="text" id="searchFilter" oninput="filterAndRenderTable()" placeholder="Search profiles, features..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          </div>
-
-          <!-- Sort Control -->
-          <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-            <label class="text-xs font-semibold uppercase text-gray-500">Order by:</label>
-            <select id="sortBy" onchange="applySorting()" class="border border-gray-300 rounded-lg p-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
-              <option value="profile_asc">Profile Name (A to Z)</option>
-              <option value="profile_desc">Profile Name (Z to A)</option>
-              <option value="id_asc">Sequence (Oldest First)</option>
-              <option value="id_desc">Sequence (Newest First)</option>
-              <option value="cycle_asc">Cycle Time (Shortest First)</option>
-              <option value="cycle_desc">Cycle Time (Longest First)</option>
-            </select>
-          </div>
+  <!-- ========================================== -->
+  <!-- MODAL: VIEW RECORD DETAILS                 -->
+  <!-- ========================================== -->
+  <div id="modalView" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+      <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3 mb-4">
+        <div>
+          <span id="viewProfileBadge" class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase">ALUMEX PROFILE</span>
+          <h3 id="viewProfileTitle" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">-</h3>
         </div>
-
-        <!-- Tool Configuration Filter Badges -->
-        <div class="flex flex-wrap items-center gap-1.5 pt-1 border-t border-gray-200">
-          <span class="text-xs font-bold text-gray-500 uppercase mr-1">Tooling:</span>
-          <button onclick="setToolFilter('ALL')" id="toolBtn_ALL" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-600 text-white transition">All</button>
-          <button onclick="setToolFilter('SINGLE')" id="toolBtn_SINGLE" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Single Tool</button>
-          <button onclick="setToolFilter('TWO')" id="toolBtn_TWO" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Two Tools</button>
-          <button onclick="setToolFilter('FOUR')" id="toolBtn_FOUR" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Four Tools</button>
-        </div>
+        <button onclick="closeViewModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase">
+      <div class="space-y-3 text-xs" id="viewModalContent">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div class="mt-6 pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+        <button onclick="closeViewModal()" class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-5 py-2 rounded-xl font-bold">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: IMPORT PREVIEW & DUPLICATE RESOLUTION-->
+  <!-- ========================================== -->
+  <div id="modalImport" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-3xl rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center mb-3">
+        <div>
+          <h3 class="text-base font-black text-slate-900 dark:text-white">Import Spreadsheet Preview</h3>
+          <p id="importSummaryStats" class="text-xs text-slate-400">Verifying records...</p>
+        </div>
+        <button onclick="closeImportModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 border border-slate-200 dark:border-slate-700 rounded-xl mb-4">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-100 dark:bg-slate-700 font-bold sticky top-0">
             <tr>
-              <th class="p-3">#</th>
-              <th class="p-3">Main Profile</th>
-              <th class="p-3">Feature / Description</th>
-              <th class="p-3">Length / Dim</th>
-              <th class="p-3">Override</th>
-              <th class="p-3">Sec</th>
-              <th class="p-3">Duration</th>
-              <th class="p-3">Feed Speed</th>
-              <th class="p-3">Tooling</th>
-              <th class="p-3">Remarks</th>
-              <th class="p-3 text-center">Actions</th>
+              <th class="p-2.5">Profile</th>
+              <th class="p-2.5">Description</th>
+              <th class="p-2.5">Cycle (s)</th>
+              <th class="p-2.5">Status</th>
             </tr>
           </thead>
-          <tbody id="tableBody" class="divide-y divide-gray-200">
-            <tr><td colspan="11" class="p-4 text-center text-gray-400">Loading records...</td></tr>
-          </tbody>
+          <tbody id="importPreviewTable" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
         </table>
       </div>
-    </div>
 
+      <div class="flex justify-between items-center">
+        <span class="text-[11px] text-slate-400 italic">Existing duplicates will be updated with new cycle parameters.</span>
+        <div class="flex gap-2">
+          <button onclick="closeImportModal()" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-xl text-xs font-bold">Cancel</button>
+          <button onclick="confirmBulkImport()" id="confirmImportBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold">Import Valid Records</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Box -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-slate-700">
+    <span id="toastIcon">✓</span>
+    <span id="toastMessage">Action completed successfully</span>
   </div>
 
   <script>
-    // --- SUPABASE CLIENT ---
+    // --- SUPABASE CONNECTIVITY ---
     const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_s8wnE3RfwJRQxO2NyPdWTg_YBssVkbM";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let records = [];
+    let trashRecords = [];
     let displayedRecords = [];
-    let selectedToolFilter = 'ALL';
-    let jobOrderCart = [];
+    let planningCart = [];
+    let pendingImportRecords = [];
+    let chartCycle = null;
+    let chartTool = null;
+
+    // --- TOAST HELPER ---
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toastNotification');
+      const text = document.getElementById('toastMessage');
+      const icon = document.getElementById('toastIcon');
+      text.innerText = msg;
+      icon.innerText = isError ? "⚠" : "✓";
+      toast.className = isError 
+        ? "fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-0 opacity-100 bg-rose-600 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2"
+        : "fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-0 opacity-100 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2";
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
 
     function formatDuration(sec) {
-      if (sec === null || sec === undefined || isNaN(sec) || sec === '') return '-';
+      if (!sec || isNaN(sec)) return '0 sec';
       const s = parseInt(sec, 10);
       const hrs = Math.floor(s / 3600);
       const mins = Math.floor((s % 3600) / 60);
       const remSec = s % 60;
       let out = '';
-      if (hrs > 0) out += `${hrs} hr `;
-      if (mins > 0 || hrs > 0) out += `${mins} min `;
-      out += `${remSec} sec`;
-      return out;
+      if (hrs > 0) out += `${hrs}h `;
+      if (mins > 0 || hrs > 0) out += `${mins}m `;
+      out += `${remSec}s`;
+      return out.trim();
     }
 
-    async function fetchRecords() {
-      const { data, error } = await supabaseClient
-        .from('cnc_cycle_times')
-        .select('*');
+    // --- TAB SWITCHING ---
+    function switchTab(tabId) {
+      ['dashboard', 'logs', 'production', 'trash'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tabBtn-${t}`);
+        btn.className = "px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900";
+      });
+
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      document.getElementById(`tabBtn-${tabId}`).className = "px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold";
+
+      if (tabId === 'dashboard') renderCharts();
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('themeIcon').innerText = isDark ? '☀' : '🌙';
+      renderCharts();
+    }
+
+    // --- FETCH & REAL-TIME ---
+    async function fetchAllData() {
+      document.getElementById('syncStatus').innerText = "Syncing...";
+      const { data, error } = await supabaseClient.from('cnc_cycle_times').select('*');
 
       if (error) {
-        console.error('Error fetching data:', error);
+        showToast("Error connecting to Supabase: " + error.message, true);
+        document.getElementById('syncStatus').innerText = "Offline";
         return;
       }
 
-      records = data || [];
+      records = (data || []).filter(r => !r.is_deleted);
+      trashRecords = (data || []).filter(r => r.is_deleted);
+
+      document.getElementById('syncStatus').innerText = "Online";
+      document.getElementById('trashCountBadge').innerText = trashRecords.length;
+      if (trashRecords.length > 0) {
+        document.getElementById('trashCountBadge').classList.remove('hidden');
+      } else {
+        document.getElementById('trashCountBadge').classList.add('hidden');
+      }
+
       updateKPIs();
-      populateDropdowns();
-      applySorting();
+      populatePlanningDropdown();
+      applyFiltersAndRender();
+      renderTrashTable();
+      renderCharts();
     }
 
-    // Real-Time Listener
     supabaseClient
-      .channel('cnc-realtime')
+      .channel('cnc-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'cnc_cycle_times' }, () => {
-        fetchRecords();
+        fetchAllData();
       })
       .subscribe();
 
+    // --- DASHBOARD & CHARTS ---
     function updateKPIs() {
-      document.getElementById('kpiCount').innerText = records.length;
+      document.getElementById('kpiTotalProfiles').innerText = records.length;
       if (records.length === 0) {
-        document.getElementById('kpiMax').innerText = '-';
+        document.getElementById('kpiAvgCycle').innerText = "0s";
+        document.getElementById('kpiMaxCycle').innerText = "-";
+        document.getElementById('kpiShiftCapacity').innerText = "0 pcs";
         return;
       }
 
-      const validTimes = records.map(r => r.cycle_seconds).filter(s => s > 0);
-      if (validTimes.length > 0) {
-        const maxSec = Math.max(...validTimes);
-        document.getElementById('kpiMax').innerText = formatDuration(maxSec);
-      }
+      const cycleTimes = records.map(r => r.cycle_seconds || 0).filter(s => s > 0);
+      const avg = cycleTimes.length > 0 ? Math.round(cycleTimes.reduce((a, b) => a + b, 0) / cycleTimes.length) : 0;
+      const max = cycleTimes.length > 0 ? Math.max(...cycleTimes) : 0;
+      const maxItem = records.find(r => r.cycle_seconds === max);
+
+      document.getElementById('kpiAvgCycle').innerText = `${avg} sec`;
+      document.getElementById('kpiMaxCycle').innerText = formatDuration(max);
+      document.getElementById('kpiMaxProfileName').innerText = maxItem ? `${maxItem.profile} (${maxItem.description || 'Standard'})` : '-';
+
+      // 10.5 Net Hours = 37,800 sec
+      const shiftCapacity = avg > 0 ? Math.floor(37800 / (avg + 30)) : 0;
+      document.getElementById('kpiShiftCapacity').innerText = `${shiftCapacity} pcs`;
     }
 
-    function populateDropdowns() {
-      const cartSelect = document.getElementById('cartProfile');
-      cartSelect.innerHTML = '<option value="">-- Choose Profile --</option>';
-      records.forEach(r => {
-        const label = `${r.profile} ${r.description ? '(' + r.description + ')' : ''} [${r.cycle_seconds || 0}s]`;
-        cartSelect.innerHTML += `<option value="${r.id}">${label}</option>`;
-      });
-    }
+    function renderCharts() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#475569';
 
-    // --- MULTI-PART JOB ORDER CART LOGIC ---
-    function addToJobCart() {
-      const selectedId = document.getElementById('cartProfile').value;
-      const handlingSec = parseInt(document.getElementById('cartHandling').value, 10) || 0;
-      const qty = parseInt(document.getElementById('cartQty').value, 10) || 0;
+      // Bar Chart: Top Profiles by Cycle Time
+      const sortedByTime = [...records].sort((a, b) => (b.cycle_seconds || 0) - (a.cycle_seconds || 0)).slice(0, 10);
+      const ctxBar = document.getElementById('chartCycleTime').getContext('2d');
+      if (chartCycle) chartCycle.destroy();
 
-      if (!selectedId || qty <= 0) {
-        alert("Please select a profile and enter a valid quantity.");
-        return;
-      }
-
-      const item = records.find(r => r.id == selectedId);
-      if (!item) return;
-
-      jobOrderCart.push({
-        id: item.id,
-        profile: item.profile,
-        machineSec: item.cycle_seconds || 0,
-        handlingSec: handlingSec,
-        qty: qty
-      });
-
-      renderJobCart();
-    }
-
-    function removeCartItem(index) {
-      jobOrderCart.splice(index, 1);
-      renderJobCart();
-    }
-
-    function clearJobCart() {
-      jobOrderCart = [];
-      renderJobCart();
-    }
-
-    function renderJobCart() {
-      const container = document.getElementById('cartItemsList');
-      if (jobOrderCart.length === 0) {
-        container.innerHTML = `<p class="text-xs text-gray-400 italic">No profiles added yet.</p>`;
-        document.getElementById('cartTotalTime').innerText = "0 sec";
-        document.getElementById('cartShifts').innerText = "0 full 8-hour shift(s)";
-        return;
-      }
-
-      container.innerHTML = '';
-      let totalBatchSec = 0;
-
-      jobOrderCart.forEach((item, index) => {
-        const itemTotalSec = (item.machineSec + item.handlingSec) * item.qty;
-        totalBatchSec += itemTotalSec;
-
-        container.innerHTML += `
-          <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg text-xs border border-gray-200">
-            <div>
-              <span class="font-bold text-gray-900">${item.profile}</span>
-              <span class="text-gray-500"> × ${item.qty} pcs</span>
-              <div class="text-[10px] text-gray-400">(${item.machineSec}s cut + ${item.handlingSec}s handle)</div>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="font-medium text-blue-700">${formatDuration(itemTotalSec)}</span>
-              <button onclick="removeCartItem(${index})" class="text-rose-600 font-bold hover:text-rose-800">×</button>
-            </div>
-          </div>
-        `;
-      });
-
-      const totalHours = (totalBatchSec / 3600).toFixed(2);
-      const totalShifts = (totalBatchSec / (8 * 3600)).toFixed(1);
-
-      document.getElementById('cartTotalTime').innerText = `${formatDuration(totalBatchSec)} (${totalHours} hrs)`;
-      document.getElementById('cartShifts').innerText = `Requires ~${totalShifts} full 8-hour shift(s)`;
-    }
-
-    // --- TOOL FILTERING ---
-    function setToolFilter(type) {
-      selectedToolFilter = type;
-      ['ALL', 'SINGLE', 'TWO', 'FOUR'].forEach(t => {
-        const btn = document.getElementById(`toolBtn_${t}`);
-        if (t === type) {
-          btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-600 text-white transition";
-        } else {
-          btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition";
+      chartCycle = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: sortedByTime.map(r => r.profile),
+          datasets: [{
+            label: 'Seconds',
+            data: sortedByTime.map(r => r.cycle_seconds || 0),
+            backgroundColor: '#3b82f6',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: isDark ? '#334155' : '#e2e8f0' } }
+          }
         }
       });
-      filterAndRenderTable();
-    }
 
-    function applySorting() {
-      const sortValue = document.getElementById('sortBy').value;
-      records.sort((a, b) => {
-        if (sortValue === 'profile_asc') {
-          return (a.profile || '').localeCompare(b.profile || '', undefined, { numeric: true, sensitivity: 'base' });
-        } else if (sortValue === 'profile_desc') {
-          return (b.profile || '').localeCompare(a.profile || '', undefined, { numeric: true, sensitivity: 'base' });
-        } else if (sortValue === 'id_asc') {
-          return a.id - b.id;
-        } else if (sortValue === 'id_desc') {
-          return b.id - a.id;
-        } else if (sortValue === 'cycle_asc') {
-          return (a.cycle_seconds || 0) - (b.cycle_seconds || 0);
-        } else if (sortValue === 'cycle_desc') {
-          return (b.cycle_seconds || 0) - (a.cycle_seconds || 0);
+      // Doughnut: Tooling Count Distribution
+      const count1 = records.filter(r => (r.tooling || '').toLowerCase().includes('single') || r.tool_count === 1).length;
+      const count2 = records.filter(r => (r.tooling || '').toLowerCase().includes('two') || r.tool_count === 2).length;
+      const count4 = records.filter(r => (r.tooling || '').toLowerCase().includes('four') || r.tool_count === 4).length;
+
+      const ctxPie = document.getElementById('chartTooling').getContext('2d');
+      if (chartTool) chartTool.destroy();
+
+      chartTool = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: ['Single Tool', 'Two Tools', 'Four Tools'],
+          datasets: [{
+            data: [count1, count2, count4],
+            backgroundColor: ['#3b82f6', '#f59e0b', '#10b981'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } }
+          }
         }
-        return 0;
       });
-      filterAndRenderTable();
     }
 
-    function filterAndRenderTable() {
-      const query = document.getElementById('searchFilter').value.toLowerCase();
+    // --- CNC LOGS & FILTERING ---
+    function applyFiltersAndRender() {
+      const q = (document.getElementById('logSearchInput').value || '').toLowerCase();
+      const toolF = document.getElementById('filterToolCount').value;
+      const sortF = document.getElementById('filterSort').value;
+
       displayedRecords = records.filter(r => {
-        const matchesQuery = (r.profile || '').toLowerCase().includes(query) ||
-                             (r.description || '').toLowerCase().includes(query) ||
-                             (r.remarks || '').toLowerCase().includes(query);
+        const matchesQ = (r.profile || '').toLowerCase().includes(q) ||
+                         (r.description || '').toLowerCase().includes(q) ||
+                         (r.machine || '').toLowerCase().includes(q);
         
-        const toolStr = (r.tooling || '').toLowerCase();
         let matchesTool = true;
-        if (selectedToolFilter === 'SINGLE') matchesTool = toolStr.includes('single');
-        else if (selectedToolFilter === 'TWO') matchesTool = toolStr.includes('two') || toolStr.includes('2');
-        else if (selectedToolFilter === 'FOUR') matchesTool = toolStr.includes('four') || toolStr.includes('4');
+        const tStr = (r.tooling || '').toLowerCase();
+        if (toolF === '1') matchesTool = tStr.includes('single') || r.tool_count === 1;
+        if (toolF === '2') matchesTool = tStr.includes('two') || tStr.includes('2') || r.tool_count === 2;
+        if (toolF === '4') matchesTool = tStr.includes('four') || tStr.includes('4') || r.tool_count === 4;
 
-        return matchesQuery && matchesTool;
+        return matchesQ && matchesTool;
       });
 
-      renderTable();
+      displayedRecords.sort((a, b) => {
+        if (sortF === 'profile_asc') return (a.profile || '').localeCompare(b.profile || '', undefined, { numeric: true });
+        if (sortF === 'profile_desc') return (b.profile || '').localeCompare(a.profile || '', undefined, { numeric: true });
+        if (sortF === 'cycle_asc') return (a.cycle_seconds || 0) - (b.cycle_seconds || 0);
+        if (sortF === 'cycle_desc') return (b.cycle_seconds || 0) - (a.cycle_seconds || 0);
+        return new Date(b.record_date || 0) - new Date(a.record_date || 0);
+      });
+
+      renderLogsTable();
     }
 
-    function renderTable() {
-      const tbody = document.getElementById('tableBody');
+    function renderLogsTable() {
+      const tbody = document.getElementById('logsTableBody');
       if (displayedRecords.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-gray-500">No matching records found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No active profile logs match your filter criteria.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = '';
       displayedRecords.forEach((r, idx) => {
         const row = `
-          <tr class="hover:bg-gray-50 transition">
-            <td class="p-3 font-semibold text-gray-400">${idx + 1}</td>
-            <td class="p-3 font-bold text-gray-900">${r.profile || '-'}</td>
-            <td class="p-3">${r.description || '-'}</td>
-            <td class="p-3">${r.length || '-'}</td>
-            <td class="p-3">${r.feed_override || '-'}</td>
-            <td class="p-3 font-mono font-medium">${r.cycle_seconds !== null && r.cycle_seconds !== undefined ? r.cycle_seconds : '-'}</td>
-            <td class="p-3">${formatDuration(r.cycle_seconds)}</td>
-            <td class="p-3">${r.feed_speeds || '-'}</td>
-            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 border border-gray-200 text-gray-700">${r.tooling || '-'}</span></td>
-            <td class="p-3 text-gray-500">${r.remarks || '-'}</td>
-            <td class="p-3 text-center space-x-2">
-              <button onclick="startEdit(${r.id})" class="text-blue-600 hover:text-blue-800 text-xs font-semibold underline">Edit</button>
-              <button onclick="deleteEntry(${r.id})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold">Delete</button>
+          <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition">
+            <td class="p-3.5 font-semibold text-slate-400">${idx + 1}</td>
+            <td class="p-3.5 font-bold text-slate-900 dark:text-white">${r.profile}</td>
+            <td class="p-3.5 max-w-xs truncate">${r.description || '-'}</td>
+            <td class="p-3.5"><span class="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold text-[10px]">${r.machine || 'CNC-01'}</span></td>
+            <td class="p-3.5 font-mono font-bold text-blue-600 dark:text-blue-400">${r.cycle_seconds}s (${formatDuration(r.cycle_seconds)})</td>
+            <td class="p-3.5 font-mono">${r.feed_speeds || '-'}</td>
+            <td class="p-3.5"><span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium text-[11px]">${r.tooling || (r.tool_count + ' Tool')}</span></td>
+            <td class="p-3.5 text-slate-500 font-semibold text-[11px]">${r.revision || 'Rev 01'}</td>
+            <td class="p-3.5 text-center space-x-2">
+              <button onclick="viewRecordDetails(${r.id})" class="text-blue-600 hover:underline font-bold">View</button>
+              <button onclick="openFormModal(${r.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
+              <button onclick="softDeleteRecord(${r.id})" class="text-rose-600 hover:underline font-bold">Delete</button>
             </td>
           </tr>
         `;
@@ -459,187 +719,455 @@
       });
     }
 
-    // --- SPREADSHEET BULK IMPORT ---
-    function importSpreadsheet(event) {
+    // --- FORM ACTIONS (ADD/EDIT) ---
+    function openFormModal(id = null) {
+      document.getElementById('modalForm').classList.remove('hidden');
+      if (id) {
+        const item = records.find(r => r.id === id);
+        if (!item) return;
+        document.getElementById('formModalTitle').innerText = "Revise CNC Recipe";
+        document.getElementById('formRowId').value = item.id;
+        document.getElementById('formProfile').value = item.profile || '';
+        document.getElementById('formMachine').value = item.machine || 'CNC-01';
+        document.getElementById('formDescription').value = item.description || '';
+        document.getElementById('formCycleSeconds').value = item.cycle_seconds || '';
+        document.getElementById('formToolCount').value = item.tool_count || (item.tooling?.includes('Two') ? 2 : item.tooling?.includes('Four') ? 4 : 1);
+        document.getElementById('formFeedSpeeds').value = item.feed_speeds || '';
+        document.getElementById('formFeedOverride').value = item.feed_override || '';
+        document.getElementById('formLength').value = item.length || '';
+        document.getElementById('formRevision').value = item.revision || 'Rev 02';
+        document.getElementById('formRemarks').value = item.remarks || '';
+      } else {
+        document.getElementById('formModalTitle').innerText = "Log CNC Production Recipe";
+        document.getElementById('recordForm').reset();
+        document.getElementById('formRowId').value = '';
+        document.getElementById('formRevision').value = 'Rev 01';
+      }
+    }
+
+    function closeFormModal() {
+      document.getElementById('modalForm').classList.add('hidden');
+    }
+
+    async function submitForm(e) {
+      e.preventDefault();
+      const id = document.getElementById('formRowId').value;
+      const cycleSec = parseInt(document.getElementById('formCycleSeconds').value, 10);
+      const tools = parseInt(document.getElementById('formToolCount').value, 10);
+
+      // Validation
+      if (cycleSec <= 0 || cycleSec > 7200) {
+        showToast("Cycle Time must be between 1 and 7200 seconds.", true);
+        return;
+      }
+
+      const payload = {
+        profile: document.getElementById('formProfile').value.trim().toUpperCase(),
+        machine: document.getElementById('formMachine').value,
+        description: document.getElementById('formDescription').value.trim() || null,
+        cycle_seconds: cycleSec,
+        tool_count: tools,
+        tooling: tools === 1 ? 'Single tool' : tools === 2 ? 'Two tools' : 'Four tools',
+        feed_speeds: document.getElementById('formFeedSpeeds').value.trim() || null,
+        feed_override: document.getElementById('formFeedOverride').value.trim() || null,
+        length: document.getElementById('formLength').value.trim() || null,
+        revision: document.getElementById('formRevision').value.trim() || 'Rev 01',
+        remarks: document.getElementById('formRemarks').value.trim() || null,
+        record_date: new Date().toISOString().split('T')[0],
+        updated_by: 'Production Engineering',
+        is_deleted: false
+      };
+
+      const btn = document.getElementById('formSubmitBtn');
+      btn.disabled = true;
+      btn.innerText = "Saving...";
+
+      let err;
+      if (id) {
+        const res = await supabaseClient.from('cnc_cycle_times').update(payload).eq('id', id);
+        err = res.error;
+      } else {
+        const res = await supabaseClient.from('cnc_cycle_times').insert([payload]);
+        err = res.error;
+      }
+
+      btn.disabled = false;
+      btn.innerText = "Save Recipe";
+
+      if (err) {
+        showToast("Database error: " + err.message, true);
+      } else {
+        showToast(id ? "Record revised successfully!" : "New CNC profile saved!");
+        closeFormModal();
+        fetchAllData();
+      }
+    }
+
+    // --- VIEW MODAL ---
+    function viewRecordDetails(id) {
+      const item = records.find(r => r.id === id);
+      if (!item) return;
+
+      document.getElementById('viewProfileTitle').innerText = item.profile;
+      document.getElementById('viewModalContent').innerHTML = `
+        <div class="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-700/50 p-3.5 rounded-xl">
+          <div><span class="text-slate-400 uppercase font-bold text-[10px]">Machine</span><p class="font-bold text-slate-800 dark:text-white mt-0.5">${item.machine || 'CNC-01'}</p></div>
+          <div><span class="text-slate-400 uppercase font-bold text-[10px]">Cycle Time</span><p class="font-mono font-bold text-blue-600 dark:text-blue-400 mt-0.5">${item.cycle_seconds}s (${formatDuration(item.cycle_seconds)})</p></div>
+          <div><span class="text-slate-400 uppercase font-bold text-[10px]">Tooling</span><p class="font-bold text-slate-800 dark:text-white mt-0.5">${item.tooling || (item.tool_count + ' Tools')}</p></div>
+          <div><span class="text-slate-400 uppercase font-bold text-[10px]">Feed Speed</span><p class="font-mono font-bold text-slate-800 dark:text-white mt-0.5">${item.feed_speeds || '-'}</p></div>
+          <div><span class="text-slate-400 uppercase font-bold text-[10px]">Length / Dim</span><p class="font-bold text-slate-800 dark:text-white mt-0.5">${item.length || '-'}</p></div>
+          <div><span class="text-slate-400 uppercase font-bold text-[10px]">Feed Override</span><p class="font-bold text-slate-800 dark:text-white mt-0.5">${item.feed_override || '-'}</p></div>
+        </div>
+        <div>
+          <span class="text-slate-400 uppercase font-bold text-[10px]">Feature Description</span>
+          <p class="text-slate-700 dark:text-slate-200 mt-0.5 font-medium">${item.description || 'No description recorded.'}</p>
+        </div>
+        <div>
+          <span class="text-slate-400 uppercase font-bold text-[10px]">Engineering Remarks</span>
+          <p class="text-slate-700 dark:text-slate-200 mt-0.5 font-medium">${item.remarks || 'Standard production operation.'}</p>
+        </div>
+        <div class="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between text-[11px] text-slate-400">
+          <span>Revision: <b>${item.revision || 'Rev 01'}</b></span>
+          <span>Logged Date: <b>${item.record_date || '18 Aug 2026'}</b></span>
+        </div>
+      `;
+      document.getElementById('modalView').classList.remove('hidden');
+    }
+
+    function closeViewModal() {
+      document.getElementById('modalView').classList.add('hidden');
+    }
+
+    // --- SOFT DELETE & TRASH BIN ---
+    async function softDeleteRecord(id) {
+      if (!confirm("Move this profile recipe to the Trash Bin? You can recover it within 30 days.")) return;
+
+      const { error } = await supabaseClient
+        .from('cnc_cycle_times')
+        .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) {
+        showToast("Error moving to trash: " + error.message, true);
+      } else {
+        showToast("Record moved to Trash Bin");
+        fetchAllData();
+      }
+    }
+
+    async function restoreRecord(id) {
+      const { error } = await supabaseClient
+        .from('cnc_cycle_times')
+        .update({ is_deleted: false, deleted_at: null })
+        .eq('id', id);
+
+      if (error) {
+        showToast("Restore failed: " + error.message, true);
+      } else {
+        showToast("Record restored to active logs!");
+        fetchAllData();
+      }
+    }
+
+    function renderTrashTable() {
+      const tbody = document.getElementById('trashTableBody');
+      if (trashRecords.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">Trash bin is empty.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      trashRecords.forEach(r => {
+        const deletedDate = r.deleted_at ? new Date(r.deleted_at).toLocaleDateString() : 'Recent';
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+            <td class="p-3.5 font-bold text-slate-900 dark:text-white">${r.profile}</td>
+            <td class="p-3.5">${r.description || '-'}</td>
+            <td class="p-3.5 font-mono text-blue-600 dark:text-blue-400">${r.cycle_seconds}s</td>
+            <td class="p-3.5 text-slate-500">${deletedDate}</td>
+            <td class="p-3.5 text-center">
+              <button onclick="restoreRecord(${r.id})" class="text-emerald-600 hover:underline font-bold">Restore</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // --- SPREADSHEET PREVIEW & BULK IMPORT ---
+    function previewSpreadsheet(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = async function(e) {
+      reader.onload = function(e) {
         try {
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: 'array' });
           const firstSheet = workbook.SheetNames[0];
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+          const rawRows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
 
-          if (rows.length === 0) {
-            alert("The uploaded spreadsheet is empty.");
+          if (rawRows.length === 0) {
+            showToast("Spreadsheet is empty!", true);
             return;
           }
 
-          const parsedRecords = rows.map(r => ({
-            profile: String(r["Main Profile"] || r["Profile"] || r["Profile / Description"] || r["profile"] || "Unnamed"),
-            description: r["Feature / Description"] || r["Feature"] || r["Description"] || r["description"] || null,
-            length: r["Length / Dim"] || r["Length"] || r["length"] || null,
-            feed_override: r["Feed Rate Override"] || r["Override"] || r["feed_override"] || null,
-            cycle_seconds: parseInt(r["Cycle Time (Seconds)"] || r["Cycle Time (sec)"] || r["Sec"] || r["cycle_seconds"] || 0, 10),
-            feed_speeds: r["Feed Speed"] || r["Feed Speeds (mm/min)"] || r["feed_speeds"] || null,
-            tooling: r["Tooling"] || r["Tool Configuration"] || r["tooling"] || null,
-            remarks: r["Remarks"] || r["remarks"] || null
-          }));
+          pendingImportRecords = rawRows.map(r => {
+            const prof = String(r["Main Profile"] || r["Profile"] || r["Profile / Description"] || r["profile"] || "").trim().toUpperCase();
+            const cycle = parseInt(r["Cycle Time (Seconds)"] || r["Cycle Time (sec)"] || r["Sec"] || r["cycle_seconds"] || 0, 10);
+            const isValid = prof.length > 0 && cycle > 0 && cycle <= 7200;
+            const isDuplicate = records.some(existing => existing.profile === prof);
 
-          const { error } = await supabaseClient.from('cnc_cycle_times').insert(parsedRecords);
+            return {
+              profile: prof || "UNKNOWN",
+              description: r["Feature / Description"] || r["Feature"] || r["Description"] || null,
+              length: r["Length / Dim"] || r["Length"] || null,
+              feed_override: r["Feed Rate Override"] || r["Override"] || null,
+              cycle_seconds: cycle,
+              feed_speeds: r["Feed Speed"] || r["Feed Speeds (mm/min)"] || null,
+              tooling: r["Tooling"] || r["Tool Configuration"] || "Single tool",
+              tool_count: (r["Tooling"] || '').toLowerCase().includes('two') ? 2 : (r["Tooling"] || '').toLowerCase().includes('four') ? 4 : 1,
+              remarks: r["Remarks"] || null,
+              machine: r["Machine"] || 'CNC-01',
+              revision: 'Rev 01',
+              record_date: '2026-08-18',
+              is_deleted: false,
+              isValid: isValid,
+              isDuplicate: isDuplicate
+            };
+          });
 
-          if (error) {
-            alert('Import failed: ' + error.message);
-          } else {
-            alert(`Successfully imported ${parsedRecords.length} records!`);
-            await fetchRecords();
-          }
+          renderImportPreview();
         } catch (err) {
-          alert('Error parsing file: ' + err.message);
+          showToast("Failed to parse file: " + err.message, true);
         }
       };
       reader.readAsArrayBuffer(file);
     }
 
-    // --- FORM ACTIONS ---
-    function startEdit(id) {
-      const item = records.find(r => r.id === id);
+    function renderImportPreview() {
+      const tbody = document.getElementById('importPreviewTable');
+      tbody.innerHTML = '';
+
+      let validCount = 0;
+      let dupCount = 0;
+
+      pendingImportRecords.forEach(r => {
+        if (r.isValid) validCount++;
+        if (r.isDuplicate) dupCount++;
+
+        const statusBadge = !r.isValid
+          ? `<span class="text-rose-600 font-bold">Invalid Data</span>`
+          : r.isDuplicate
+          ? `<span class="text-amber-600 font-bold">Duplicate (Will Update)</span>`
+          : `<span class="text-emerald-600 font-bold">✓ Ready</span>`;
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+            <td class="p-2.5 font-bold">${r.profile}</td>
+            <td class="p-2.5 max-w-xs truncate">${r.description || '-'}</td>
+            <td class="p-2.5 font-mono">${r.cycle_seconds}s</td>
+            <td class="p-2.5">${statusBadge}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('importSummaryStats').innerText = `${pendingImportRecords.length} records detected (${validCount} valid, ${dupCount} duplicates)`;
+      document.getElementById('modalImport').classList.remove('hidden');
+    }
+
+    function closeImportModal() {
+      document.getElementById('modalImport').classList.add('hidden');
+      document.getElementById('bulkFileInput').value = '';
+    }
+
+    async function confirmBulkImport() {
+      const validRecords = pendingImportRecords.filter(r => r.isValid).map(({ isValid, isDuplicate, ...dbRecord }) => dbRecord);
+      if (validRecords.length === 0) {
+        showToast("No valid records to import!", true);
+        return;
+      }
+
+      const btn = document.getElementById('confirmImportBtn');
+      btn.disabled = true;
+      btn.innerText = "Importing...";
+
+      const { error } = await supabaseClient.from('cnc_cycle_times').upsert(validRecords, { onConflict: 'profile' });
+
+      btn.disabled = false;
+      btn.innerText = "Import Valid Records";
+
+      if (error) {
+        showToast("Import failed: " + error.message, true);
+      } else {
+        showToast(`Successfully imported ${validRecords.length} records!`);
+        closeImportModal();
+        fetchAllData();
+      }
+    }
+
+    // --- PRODUCTION PLANNING & SHIFTS (DAY: 10.5H, NIGHT: 9.75H) ---
+    function populatePlanningDropdown() {
+      const sel = document.getElementById('planProfileSelect');
+      sel.innerHTML = '<option value="">-- Choose Profile --</option>';
+      records.forEach(r => {
+        sel.innerHTML += `<option value="${r.id}">${r.profile} - ${r.cycle_seconds}s [${r.machine || 'CNC-01'}]</option>`;
+      });
+    }
+
+    function addProfileToPlanningCart() {
+      const id = document.getElementById('planProfileSelect').value;
+      const handling = parseInt(document.getElementById('planHandlingSec').value, 10) || 0;
+      const qty = parseInt(document.getElementById('planBatchQty').value, 10) || 0;
+
+      if (!id || qty <= 0) {
+        showToast("Please pick a profile and enter batch quantity.", true);
+        return;
+      }
+
+      const item = records.find(r => r.id == id);
       if (!item) return;
 
-      document.getElementById('editRowId').value = item.id;
-      document.getElementById('profile').value = item.profile || '';
-      document.getElementById('description').value = item.description || '';
-      document.getElementById('length').value = item.length || '';
-      document.getElementById('feed_override').value = item.feed_override || '';
-      document.getElementById('cycle_seconds').value = item.cycle_seconds !== null ? item.cycle_seconds : '';
-      document.getElementById('feed_speeds').value = item.feed_speeds || '';
-      document.getElementById('tooling').value = item.tooling || '';
-      document.getElementById('remarks').value = item.remarks || '';
+      planningCart.push({
+        id: item.id,
+        profile: item.profile,
+        machine: item.machine || 'CNC-01',
+        cutSec: item.cycle_seconds,
+        handlingSec: handling,
+        qty: qty
+      });
 
-      document.getElementById('formTitle').innerText = "Edit CNC Record";
-      document.getElementById('editBadge').classList.remove('hidden');
-      document.getElementById('cancelBtn').classList.remove('hidden');
-      document.getElementById('submitBtn').innerText = "Update Record";
-      document.getElementById('submitBtn').className = "bg-amber-600 hover:bg-amber-700 text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition";
-
-      window.scrollTo({ top: 150, behavior: 'smooth' });
+      renderPlanningCart();
     }
 
-    function resetFormState() {
-      document.getElementById('editRowId').value = '';
-      document.getElementById('logForm').reset();
-      document.getElementById('formTitle').innerText = "Add CNC Record";
-      document.getElementById('editBadge').classList.add('hidden');
-      document.getElementById('cancelBtn').classList.add('hidden');
-      document.getElementById('submitBtn').innerText = "Save to Database";
-      document.getElementById('submitBtn').className = "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition";
+    function removePlanItem(idx) {
+      planningCart.splice(idx, 1);
+      renderPlanningCart();
     }
 
-    async function saveOrUpdateEntry(e) {
-      e.preventDefault();
-      const submitBtn = document.getElementById('submitBtn');
-      const editId = document.getElementById('editRowId').value;
-      const cycleSecVal = document.getElementById('cycle_seconds').value;
+    function clearPlanningCart() {
+      planningCart = [];
+      renderPlanningCart();
+    }
 
-      submitBtn.disabled = true;
-      submitBtn.innerText = editId ? "Updating..." : "Saving...";
-
-      const recordPayload = {
-        profile: document.getElementById('profile').value,
-        description: document.getElementById('description').value || null,
-        length: document.getElementById('length').value || null,
-        feed_override: document.getElementById('feed_override').value || null,
-        cycle_seconds: cycleSecVal !== '' ? parseInt(cycleSecVal, 10) : 0,
-        feed_speeds: document.getElementById('feed_speeds').value || null,
-        tooling: document.getElementById('tooling').value || null,
-        remarks: document.getElementById('remarks').value || null
-      };
-
-      let error;
-      if (editId) {
-        const res = await supabaseClient.from('cnc_cycle_times').update(recordPayload).eq('id', editId);
-        error = res.error;
-      } else {
-        const res = await supabaseClient.from('cnc_cycle_times').insert([recordPayload]);
-        error = res.error;
+    function renderPlanningCart() {
+      const container = document.getElementById('planningCartList');
+      if (planningCart.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p>`;
+        document.getElementById('calcTotalQty').innerText = "0 pcs";
+        document.getElementById('calcTheorTime').innerText = "0h 0m";
+        document.getElementById('calcAdjustedTime').innerText = "0h 0m";
+        document.getElementById('calcShiftRequirement').innerText = "0.0";
+        return;
       }
 
-      if (error) {
-        alert('Operation failed: ' + error.message);
-      } else {
-        resetFormState();
-        await fetchRecords();
-      }
+      container.innerHTML = '';
+      let totalParts = 0;
+      let totalTheoreticalSec = 0;
 
-      submitBtn.disabled = false;
+      planningCart.forEach((item, idx) => {
+        const itemSec = (item.cutSec + item.handlingSec) * item.qty;
+        totalParts += item.qty;
+        totalTheoreticalSec += itemSec;
+
+        container.innerHTML += `
+          <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-xs">
+            <div>
+              <span class="font-bold text-slate-900 dark:text-white">${item.profile}</span>
+              <span class="text-slate-500"> × ${item.qty} pcs [${item.machine}]</span>
+              <div class="text-[10px] text-slate-400">Unit: ${item.cutSec}s cut + ${item.handlingSec}s handle</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-blue-600 dark:text-blue-400">${formatDuration(itemSec)}</span>
+              <button onclick="removePlanItem(${idx})" class="text-rose-500 font-bold hover:text-rose-700 px-1">×</button>
+            </div>
+          </div>
+        `;
+      });
+
+      const oee = (parseFloat(document.getElementById('planEfficiency').value) || 85) / 100;
+      const adjustedSec = totalTheoreticalSec / oee;
+
+      // Net working seconds: Day shift = 10.5h (37,800s), Night shift = 9.75h (35,100s) -> Avg = 36,450s per 12h block
+      const shiftsRequired = (adjustedSec / 36450).toFixed(1);
+
+      document.getElementById('calcTotalQty').innerText = `${totalParts} pcs`;
+      document.getElementById('calcTheorTime').innerText = `${(totalTheoreticalSec / 3600).toFixed(1)} hrs`;
+      document.getElementById('calcAdjustedTime').innerText = `${(adjustedSec / 3600).toFixed(1)} hrs`;
+      document.getElementById('calcShiftRequirement').innerText = `${shiftsRequired} shifts`;
     }
 
-    async function deleteEntry(id) {
-      if (!confirm('Are you sure you want to delete this record?')) return;
-      const { error } = await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
-      if (error) {
-        alert('Failed to delete: ' + error.message);
-      } else {
-        await fetchRecords();
-      }
+    // --- FORMAL ENGINEERING PDF REPORT ---
+    function generateEngineeringReportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+
+      // Title Header
+      doc.setFillColor(30, 64, 175);
+      doc.rect(0, 0, 210, 24, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text("ALUMEX PLC - CNC PRODUCTION ENGINEERING REPORT", 14, 15);
+
+      // Metadata block
+      doc.setTextColor(51, 65, 85);
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text("Report Date: 18 August 2026", 14, 32);
+      doc.text(`Active Recipes: ${records.length}`, 14, 37);
+      doc.text("Prepared By: Production Engineering Department", 140, 32);
+
+      // Summary Table
+      const avg = records.length > 0 ? Math.round(records.reduce((a, b) => a + (b.cycle_seconds || 0), 0) / records.length) : 0;
+      const tableData = records.map((r, i) => [
+        i + 1,
+        r.profile,
+        r.description || '-',
+        r.machine || 'CNC-01',
+        `${r.cycle_seconds}s`,
+        formatDuration(r.cycle_seconds),
+        r.feed_speeds || '-',
+        r.tooling || 'Single tool',
+        r.revision || 'Rev 01'
+      ]);
+
+      doc.autoTable({
+        head: [['#', 'Profile', 'Description', 'Machine', 'Sec', 'Duration', 'Feed Speed', 'Tooling', 'Revision']],
+        body: tableData,
+        startY: 42,
+        theme: 'striped',
+        headStyles: { fillColor: [30, 64, 175] },
+        styles: { fontSize: 8, cellPadding: 2 }
+      });
+
+      doc.save("Alumex_CNC_Production_Report.pdf");
     }
 
-    // --- EXPORTS ---
     function exportToExcel() {
       const exportData = records.map((r, i) => ({
         "No.": i + 1,
-        "Main Profile": r.profile || '',
-        "Feature / Description": r.description || '',
-        "Length / Dim": r.length || '',
-        "Feed Rate Override": r.feed_override || '',
-        "Cycle Time (Seconds)": r.cycle_seconds || 0,
+        "Profile Code": r.profile,
+        "Machine ID": r.machine || 'CNC-01',
+        "Feature Description": r.description || '',
+        "Cycle Time (Seconds)": r.cycle_seconds,
         "Cycle Time (Formatted)": formatDuration(r.cycle_seconds),
         "Feed Speed": r.feed_speeds || '',
-        "Tooling": r.tooling || '',
+        "Feed Override": r.feed_override || '',
+        "Length / Dim": r.length || '',
+        "Tool Configuration": r.tooling || 'Single tool',
+        "Revision": r.revision || 'Rev 01',
+        "Record Date": r.record_date || '2026-08-18',
         "Remarks": r.remarks || ''
       }));
 
       const ws = XLSX.utils.json_to_sheet(exportData);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Alumex Cycle Times");
-      XLSX.writeFile(wb, "Alumex_CNC_Cycle_Time_Log.xlsx");
+      XLSX.utils.book_append_sheet(wb, ws, "CNC Production Recipes");
+      XLSX.writeFile(wb, "Alumex_CNC_Production_Log.xlsx");
     }
 
-    function exportToPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('l', 'mm', 'a4');
-
-      doc.setFontSize(14);
-      doc.text("CNC Profiles Cycle Time Sheet - Alumex PLC", 14, 15);
-
-      const tableData = records.map((r, i) => [
-        i + 1,
-        r.profile || '-',
-        r.description || '-',
-        r.length || '-',
-        r.feed_override || '-',
-        r.cycle_seconds !== null && r.cycle_seconds !== undefined ? r.cycle_seconds : '-',
-        formatDuration(r.cycle_seconds),
-        r.feed_speeds || '-',
-        r.tooling || '-',
-        r.remarks || '-'
-      ]);
-
-      doc.autoTable({
-        head: [['No.', 'Profile', 'Description', 'Length', 'Override', 'Sec', 'Duration', 'Feed Speed', 'Tooling', 'Remarks']],
-        body: tableData,
-        startY: 22,
-        theme: 'striped',
-        headStyles: { fillColor: [30, 64, 175] },
-        styles: { fontSize: 8 }
-      });
-
-      doc.save("Alumex_CNC_Cycle_Time_Log.pdf");
-    }
-
-    fetchRecords();
+    // Initial boot
+    fetchAllData();
   </script>
 </body>
 </html>
