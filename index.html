@@ -280,6 +280,7 @@
                 <th class="p-3.5">#</th>
                 <th class="p-3.5">Profile Code</th>
                 <th class="p-3.5">Description</th>
+                <th class="p-3.5">Length / Dim</th>
                 <th class="p-3.5">Cycle Time</th>
                 <th class="p-3.5">Feed (mm/min)</th>
                 <th class="p-3.5">Tooling</th>
@@ -288,7 +289,7 @@
               </tr>
             </thead>
             <tbody id="logsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs">
-              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading production records...</td></tr>
+              <tr><td colspan="9" class="p-6 text-center text-slate-400">Loading production records...</td></tr>
             </tbody>
           </table>
         </div>
@@ -897,7 +898,8 @@
 
       displayedRecords = records.filter(r => {
         const matchesQ = (r.profile || '').toLowerCase().includes(q) ||
-                         (r.description || '').toLowerCase().includes(q);
+                         (r.description || '').toLowerCase().includes(q) ||
+                         (r.length || '').toLowerCase().includes(q);
         
         let matchesTool = true;
         const tStr = (r.tooling || '').toLowerCase();
@@ -924,7 +926,7 @@
     function renderLogsTable() {
       const tbody = document.getElementById('logsTableBody');
       if (displayedRecords.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No active profile logs match your filter criteria.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No active profile logs match your filter criteria.</td></tr>`;
         return;
       }
 
@@ -935,6 +937,7 @@
             <td class="p-3.5 font-semibold text-slate-400">${idx + 1}</td>
             <td class="p-3.5 font-bold text-slate-900 dark:text-white">${r.profile}</td>
             <td class="p-3.5 max-w-xs truncate">${r.description || '-'}</td>
+            <td class="p-3.5 font-medium text-slate-700 dark:text-slate-300">${r.length || '-'}</td>
             <td class="p-3.5 font-mono font-bold text-blue-600 dark:text-blue-400">${r.cycle_seconds}s (${formatDuration(r.cycle_seconds)})</td>
             <td class="p-3.5 font-mono">${r.feed_speeds || '-'}</td>
             <td class="p-3.5"><span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium text-[11px]">${r.tooling || (r.tool_count ? `${r.tool_count} tools` : 'Single tool')}</span></td>
@@ -1410,6 +1413,7 @@
         i + 1,
         r.profile,
         r.description || '-',
+        r.length || '-',
         `${r.cycle_seconds}s`,
         formatDuration(r.cycle_seconds),
         r.feed_speeds || '-',
@@ -1418,7 +1422,7 @@
       ]);
 
       doc.autoTable({
-        head: [['#', 'Profile', 'Description', 'Sec', 'Duration', 'Feed Speed', 'Tooling', 'Revision']],
+        head: [['#', 'Profile', 'Description', 'Length / Dim', 'Sec', 'Duration', 'Feed Speed', 'Tooling', 'Revision']],
         body: tableData,
         startY: 42,
         theme: 'striped',
@@ -1434,11 +1438,11 @@
         "No.": i + 1,
         "Profile Code": r.profile,
         "Feature Description": r.description || '',
+        "Length / Dim": r.length || '',
         "Cycle Time (Seconds)": r.cycle_seconds,
         "Cycle Time (Formatted)": formatDuration(r.cycle_seconds),
         "Feed Speed": r.feed_speeds || '',
         "Feed Override": r.feed_override || '',
-        "Length / Dim": r.length || '',
         "Tool Configuration": r.tooling || 'Single tool',
         "Revision": r.revision || 'Rev 01',
         "Record Date": r.record_date || '2026-08-18',
