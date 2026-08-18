@@ -242,7 +242,7 @@
         
         <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div class="w-full md:w-80">
-            <input type="text" id="logSearchInput" oninput="applyFiltersAndRender()" placeholder="Search profile or description..." class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="logSearchInput" oninput="applyFiltersAndRender()" placeholder="Search profile, length, or description..." class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
           <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
@@ -259,14 +259,16 @@
               </select>
             </div>
 
-            <!-- Sort By -->
+            <!-- Sort By (Includes Length Sorting) -->
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-bold text-slate-400 uppercase">Sort:</span>
               <select id="filterSort" onchange="applyFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none">
                 <option value="profile_asc">Profile (A-Z)</option>
                 <option value="profile_desc">Profile (Z-A)</option>
-                <option value="cycle_asc">Cycle (Shortest)</option>
-                <option value="cycle_desc">Cycle (Longest)</option>
+                <option value="length_asc">Length (Shortest First)</option>
+                <option value="length_desc">Length (Longest First)</option>
+                <option value="cycle_asc">Cycle (Shortest First)</option>
+                <option value="cycle_desc">Cycle (Longest First)</option>
                 <option value="date_desc">Latest Updated</option>
               </select>
             </div>
@@ -604,6 +606,12 @@
       return cleaned.toUpperCase();
     }
 
+    function parseNumericLength(lenStr) {
+      if (!lenStr) return 0;
+      const match = String(lenStr).replace(/,/g, '').match(/[\d.]+/);
+      return match ? parseFloat(match[0]) : 0;
+    }
+
     function switchTab(tabId) {
       ['dashboard', 'logs', 'production', 'trash'].forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
@@ -818,7 +826,7 @@
               ${v.description || v.profile}
               <div class="text-[10px] text-slate-400 font-normal">${v.profile}</div>
             </td>
-            <td class="p-3">${v.length || '-'}</td>
+            <td class="p-3 font-medium text-slate-700 dark:text-slate-300">${v.length || '-'}</td>
             <td class="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">${v.cycle_seconds}s (${formatDuration(v.cycle_seconds)})</td>
             <td class="p-3 font-mono">${v.feed_speeds || '-'} <span class="text-slate-400">(${v.feed_override || '100%'})</span></td>
             <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200">${v.tooling || (v.tool_count ? `${v.tool_count} tools` : 'Single tool')}</span></td>
@@ -915,6 +923,8 @@
       displayedRecords.sort((a, b) => {
         if (sortF === 'profile_asc') return (a.profile || '').localeCompare(b.profile || '', undefined, { numeric: true });
         if (sortF === 'profile_desc') return (b.profile || '').localeCompare(a.profile || '', undefined, { numeric: true });
+        if (sortF === 'length_asc') return parseNumericLength(a.length) - parseNumericLength(b.length);
+        if (sortF === 'length_desc') return parseNumericLength(b.length) - parseNumericLength(a.length);
         if (sortF === 'cycle_asc') return (a.cycle_seconds || 0) - (b.cycle_seconds || 0);
         if (sortF === 'cycle_desc') return (b.cycle_seconds || 0) - (a.cycle_seconds || 0);
         return new Date(b.record_date || 0) - new Date(a.record_date || 0);
