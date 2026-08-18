@@ -48,7 +48,7 @@
 
       <!-- Navigation Tabs -->
       <div class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-700 p-1 rounded-xl text-xs font-semibold">
-        <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm">Dashboard</button>
+        <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold">Dashboard</button>
         <button onclick="switchTab('logs')" id="tabBtn-logs" class="px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900">CNC Logs</button>
         <button onclick="switchTab('production')" id="tabBtn-production" class="px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900">Planning & Shifts</button>
         <button onclick="switchTab('trash')" id="tabBtn-trash" class="px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900 flex items-center gap-1">
@@ -79,55 +79,93 @@
       <!-- Primary KPI Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Active Profiles</p>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Active Profiles Logged</p>
           <p id="kpiTotalProfiles" class="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1">0</p>
-          <p class="text-[11px] text-slate-500 mt-1">Component plant database</p>
+          <p class="text-[11px] text-slate-500 mt-1">Component plant database records</p>
         </div>
         <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Max Machine Cycle Time</p>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Plant Max Cycle Time</p>
           <p id="kpiMaxCycle" class="text-3xl font-black text-rose-600 dark:text-rose-400 mt-1">-</p>
           <p id="kpiMaxProfileName" class="text-[11px] text-slate-500 mt-1 truncate">-</p>
         </div>
       </div>
 
-      <!-- Profile Visual Inspector Card -->
-      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <!-- Main Profile Family Analyzer & Variations Graph -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-4">
           <div>
-            <h3 class="font-black text-base text-slate-900 dark:text-white uppercase tracking-wide">Interactive Profile Inspector</h3>
-            <p class="text-xs text-slate-400">Select any profile to inspect specific cutting cycles and tool parameters.</p>
+            <h3 class="font-black text-base text-slate-900 dark:text-white uppercase tracking-wide">Main Profile Family Analyzer</h3>
+            <p class="text-xs text-slate-400">Select a main profile code to inspect all sub-variations, cutting graphs, and machining cycles.</p>
           </div>
           <select id="dashInspectSelect" onchange="renderProfileInspector()" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-bold outline-none">
-            <option value="">-- Choose Profile to Inspect --</option>
+            <option value="">-- Choose Main Profile --</option>
           </select>
         </div>
 
-        <div id="inspectorDetails" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          <div class="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-100 dark:border-blue-900/50">
-            <span class="text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400">Profile Name & Feature</span>
-            <p id="inspectName" class="text-base font-black text-slate-900 dark:text-white mt-1">-</p>
-            <p id="inspectFeature" class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">-</p>
+        <div id="inspectorDetails" class="hidden space-y-5">
+          <!-- KPI Summary for this specific Profile Family -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-100 dark:border-blue-900/50">
+              <span class="text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400">Total Variations</span>
+              <p id="inspectVariantCount" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+              <p id="inspectFamilyName" class="text-xs text-slate-500 mt-0.5">-</p>
+            </div>
+
+            <div class="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
+              <span class="text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400">Shortest (Min) Cycle</span>
+              <p id="inspectMinCycle" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0s</p>
+              <p id="inspectMinFormatted" class="text-xs text-slate-500 mt-0.5">-</p>
+            </div>
+
+            <div class="bg-rose-50 dark:bg-rose-950/40 p-4 rounded-xl border border-rose-100 dark:border-rose-900/50">
+              <span class="text-[10px] font-bold uppercase text-rose-600 dark:text-rose-400">Longest (Max) Cycle</span>
+              <p id="inspectMaxCycle" class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">0s</p>
+              <p id="inspectMaxFormatted" class="text-xs text-slate-500 mt-0.5">-</p>
+            </div>
           </div>
 
-          <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
-            <span class="text-[10px] font-bold uppercase text-slate-400">Cycle Duration</span>
-            <p id="inspectCycle" class="text-base font-black text-blue-600 dark:text-blue-400 mt-1">0s</p>
-            <p id="inspectFormatted" class="text-xs text-slate-500 mt-0.5">-</p>
+          <!-- Variations Cycle Time Graph -->
+          <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Variations Cycle Time Comparison (Seconds)</span>
+            </div>
+            <div class="h-56 relative w-full">
+              <canvas id="chartFamilyVariants"></canvas>
+            </div>
           </div>
 
-          <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
-            <span class="text-[10px] font-bold uppercase text-slate-400">Machining Setup</span>
-            <p id="inspectTooling" class="text-base font-black text-slate-900 dark:text-white mt-1">-</p>
-            <p id="inspectFeed" class="text-xs text-slate-500 mt-0.5">-</p>
+          <!-- Variations Breakdown Sub-Table -->
+          <div class="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+            <div class="bg-slate-50 dark:bg-slate-700/60 px-4 py-2.5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">All Variations in this Profile Family</span>
+              <span id="inspectTableCount" class="text-[11px] font-semibold text-slate-400"></span>
+            </div>
+            <div class="overflow-x-auto max-h-72">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-bold sticky top-0">
+                  <tr>
+                    <th class="p-3">#</th>
+                    <th class="p-3">Variation / Description</th>
+                    <th class="p-3">Length / Dim</th>
+                    <th class="p-3">Cycle Time</th>
+                    <th class="p-3">Feed Speed</th>
+                    <th class="p-3">Override</th>
+                    <th class="p-3">Tooling</th>
+                    <th class="p-3">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody id="inspectVariantsTable" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Analytics Charts Row -->
+      <!-- Plant-Wide Analytics Overview -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wide">Top Profile Cycle Times (Seconds)</h3>
+            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wide">Top Profile Cycle Times (Plant-Wide)</h3>
           </div>
           <div class="h-64">
             <canvas id="chartCycleTime"></canvas>
@@ -497,6 +535,7 @@
     let pendingImportRecords = [];
     let chartCycle = null;
     let chartTool = null;
+    let chartFamily = null;
 
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toastNotification');
@@ -525,6 +564,12 @@
       return out.trim();
     }
 
+    function extractMainProfileName(raw) {
+      if (!raw) return 'UNKNOWN';
+      const cleaned = raw.split('(')[0].trim();
+      return cleaned.toUpperCase();
+    }
+
     function switchTab(tabId) {
       ['dashboard', 'logs', 'production', 'trash'].forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
@@ -535,7 +580,10 @@
       document.getElementById(`view-${tabId}`).classList.remove('hidden');
       document.getElementById(`tabBtn-${tabId}`).className = "px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold";
 
-      if (tabId === 'dashboard') renderCharts();
+      if (tabId === 'dashboard') {
+        renderCharts();
+        renderProfileInspector();
+      }
     }
 
     function toggleDarkMode() {
@@ -543,6 +591,7 @@
       const isDark = document.documentElement.classList.contains('dark');
       document.getElementById('themeIcon').innerText = isDark ? '☀' : '🌙';
       renderCharts();
+      renderProfileInspector();
     }
 
     async function fetchAllData() {
@@ -581,7 +630,7 @@
       })
       .subscribe();
 
-    // --- DASHBOARD & INSPECTOR ---
+    // --- DASHBOARD & MAIN PROFILE ANALYZER ---
     function updateKPIs() {
       document.getElementById('kpiTotalProfiles').innerText = records.length;
       if (records.length === 0) {
@@ -599,30 +648,120 @@
 
     function populateInspectDropdown() {
       const sel = document.getElementById('dashInspectSelect');
-      sel.innerHTML = '<option value="">-- Choose Profile to Inspect --</option>';
-      records.forEach(r => {
-        sel.innerHTML += `<option value="${r.id}">${r.profile} - ${r.description || 'Standard'}</option>`;
+      const selectedBefore = sel.value;
+      sel.innerHTML = '<option value="">-- Choose Main Profile --</option>';
+
+      const families = Array.from(new Set(records.map(r => extractMainProfileName(r.profile)))).sort();
+      families.forEach(fam => {
+        const count = records.filter(r => extractMainProfileName(r.profile) === fam).length;
+        sel.innerHTML += `<option value="${fam}">${fam} (${count} variation${count > 1 ? 's' : ''})</option>`;
       });
+
+      if (selectedBefore && families.includes(selectedBefore)) {
+        sel.value = selectedBefore;
+      } else if (families.length > 0 && !selectedBefore) {
+        sel.value = families[0];
+      }
+      renderProfileInspector();
     }
 
     function renderProfileInspector() {
-      const id = document.getElementById('dashInspectSelect').value;
+      const selectedFam = document.getElementById('dashInspectSelect').value;
       const container = document.getElementById('inspectorDetails');
 
-      if (!id) {
+      if (!selectedFam) {
         container.classList.add('hidden');
         return;
       }
 
-      const item = records.find(r => r.id == id);
-      if (!item) return;
+      const variants = records.filter(r => extractMainProfileName(r.profile) === selectedFam);
+      if (variants.length === 0) {
+        container.classList.add('hidden');
+        return;
+      }
 
-      document.getElementById('inspectName').innerText = item.profile;
-      document.getElementById('inspectFeature').innerText = item.description || 'Standard profile machining';
-      document.getElementById('inspectCycle').innerText = `${item.cycle_seconds}s`;
-      document.getElementById('inspectFormatted').innerText = `Duration: ${formatDuration(item.cycle_seconds)}`;
-      document.getElementById('inspectTooling').innerText = item.tooling || (item.tool_count ? `${item.tool_count} tools` : 'Single tool');
-      document.getElementById('inspectFeed').innerText = `Feed: ${item.feed_speeds || '-'} (${item.feed_override || '100%'})`;
+      const cycles = variants.map(v => v.cycle_seconds || 0);
+      const minCycle = Math.min(...cycles);
+      const maxCycle = Math.max(...cycles);
+
+      document.getElementById('inspectVariantCount').innerText = `${variants.length} Variation${variants.length > 1 ? 's' : ''}`;
+      document.getElementById('inspectFamilyName').innerText = `Profile Family: ${selectedFam}`;
+      
+      document.getElementById('inspectMinCycle').innerText = `${minCycle}s`;
+      document.getElementById('inspectMinFormatted').innerText = `Duration: ${formatDuration(minCycle)}`;
+
+      document.getElementById('inspectMaxCycle').innerText = `${maxCycle}s`;
+      document.getElementById('inspectMaxFormatted').innerText = `Duration: ${formatDuration(maxCycle)}`;
+      document.getElementById('inspectTableCount').innerText = `${variants.length} Total Registered`;
+
+      // Render Dynamic Family Bar Chart
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#475569';
+      const ctxFam = document.getElementById('chartFamilyVariants').getContext('2d');
+
+      const chartLabels = variants.map((v, idx) => {
+        const desc = v.description ? v.description.trim() : v.profile;
+        return desc.length > 20 ? desc.substring(0, 18) + '...' : desc;
+      });
+
+      if (chartFamily) chartFamily.destroy();
+
+      chartFamily = new Chart(ctxFam, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: 'Cycle Time (Seconds)',
+            data: cycles,
+            backgroundColor: '#3b82f6',
+            hoverBackgroundColor: '#2563eb',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: function(context) {
+                  const item = variants[context[0].dataIndex];
+                  return item.description ? `${item.profile} - ${item.description}` : item.profile;
+                },
+                label: function(context) {
+                  return `Cycle Time: ${context.parsed.y}s (${formatDuration(context.parsed.y)})`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: isDark ? '#334155' : '#e2e8f0' } }
+          }
+        }
+      });
+
+      // Render variants sub-table
+      const tbody = document.getElementById('inspectVariantsTable');
+      tbody.innerHTML = '';
+      variants.forEach((v, idx) => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+            <td class="p-3 font-semibold text-slate-400">${idx + 1}</td>
+            <td class="p-3 font-bold text-slate-900 dark:text-white">
+              ${v.description || v.profile}
+              <div class="text-[10px] text-slate-400 font-normal">${v.profile}</div>
+            </td>
+            <td class="p-3">${v.length || '-'}</td>
+            <td class="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">${v.cycle_seconds}s (${formatDuration(v.cycle_seconds)})</td>
+            <td class="p-3 font-mono">${v.feed_speeds || '-'}</td>
+            <td class="p-3">${v.feed_override || '100%'}</td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium">${v.tooling || (v.tool_count ? `${v.tool_count} tools` : 'Single tool')}</span></td>
+            <td class="p-3 text-slate-500">${v.remarks || '-'}</td>
+          </tr>
+        `;
+      });
 
       container.classList.remove('hidden');
     }
@@ -808,7 +947,7 @@
         length: document.getElementById('formLength').value.trim() || null,
         revision: document.getElementById('formRevision').value.trim() || 'Rev 01',
         remarks: document.getElementById('formRemarks').value.trim() || null,
-        record_date: new Date().toISOString().split('T')[0],
+        record_date: '2026-08-18',
         updated_by: 'Production Engineering',
         is_deleted: false
       };
@@ -862,7 +1001,7 @@
           <p class="text-slate-700 dark:text-slate-200 mt-0.5 font-medium">${item.remarks || 'Standard production operation.'}</p>
         </div>
         <div class="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between text-[11px] text-slate-400">
-          <span>Logged Date: <b>${item.record_date || '18 Aug 2026'}</b></span>
+          <span>Logged Date: <b>${item.record_date || '2026-08-18'}</b></span>
           <span>Logged by: <b>Production Engineering</b></span>
         </div>
       `;
