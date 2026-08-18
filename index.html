@@ -90,7 +90,7 @@
         </div>
       </div>
 
-      <!-- FEATURE A: QUICK SINGLE-PROFILE INSPECTOR -->
+      <!-- Quick Single-Profile Inspector -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
@@ -123,7 +123,7 @@
         </div>
       </div>
 
-      <!-- FEATURE B: MAIN PROFILE FAMILY & VARIATION ANALYZER WITH VISUAL GRAPH -->
+      <!-- Main Profile Family & Variations Analyzer -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
@@ -136,7 +136,7 @@
         </div>
 
         <div id="familyInspectorDetails" class="hidden space-y-5">
-          <!-- KPI Summary for selected Family -->
+          <!-- Summary for selected Family -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-100 dark:border-blue-900/50">
               <span class="text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400">Total Variations</span>
@@ -168,7 +168,7 @@
             </div>
           </div>
 
-          <!-- Variations Breakdown Sub-Table -->
+          <!-- Variations Sub-Table -->
           <div class="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
             <div class="bg-slate-50 dark:bg-slate-700/60 px-4 py-2.5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
               <span class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">All Variations in this Family</span>
@@ -259,7 +259,7 @@
               </select>
             </div>
 
-            <!-- Sort By (Includes Length Sorting) -->
+            <!-- Sort By -->
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-bold text-slate-400 uppercase">Sort:</span>
               <select id="filterSort" onchange="applyFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none">
@@ -356,7 +356,13 @@
         <!-- Assembly Queue & Calculated Times -->
         <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
           <div>
-            <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider mb-3">Planned Profile Assembly Queue</h3>
+            <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider">Planned Profile Assembly Queue</h3>
+              <button onclick="generateJobSheetPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Export Job Sheet (PDF)
+              </button>
+            </div>
             <div id="planningCartList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
               <p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p>
             </div>
@@ -420,7 +426,7 @@
   </main>
 
   <!-- ========================================== -->
-  <!-- MODAL: ADD / EDIT PRODUCTION LOG           -->
+  <!-- MODAL: ADD / EDIT / DUPLICATE RECIPE       -->
   <!-- ========================================== -->
   <div id="modalForm" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
@@ -766,7 +772,6 @@
       document.getElementById('familyMaxFormatted').innerText = `Duration: ${formatDuration(maxCycle)}`;
       document.getElementById('chartFamilyBadge').innerText = `${selectedFam} (${variants.length} Variants)`;
 
-      // Render Bar Chart: Variation name vs Time (sec)
       const isDark = document.documentElement.classList.contains('dark');
       const textColor = isDark ? '#cbd5e1' : '#475569';
       const ctxVariant = document.getElementById('chartFamilyVariants').getContext('2d');
@@ -815,7 +820,6 @@
         }
       });
 
-      // Render variations table
       const tbody = document.getElementById('familyVariantsTable');
       tbody.innerHTML = '';
       variants.forEach((v, idx) => {
@@ -952,8 +956,9 @@
             <td class="p-3.5 font-mono">${r.feed_speeds || '-'}</td>
             <td class="p-3.5"><span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium text-[11px]">${r.tooling || (r.tool_count ? `${r.tool_count} tools` : 'Single tool')}</span></td>
             <td class="p-3.5 text-slate-500 font-semibold text-[11px]">${r.revision || 'Rev 01'}</td>
-            <td class="p-3.5 text-center space-x-2">
+            <td class="p-3.5 text-center space-x-1.5 whitespace-nowrap">
               <button onclick="viewRecordDetails(${r.id})" class="text-blue-600 hover:underline font-bold">View</button>
+              <button onclick="duplicateRecord(${r.id})" class="text-emerald-600 hover:underline font-bold">Copy</button>
               <button onclick="openFormModal(${r.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
               <button onclick="softDeleteRecord(${r.id})" class="text-rose-600 hover:underline font-bold">Delete</button>
             </td>
@@ -963,7 +968,7 @@
       });
     }
 
-    // --- FORM ACTIONS (ADD/EDIT) ---
+    // --- FORM ACTIONS (ADD / EDIT / DUPLICATE) ---
     function openFormModal(id = null) {
       document.getElementById('modalForm').classList.remove('hidden');
       if (id) {
@@ -994,6 +999,34 @@
         document.getElementById('formRowId').value = '';
         document.getElementById('formRevision').value = 'Rev 01';
       }
+    }
+
+    function duplicateRecord(id) {
+      const item = records.find(r => r.id === id);
+      if (!item) return;
+
+      document.getElementById('modalForm').classList.remove('hidden');
+      document.getElementById('formModalTitle').innerText = `Clone & Create Variant (${item.profile})`;
+      document.getElementById('formRowId').value = ''; // Clean ID ensures a new insert
+      document.getElementById('formProfile').value = item.profile || '';
+      document.getElementById('formDescription').value = item.description || '';
+      document.getElementById('formCycleSeconds').value = item.cycle_seconds || '';
+
+      let tCount = item.tool_count || 1;
+      if (!item.tool_count && item.tooling) {
+        if (item.tooling.toLowerCase().includes('two')) tCount = 2;
+        else if (item.tooling.toLowerCase().includes('three')) tCount = 3;
+        else if (item.tooling.toLowerCase().includes('four')) tCount = 4;
+        else if (item.tooling.toLowerCase().includes('five')) tCount = 5;
+      }
+      document.getElementById('formToolCount').value = tCount;
+      document.getElementById('formFeedSpeeds').value = item.feed_speeds || '';
+      document.getElementById('formFeedOverride').value = item.feed_override || '';
+      document.getElementById('formLength').value = item.length || '';
+      document.getElementById('formRevision').value = 'Rev 01';
+      document.getElementById('formRemarks').value = item.remarks ? `Clone of ${item.profile}: ` + item.remarks : '';
+
+      showToast(`Pre-filled recipe for ${item.profile}. Adjust length/cycle & save.`);
     }
 
     function closeFormModal() {
@@ -1316,7 +1349,7 @@
       }
     }
 
-    // --- PRODUCTION PLANNING & SHIFTS ---
+    // --- PRODUCTION PLANNING & JOB SHEET EXPORT ---
     function populatePlanningDropdown() {
       const sel = document.getElementById('planProfileSelect');
       sel.innerHTML = '<option value="">-- Choose Profile --</option>';
@@ -1341,6 +1374,7 @@
       planningCart.push({
         id: item.id,
         profile: item.profile,
+        description: item.description || 'Standard Milling',
         cutSec: item.cycle_seconds,
         handlingSec: handling,
         qty: qty
@@ -1400,7 +1434,80 @@
       document.getElementById('calcShiftRequirement').innerText = `${shiftsRequired} shift(s)`;
     }
 
-    // --- FORMAL ENGINEERING PDF REPORT ---
+    function generateJobSheetPDF() {
+      if (planningCart.length === 0) {
+        showToast("Add profiles to the job queue before exporting.", true);
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+
+      // Top Title Bar
+      doc.setFillColor(30, 64, 175);
+      doc.rect(0, 0, 210, 24, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(13);
+      doc.setFont(undefined, 'bold');
+      doc.text("ALUMEX PLC - CNC JOB ORDER & TRAVELER SHEET", 14, 15);
+
+      // Metadata Section
+      doc.setTextColor(51, 65, 85);
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text("Generated: 18 August 2026", 14, 31);
+      doc.text("Department: Component Plant CNC Production", 14, 36);
+      doc.text("Shift Target: 12-Hour Shift Baseline (6-6)", 130, 31);
+
+      let totalParts = 0;
+      let totalSec = 0;
+
+      const tableData = planningCart.map((item, i) => {
+        const itemSec = (item.cutSec + item.handlingSec) * item.qty;
+        totalParts += item.qty;
+        totalSec += itemSec;
+
+        return [
+          i + 1,
+          item.profile,
+          item.description,
+          `${item.qty} pcs`,
+          `${item.cutSec}s`,
+          `${item.handlingSec}s`,
+          formatDuration(itemSec),
+          "[  ] Pending"
+        ];
+      });
+
+      const shifts = (totalSec / 43200).toFixed(1);
+
+      doc.autoTable({
+        head: [['#', 'Profile', 'Feature / Description', 'Target Qty', 'Cut Time', 'Handling', 'Total Duration', 'Sign-Off']],
+        body: tableData,
+        startY: 42,
+        theme: 'striped',
+        headStyles: { fillColor: [30, 64, 175] },
+        styles: { fontSize: 8, cellPadding: 2.5 }
+      });
+
+      const finalY = doc.lastAutoTable.finalY + 8;
+
+      // Summary Card at bottom of sheet
+      doc.setFillColor(241, 245, 249);
+      doc.roundedRect(14, finalY, 182, 22, 3, 3, 'F');
+      doc.setTextColor(15, 23, 42);
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(9);
+      doc.text(`Total Planned Parts: ${totalParts} pcs`, 20, finalY + 8);
+      doc.text(`Total Estimated Run Time: ${formatDuration(totalSec)} (${(totalSec / 3600).toFixed(1)} hrs)`, 20, finalY + 15);
+      doc.text(`Estimated Required Shifts: ~${shifts} shift(s)`, 110, finalY + 8);
+      doc.text("Supervisor Verification: ___________________", 110, finalY + 15);
+
+      doc.save("Alumex_CNC_Job_Order_Sheet.pdf");
+      showToast("Job Sheet PDF generated successfully!");
+    }
+
+    // --- FORMAL ENGINEERING PDF & EXCEL REPORTS ---
     function generateEngineeringReportPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
