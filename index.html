@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alumex CNC Production Engineering Hub</title>
+  <title>Alumex PLC - Component Plant CNC Cycle Time</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -42,7 +42,7 @@
         <div class="bg-blue-600 text-white p-2 rounded-xl font-black text-lg">AL</div>
         <div>
           <h1 class="text-base md:text-lg font-black text-slate-900 dark:text-white leading-tight tracking-tight">ALUMEX PLC</h1>
-          <p class="text-[11px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide">CNC Production & Process Engineering</p>
+          <p class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">Component Plant CNC Machine Cycle Time for Each Profiles</p>
         </div>
       </div>
 
@@ -72,40 +72,62 @@
   <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
     <!-- ========================================== -->
-    <!-- SECTION 1: DASHBOARD & ANALYTICS           -->
+    <!-- SECTION 1: DASHBOARD                       -->
     <!-- ========================================== -->
     <section id="view-dashboard" class="space-y-6">
       
-      <!-- KPI Metric Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Primary KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Active Profiles</p>
           <p id="kpiTotalProfiles" class="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1">0</p>
-          <p class="text-[11px] text-slate-500 mt-1">Active tooling recipes</p>
+          <p class="text-[11px] text-slate-500 mt-1">Component plant database</p>
         </div>
         <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Average Cycle Time</p>
-          <p id="kpiAvgCycle" class="text-3xl font-black text-amber-600 dark:text-amber-400 mt-1">0s</p>
-          <p class="text-[11px] text-slate-500 mt-1">Across all profile runs</p>
-        </div>
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Max Machine Cycle</p>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Max Machine Cycle Time</p>
           <p id="kpiMaxCycle" class="text-3xl font-black text-rose-600 dark:text-rose-400 mt-1">-</p>
           <p id="kpiMaxProfileName" class="text-[11px] text-slate-500 mt-1 truncate">-</p>
         </div>
-        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Avg Shift Capacity</p>
-          <p id="kpiShiftCapacity" class="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0 pcs</p>
-          <p class="text-[11px] text-slate-500 mt-1">Per 10.5h net day shift</p>
+      </div>
+
+      <!-- Profile Visual Inspector Card -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <h3 class="font-black text-base text-slate-900 dark:text-white uppercase tracking-wide">Interactive Profile Inspector</h3>
+            <p class="text-xs text-slate-400">Select any profile to inspect specific cutting cycles and tool parameters.</p>
+          </div>
+          <select id="dashInspectSelect" onchange="renderProfileInspector()" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+            <option value="">-- Choose Profile to Inspect --</option>
+          </select>
+        </div>
+
+        <div id="inspectorDetails" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-100 dark:border-blue-900/50">
+            <span class="text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400">Profile Name & Feature</span>
+            <p id="inspectName" class="text-base font-black text-slate-900 dark:text-white mt-1">-</p>
+            <p id="inspectFeature" class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">-</p>
+          </div>
+
+          <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
+            <span class="text-[10px] font-bold uppercase text-slate-400">Cycle Duration</span>
+            <p id="inspectCycle" class="text-base font-black text-blue-600 dark:text-blue-400 mt-1">0s</p>
+            <p id="inspectFormatted" class="text-xs text-slate-500 mt-0.5">-</p>
+          </div>
+
+          <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
+            <span class="text-[10px] font-bold uppercase text-slate-400">Machining Setup</span>
+            <p id="inspectTooling" class="text-base font-black text-slate-900 dark:text-white mt-1">-</p>
+            <p id="inspectFeed" class="text-xs text-slate-500 mt-0.5">-</p>
+          </div>
         </div>
       </div>
 
-      <!-- Charts Row -->
+      <!-- Analytics Charts Row -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wide">Cycle Time Analysis (Top Profiles)</h3>
-            <span class="text-xs text-slate-400">Seconds per profile run</span>
+            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wide">Top Profile Cycle Times (Seconds)</h3>
           </div>
           <div class="h-64">
             <canvas id="chartCycleTime"></canvas>
@@ -113,8 +135,7 @@
         </div>
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wide">Tooling Distribution</h3>
-            <span class="text-xs text-slate-400">Tool configurations</span>
+            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wide">Tool Distribution</h3>
           </div>
           <div class="h-64 flex items-center justify-center">
             <canvas id="chartTooling"></canvas>
@@ -128,7 +149,7 @@
     <!-- ========================================== -->
     <section id="view-logs" class="hidden space-y-6">
       
-      <!-- Top Action Bar -->
+      <!-- Action Bar -->
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
@@ -145,12 +166,12 @@
         </div>
       </div>
 
-      <!-- Filters and Table Container -->
+      <!-- Filters & Main Table -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
         
         <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div class="w-full md:w-80">
-            <input type="text" id="logSearchInput" oninput="applyFiltersAndRender()" placeholder="Search profile, machine, description..." class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="logSearchInput" oninput="applyFiltersAndRender()" placeholder="Search profile or description..." class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
 
           <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
@@ -159,9 +180,11 @@
               <span class="text-xs font-bold text-slate-400 uppercase">Tools:</span>
               <select id="filterToolCount" onchange="applyFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none">
                 <option value="ALL">All Tools</option>
-                <option value="1">1 Tool</option>
-                <option value="2">2 Tools</option>
-                <option value="4">4 Tools</option>
+                <option value="1">Single tool</option>
+                <option value="2">Two tools</option>
+                <option value="3">Three tools</option>
+                <option value="4">Four tools</option>
+                <option value="5">Five tools</option>
               </select>
             </div>
 
@@ -179,7 +202,6 @@
           </div>
         </div>
 
-        <!-- Clean Responsive Main Table -->
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
@@ -187,7 +209,6 @@
                 <th class="p-3.5">#</th>
                 <th class="p-3.5">Profile Code</th>
                 <th class="p-3.5">Description</th>
-                <th class="p-3.5">Machine</th>
                 <th class="p-3.5">Cycle Time</th>
                 <th class="p-3.5">Feed (mm/min)</th>
                 <th class="p-3.5">Tooling</th>
@@ -196,7 +217,7 @@
               </tr>
             </thead>
             <tbody id="logsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs">
-              <tr><td colspan="9" class="p-6 text-center text-slate-400">Loading production records...</td></tr>
+              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading production records...</td></tr>
             </tbody>
           </table>
         </div>
@@ -208,20 +229,20 @@
     <!-- ========================================== -->
     <section id="view-production" class="hidden space-y-6">
       
-      <!-- Shift Rules Reference Header -->
-      <div class="bg-blue-900 text-white p-6 rounded-2xl shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Shift Header -->
+      <div class="bg-blue-900 text-white p-6 rounded-2xl shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
         <div>
           <h3 class="font-black text-lg">Alumex Factory Shift Schedule</h3>
-          <p class="text-xs text-blue-200 mt-1">Calculations factor in mandatory tea, meal, and relief allowances.</p>
+          <p class="text-xs text-blue-200 mt-1">Component Plant CNC Milling Operations</p>
         </div>
         <div class="grid grid-cols-2 gap-3 text-xs bg-blue-950/50 p-3 rounded-xl border border-blue-800">
           <div>
-            <p class="font-bold text-blue-300">DAY SHIFT (6 AM - 6 PM)</p>
-            <p class="text-[11px] text-blue-200">12h total - 1.5h breaks = <span class="font-bold text-white">10.5h net run</span></p>
+            <p class="font-bold text-blue-300">DAY SHIFT</p>
+            <p class="text-[11px] text-white font-semibold">6:00 AM – 6:00 PM</p>
           </div>
           <div>
-            <p class="font-bold text-blue-300">NIGHT SHIFT (6 PM - 6 AM)</p>
-            <p class="text-[11px] text-blue-200">12h total - 2.25h breaks = <span class="font-bold text-white">9.75h net run</span></p>
+            <p class="font-bold text-blue-300">NIGHT SHIFT</p>
+            <p class="text-[11px] text-white font-semibold">6:00 PM – 6:00 AM</p>
           </div>
         </div>
       </div>
@@ -252,17 +273,13 @@
                 <input type="number" id="planBatchQty" value="50" min="1" max="100000" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-medium outline-none">
               </div>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Assumed Machine OEE / Utilization (%)</label>
-              <input type="number" id="planEfficiency" value="85" min="50" max="100" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-medium outline-none">
-            </div>
             <button onclick="addProfileToPlanningCart()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-sm">
               + Add to Production Run
             </button>
           </div>
         </div>
 
-        <!-- Assembly Cart & Shift Calculations -->
+        <!-- Assembly Queue & Calculated Times -->
         <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
           <div>
             <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider mb-3">Planned Profile Assembly Queue</h3>
@@ -271,22 +288,17 @@
             </div>
           </div>
 
-          <!-- Total Forecast Box -->
-          <div class="mt-6 p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div class="mt-6 p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-4 text-center">
             <div>
               <p class="text-[11px] font-bold text-slate-400 uppercase">Total Parts</p>
               <p id="calcTotalQty" class="text-xl font-black text-slate-800 dark:text-slate-100 mt-0.5">0 pcs</p>
             </div>
             <div>
-              <p class="text-[11px] font-bold text-slate-400 uppercase">Theoretical Time</p>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Total Time</p>
               <p id="calcTheorTime" class="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">0h 0m</p>
             </div>
             <div>
-              <p class="text-[11px] font-bold text-slate-400 uppercase">OEE Adjusted Time</p>
-              <p id="calcAdjustedTime" class="text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5">0h 0m</p>
-            </div>
-            <div>
-              <p class="text-[11px] font-bold text-slate-400 uppercase">Required Shifts</p>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Estimated Shifts</p>
               <p id="calcShiftRequirement" class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">0.0</p>
             </div>
           </div>
@@ -299,10 +311,14 @@
     <!-- SECTION 4: TRASH BIN (SOFT DELETE)         -->
     <!-- ========================================== -->
     <section id="view-trash" class="hidden space-y-6">
-      <div class="bg-amber-50 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200 dark:border-amber-800 flex justify-between items-center">
+      <div class="bg-amber-50 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200 dark:border-amber-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h3 class="font-bold text-sm text-amber-900 dark:text-amber-200">Soft-Delete Archive (30-Day Retention)</h3>
-          <p class="text-xs text-amber-700 dark:text-amber-300">Items remain recoverable here for 30 days before permanent cleanup.</p>
+          <p class="text-xs text-amber-700 dark:text-amber-300">Recover items or select them for permanent deletion.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="restoreSelectedTrash()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm">Restore Selected</button>
+          <button onclick="permanentDeleteSelectedTrash()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm">Delete Permanently</button>
         </div>
       </div>
 
@@ -311,15 +327,16 @@
           <table class="w-full text-left text-sm">
             <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
               <tr>
+                <th class="p-3.5"><input type="checkbox" id="selectAllTrash" onchange="toggleSelectAllTrash(this)" class="rounded"></th>
                 <th class="p-3.5">Profile</th>
                 <th class="p-3.5">Description</th>
                 <th class="p-3.5">Cycle Time</th>
                 <th class="p-3.5">Deleted Date</th>
-                <th class="p-3.5 text-center">Restore</th>
+                <th class="p-3.5 text-center">Action</th>
               </tr>
             </thead>
             <tbody id="trashTableBody" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs">
-              <tr><td colspan="5" class="p-6 text-center text-slate-400">Trash bin is empty.</td></tr>
+              <tr><td colspan="6" class="p-6 text-center text-slate-400">Trash bin is empty.</td></tr>
             </tbody>
           </table>
         </div>
@@ -335,8 +352,8 @@
     <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
         <div>
-          <h3 id="modalFormTitle" class="text-lg font-black text-slate-900 dark:text-white">Log CNC Production Recipe</h3>
-          <p class="text-xs text-slate-400">Add or revise standard parameters in database.</p>
+          <h3 id="formModalTitle" class="text-lg font-black text-slate-900 dark:text-white">Log CNC Production Recipe</h3>
+          <p class="text-xs text-slate-400">Add or revise standard profile parameters in database.</p>
         </div>
         <button onclick="closeFormModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
       </div>
@@ -350,11 +367,13 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Machine ID</label>
-          <select id="formMachine" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="CNC-01">CNC-01 (Milling Line 1)</option>
-            <option value="CNC-02">CNC-02 (Milling Line 2)</option>
-            <option value="CNC-03">CNC-03 (High Speed)</option>
+          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Tool Count</label>
+          <select id="formToolCount" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="1">Single tool</option>
+            <option value="2">Two tools</option>
+            <option value="3">Three tools</option>
+            <option value="4">Four tools</option>
+            <option value="5">Five tools</option>
           </select>
         </div>
 
@@ -366,15 +385,6 @@
         <div>
           <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Cycle Time (1 - 7200 Sec) *</label>
           <input type="number" id="formCycleSeconds" min="1" max="7200" placeholder="e.g., 83" required class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Tool Count</label>
-          <select id="formToolCount" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
-            <option value="1">1 Tool (Single tool)</option>
-            <option value="2">2 Tools (Two tools)</option>
-            <option value="4">4 Tools (Four tools)</option>
-          </select>
         </div>
 
         <div>
@@ -399,7 +409,7 @@
 
         <div class="sm:col-span-2">
           <label class="block font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">Engineering Remarks</label>
-          <input type="text" id="formRemarks" placeholder="Optional setup details or test notes" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+          <input type="text" id="formRemarks" placeholder="Optional setup details or notes" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
 
         <div class="sm:col-span-2 flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -417,15 +427,13 @@
     <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
       <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3 mb-4">
         <div>
-          <span id="viewProfileBadge" class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase">ALUMEX PROFILE</span>
+          <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase">ALUMEX PROFILE</span>
           <h3 id="viewProfileTitle" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">-</h3>
         </div>
         <button onclick="closeViewModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
       </div>
 
-      <div class="space-y-3 text-xs" id="viewModalContent">
-        <!-- Injected dynamically -->
-      </div>
+      <div class="space-y-3 text-xs" id="viewModalContent"></div>
 
       <div class="mt-6 pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end">
         <button onclick="closeViewModal()" class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-5 py-2 rounded-xl font-bold">Close</button>
@@ -490,7 +498,6 @@
     let chartCycle = null;
     let chartTool = null;
 
-    // --- TOAST HELPER ---
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toastNotification');
       const text = document.getElementById('toastMessage');
@@ -518,7 +525,6 @@
       return out.trim();
     }
 
-    // --- TAB SWITCHING ---
     function switchTab(tabId) {
       ['dashboard', 'logs', 'production', 'trash'].forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
@@ -539,7 +545,6 @@
       renderCharts();
     }
 
-    // --- FETCH & REAL-TIME ---
     async function fetchAllData() {
       document.getElementById('syncStatus').innerText = "Syncing...";
       const { data, error } = await supabaseClient.from('cnc_cycle_times').select('*');
@@ -562,6 +567,7 @@
       }
 
       updateKPIs();
+      populateInspectDropdown();
       populatePlanningDropdown();
       applyFiltersAndRender();
       renderTrashTable();
@@ -575,35 +581,56 @@
       })
       .subscribe();
 
-    // --- DASHBOARD & CHARTS ---
+    // --- DASHBOARD & INSPECTOR ---
     function updateKPIs() {
       document.getElementById('kpiTotalProfiles').innerText = records.length;
       if (records.length === 0) {
-        document.getElementById('kpiAvgCycle').innerText = "0s";
         document.getElementById('kpiMaxCycle').innerText = "-";
-        document.getElementById('kpiShiftCapacity').innerText = "0 pcs";
         return;
       }
 
       const cycleTimes = records.map(r => r.cycle_seconds || 0).filter(s => s > 0);
-      const avg = cycleTimes.length > 0 ? Math.round(cycleTimes.reduce((a, b) => a + b, 0) / cycleTimes.length) : 0;
       const max = cycleTimes.length > 0 ? Math.max(...cycleTimes) : 0;
       const maxItem = records.find(r => r.cycle_seconds === max);
 
-      document.getElementById('kpiAvgCycle').innerText = `${avg} sec`;
       document.getElementById('kpiMaxCycle').innerText = formatDuration(max);
       document.getElementById('kpiMaxProfileName').innerText = maxItem ? `${maxItem.profile} (${maxItem.description || 'Standard'})` : '-';
+    }
 
-      // 10.5 Net Hours = 37,800 sec
-      const shiftCapacity = avg > 0 ? Math.floor(37800 / (avg + 30)) : 0;
-      document.getElementById('kpiShiftCapacity').innerText = `${shiftCapacity} pcs`;
+    function populateInspectDropdown() {
+      const sel = document.getElementById('dashInspectSelect');
+      sel.innerHTML = '<option value="">-- Choose Profile to Inspect --</option>';
+      records.forEach(r => {
+        sel.innerHTML += `<option value="${r.id}">${r.profile} - ${r.description || 'Standard'}</option>`;
+      });
+    }
+
+    function renderProfileInspector() {
+      const id = document.getElementById('dashInspectSelect').value;
+      const container = document.getElementById('inspectorDetails');
+
+      if (!id) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      const item = records.find(r => r.id == id);
+      if (!item) return;
+
+      document.getElementById('inspectName').innerText = item.profile;
+      document.getElementById('inspectFeature').innerText = item.description || 'Standard profile machining';
+      document.getElementById('inspectCycle').innerText = `${item.cycle_seconds}s`;
+      document.getElementById('inspectFormatted').innerText = `Duration: ${formatDuration(item.cycle_seconds)}`;
+      document.getElementById('inspectTooling').innerText = item.tooling || (item.tool_count ? `${item.tool_count} tools` : 'Single tool');
+      document.getElementById('inspectFeed').innerText = `Feed: ${item.feed_speeds || '-'} (${item.feed_override || '100%'})`;
+
+      container.classList.remove('hidden');
     }
 
     function renderCharts() {
       const isDark = document.documentElement.classList.contains('dark');
       const textColor = isDark ? '#cbd5e1' : '#475569';
 
-      // Bar Chart: Top Profiles by Cycle Time
       const sortedByTime = [...records].sort((a, b) => (b.cycle_seconds || 0) - (a.cycle_seconds || 0)).slice(0, 10);
       const ctxBar = document.getElementById('chartCycleTime').getContext('2d');
       if (chartCycle) chartCycle.destroy();
@@ -630,10 +657,11 @@
         }
       });
 
-      // Doughnut: Tooling Count Distribution
       const count1 = records.filter(r => (r.tooling || '').toLowerCase().includes('single') || r.tool_count === 1).length;
       const count2 = records.filter(r => (r.tooling || '').toLowerCase().includes('two') || r.tool_count === 2).length;
+      const count3 = records.filter(r => (r.tooling || '').toLowerCase().includes('three') || r.tool_count === 3).length;
       const count4 = records.filter(r => (r.tooling || '').toLowerCase().includes('four') || r.tool_count === 4).length;
+      const count5 = records.filter(r => (r.tooling || '').toLowerCase().includes('five') || r.tool_count === 5).length;
 
       const ctxPie = document.getElementById('chartTooling').getContext('2d');
       if (chartTool) chartTool.destroy();
@@ -641,10 +669,10 @@
       chartTool = new Chart(ctxPie, {
         type: 'doughnut',
         data: {
-          labels: ['Single Tool', 'Two Tools', 'Four Tools'],
+          labels: ['Single tool', 'Two tools', 'Three tools', 'Four tools', 'Five tools'],
           datasets: [{
-            data: [count1, count2, count4],
-            backgroundColor: ['#3b82f6', '#f59e0b', '#10b981'],
+            data: [count1, count2, count3, count4, count5],
+            backgroundColor: ['#3b82f6', '#f59e0b', '#8b5cf6', '#10b981', '#ec4899'],
             borderWidth: 0
           }]
         },
@@ -666,14 +694,15 @@
 
       displayedRecords = records.filter(r => {
         const matchesQ = (r.profile || '').toLowerCase().includes(q) ||
-                         (r.description || '').toLowerCase().includes(q) ||
-                         (r.machine || '').toLowerCase().includes(q);
+                         (r.description || '').toLowerCase().includes(q);
         
         let matchesTool = true;
         const tStr = (r.tooling || '').toLowerCase();
         if (toolF === '1') matchesTool = tStr.includes('single') || r.tool_count === 1;
         if (toolF === '2') matchesTool = tStr.includes('two') || tStr.includes('2') || r.tool_count === 2;
+        if (toolF === '3') matchesTool = tStr.includes('three') || tStr.includes('3') || r.tool_count === 3;
         if (toolF === '4') matchesTool = tStr.includes('four') || tStr.includes('4') || r.tool_count === 4;
+        if (toolF === '5') matchesTool = tStr.includes('five') || tStr.includes('5') || r.tool_count === 5;
 
         return matchesQ && matchesTool;
       });
@@ -692,7 +721,7 @@
     function renderLogsTable() {
       const tbody = document.getElementById('logsTableBody');
       if (displayedRecords.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No active profile logs match your filter criteria.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No active profile logs match your filter criteria.</td></tr>`;
         return;
       }
 
@@ -703,10 +732,9 @@
             <td class="p-3.5 font-semibold text-slate-400">${idx + 1}</td>
             <td class="p-3.5 font-bold text-slate-900 dark:text-white">${r.profile}</td>
             <td class="p-3.5 max-w-xs truncate">${r.description || '-'}</td>
-            <td class="p-3.5"><span class="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold text-[10px]">${r.machine || 'CNC-01'}</span></td>
             <td class="p-3.5 font-mono font-bold text-blue-600 dark:text-blue-400">${r.cycle_seconds}s (${formatDuration(r.cycle_seconds)})</td>
             <td class="p-3.5 font-mono">${r.feed_speeds || '-'}</td>
-            <td class="p-3.5"><span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium text-[11px]">${r.tooling || (r.tool_count + ' Tool')}</span></td>
+            <td class="p-3.5"><span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium text-[11px]">${r.tooling || (r.tool_count ? `${r.tool_count} tools` : 'Single tool')}</span></td>
             <td class="p-3.5 text-slate-500 font-semibold text-[11px]">${r.revision || 'Rev 01'}</td>
             <td class="p-3.5 text-center space-x-2">
               <button onclick="viewRecordDetails(${r.id})" class="text-blue-600 hover:underline font-bold">View</button>
@@ -728,10 +756,17 @@
         document.getElementById('formModalTitle').innerText = "Revise CNC Recipe";
         document.getElementById('formRowId').value = item.id;
         document.getElementById('formProfile').value = item.profile || '';
-        document.getElementById('formMachine').value = item.machine || 'CNC-01';
         document.getElementById('formDescription').value = item.description || '';
         document.getElementById('formCycleSeconds').value = item.cycle_seconds || '';
-        document.getElementById('formToolCount').value = item.tool_count || (item.tooling?.includes('Two') ? 2 : item.tooling?.includes('Four') ? 4 : 1);
+        
+        let tCount = item.tool_count || 1;
+        if (!item.tool_count && item.tooling) {
+          if (item.tooling.toLowerCase().includes('two')) tCount = 2;
+          else if (item.tooling.toLowerCase().includes('three')) tCount = 3;
+          else if (item.tooling.toLowerCase().includes('four')) tCount = 4;
+          else if (item.tooling.toLowerCase().includes('five')) tCount = 5;
+        }
+        document.getElementById('formToolCount').value = tCount;
         document.getElementById('formFeedSpeeds').value = item.feed_speeds || '';
         document.getElementById('formFeedOverride').value = item.feed_override || '';
         document.getElementById('formLength').value = item.length || '';
@@ -755,19 +790,19 @@
       const cycleSec = parseInt(document.getElementById('formCycleSeconds').value, 10);
       const tools = parseInt(document.getElementById('formToolCount').value, 10);
 
-      // Validation
       if (cycleSec <= 0 || cycleSec > 7200) {
         showToast("Cycle Time must be between 1 and 7200 seconds.", true);
         return;
       }
 
+      const toolNames = { 1: 'Single tool', 2: 'Two tools', 3: 'Three tools', 4: 'Four tools', 5: 'Five tools' };
+
       const payload = {
         profile: document.getElementById('formProfile').value.trim().toUpperCase(),
-        machine: document.getElementById('formMachine').value,
         description: document.getElementById('formDescription').value.trim() || null,
         cycle_seconds: cycleSec,
         tool_count: tools,
-        tooling: tools === 1 ? 'Single tool' : tools === 2 ? 'Two tools' : 'Four tools',
+        tooling: toolNames[tools] || 'Single tool',
         feed_speeds: document.getElementById('formFeedSpeeds').value.trim() || null,
         feed_override: document.getElementById('formFeedOverride').value.trim() || null,
         length: document.getElementById('formLength').value.trim() || null,
@@ -811,12 +846,12 @@
       document.getElementById('viewProfileTitle').innerText = item.profile;
       document.getElementById('viewModalContent').innerHTML = `
         <div class="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-700/50 p-3.5 rounded-xl">
-          <div><span class="text-slate-400 uppercase font-bold text-[10px]">Machine</span><p class="font-bold text-slate-800 dark:text-white mt-0.5">${item.machine || 'CNC-01'}</p></div>
           <div><span class="text-slate-400 uppercase font-bold text-[10px]">Cycle Time</span><p class="font-mono font-bold text-blue-600 dark:text-blue-400 mt-0.5">${item.cycle_seconds}s (${formatDuration(item.cycle_seconds)})</p></div>
-          <div><span class="text-slate-400 uppercase font-bold text-[10px]">Tooling</span><p class="font-bold text-slate-800 dark:text-white mt-0.5">${item.tooling || (item.tool_count + ' Tools')}</p></div>
+          <div><span class="text-slate-400 uppercase font-bold text-[10px]">Tooling</span><p class="font-bold text-slate-800 dark:text-white mt-0.5">${item.tooling || (item.tool_count ? `${item.tool_count} tools` : 'Single tool')}</p></div>
           <div><span class="text-slate-400 uppercase font-bold text-[10px]">Feed Speed</span><p class="font-mono font-bold text-slate-800 dark:text-white mt-0.5">${item.feed_speeds || '-'}</p></div>
           <div><span class="text-slate-400 uppercase font-bold text-[10px]">Length / Dim</span><p class="font-bold text-slate-800 dark:text-white mt-0.5">${item.length || '-'}</p></div>
           <div><span class="text-slate-400 uppercase font-bold text-[10px]">Feed Override</span><p class="font-bold text-slate-800 dark:text-white mt-0.5">${item.feed_override || '-'}</p></div>
+          <div><span class="text-slate-400 uppercase font-bold text-[10px]">Revision</span><p class="font-bold text-slate-800 dark:text-white mt-0.5">${item.revision || 'Rev 01'}</p></div>
         </div>
         <div>
           <span class="text-slate-400 uppercase font-bold text-[10px]">Feature Description</span>
@@ -827,8 +862,8 @@
           <p class="text-slate-700 dark:text-slate-200 mt-0.5 font-medium">${item.remarks || 'Standard production operation.'}</p>
         </div>
         <div class="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between text-[11px] text-slate-400">
-          <span>Revision: <b>${item.revision || 'Rev 01'}</b></span>
           <span>Logged Date: <b>${item.record_date || '18 Aug 2026'}</b></span>
+          <span>Logged by: <b>Production Engineering</b></span>
         </div>
       `;
       document.getElementById('modalView').classList.remove('hidden');
@@ -838,7 +873,7 @@
       document.getElementById('modalView').classList.add('hidden');
     }
 
-    // --- SOFT DELETE & TRASH BIN ---
+    // --- SOFT DELETE, TRASH & PERMANENT DELETE ---
     async function softDeleteRecord(id) {
       if (!confirm("Move this profile recipe to the Trash Bin? You can recover it within 30 days.")) return;
 
@@ -872,7 +907,7 @@
     function renderTrashTable() {
       const tbody = document.getElementById('trashTableBody');
       if (trashRecords.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">Trash bin is empty.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">Trash bin is empty.</td></tr>`;
         return;
       }
 
@@ -881,6 +916,7 @@
         const deletedDate = r.deleted_at ? new Date(r.deleted_at).toLocaleDateString() : 'Recent';
         tbody.innerHTML += `
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+            <td class="p-3.5"><input type="checkbox" value="${r.id}" class="trash-select-item rounded"></td>
             <td class="p-3.5 font-bold text-slate-900 dark:text-white">${r.profile}</td>
             <td class="p-3.5">${r.description || '-'}</td>
             <td class="p-3.5 font-mono text-blue-600 dark:text-blue-400">${r.cycle_seconds}s</td>
@@ -891,6 +927,58 @@
           </tr>
         `;
       });
+    }
+
+    function toggleSelectAllTrash(master) {
+      const checkboxes = document.querySelectorAll('.trash-select-item');
+      checkboxes.forEach(cb => cb.checked = master.checked);
+    }
+
+    function getSelectedTrashIds() {
+      const checkboxes = document.querySelectorAll('.trash-select-item:checked');
+      return Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
+    }
+
+    async function restoreSelectedTrash() {
+      const ids = getSelectedTrashIds();
+      if (ids.length === 0) {
+        showToast("No items selected to restore.", true);
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('cnc_cycle_times')
+        .update({ is_deleted: false, deleted_at: null })
+        .in('id', ids);
+
+      if (error) {
+        showToast("Restore failed: " + error.message, true);
+      } else {
+        showToast(`Restored ${ids.length} records successfully!`);
+        fetchAllData();
+      }
+    }
+
+    async function permanentDeleteSelectedTrash() {
+      const ids = getSelectedTrashIds();
+      if (ids.length === 0) {
+        showToast("No items selected to delete.", true);
+        return;
+      }
+
+      if (!confirm(`Permanently delete ${ids.length} selected record(s)? This CANNOT be undone.`)) return;
+
+      const { error } = await supabaseClient
+        .from('cnc_cycle_times')
+        .delete()
+        .in('id', ids);
+
+      if (error) {
+        showToast("Permanent deletion failed: " + error.message, true);
+      } else {
+        showToast(`Permanently deleted ${ids.length} record(s).`);
+        fetchAllData();
+      }
     }
 
     // --- SPREADSHEET PREVIEW & BULK IMPORT ---
@@ -917,6 +1005,14 @@
             const isValid = prof.length > 0 && cycle > 0 && cycle <= 7200;
             const isDuplicate = records.some(existing => existing.profile === prof);
 
+            const toolRaw = (r["Tooling"] || r["Tool Configuration"] || '').toLowerCase();
+            let tCount = 1;
+            let tName = 'Single tool';
+            if (toolRaw.includes('two') || toolRaw.includes('2')) { tCount = 2; tName = 'Two tools'; }
+            else if (toolRaw.includes('three') || toolRaw.includes('3')) { tCount = 3; tName = 'Three tools'; }
+            else if (toolRaw.includes('four') || toolRaw.includes('4')) { tCount = 4; tName = 'Four tools'; }
+            else if (toolRaw.includes('five') || toolRaw.includes('5')) { tCount = 5; tName = 'Five tools'; }
+
             return {
               profile: prof || "UNKNOWN",
               description: r["Feature / Description"] || r["Feature"] || r["Description"] || null,
@@ -924,10 +1020,9 @@
               feed_override: r["Feed Rate Override"] || r["Override"] || null,
               cycle_seconds: cycle,
               feed_speeds: r["Feed Speed"] || r["Feed Speeds (mm/min)"] || null,
-              tooling: r["Tooling"] || r["Tool Configuration"] || "Single tool",
-              tool_count: (r["Tooling"] || '').toLowerCase().includes('two') ? 2 : (r["Tooling"] || '').toLowerCase().includes('four') ? 4 : 1,
+              tooling: tName,
+              tool_count: tCount,
               remarks: r["Remarks"] || null,
-              machine: r["Machine"] || 'CNC-01',
               revision: 'Rev 01',
               record_date: '2026-08-18',
               is_deleted: false,
@@ -1005,12 +1100,12 @@
       }
     }
 
-    // --- PRODUCTION PLANNING & SHIFTS (DAY: 10.5H, NIGHT: 9.75H) ---
+    // --- PRODUCTION PLANNING & SHIFTS ---
     function populatePlanningDropdown() {
       const sel = document.getElementById('planProfileSelect');
       sel.innerHTML = '<option value="">-- Choose Profile --</option>';
       records.forEach(r => {
-        sel.innerHTML += `<option value="${r.id}">${r.profile} - ${r.cycle_seconds}s [${r.machine || 'CNC-01'}]</option>`;
+        sel.innerHTML += `<option value="${r.id}">${r.profile} - ${r.cycle_seconds}s [${r.description || 'Standard'}]</option>`;
       });
     }
 
@@ -1030,7 +1125,6 @@
       planningCart.push({
         id: item.id,
         profile: item.profile,
-        machine: item.machine || 'CNC-01',
         cutSec: item.cycle_seconds,
         handlingSec: handling,
         qty: qty
@@ -1055,7 +1149,6 @@
         container.innerHTML = `<p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p>`;
         document.getElementById('calcTotalQty').innerText = "0 pcs";
         document.getElementById('calcTheorTime').innerText = "0h 0m";
-        document.getElementById('calcAdjustedTime').innerText = "0h 0m";
         document.getElementById('calcShiftRequirement').innerText = "0.0";
         return;
       }
@@ -1073,7 +1166,7 @@
           <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-xs">
             <div>
               <span class="font-bold text-slate-900 dark:text-white">${item.profile}</span>
-              <span class="text-slate-500"> × ${item.qty} pcs [${item.machine}]</span>
+              <span class="text-slate-500"> × ${item.qty} pcs</span>
               <div class="text-[10px] text-slate-400">Unit: ${item.cutSec}s cut + ${item.handlingSec}s handle</div>
             </div>
             <div class="flex items-center gap-2">
@@ -1084,16 +1177,12 @@
         `;
       });
 
-      const oee = (parseFloat(document.getElementById('planEfficiency').value) || 85) / 100;
-      const adjustedSec = totalTheoreticalSec / oee;
-
-      // Net working seconds: Day shift = 10.5h (37,800s), Night shift = 9.75h (35,100s) -> Avg = 36,450s per 12h block
-      const shiftsRequired = (adjustedSec / 36450).toFixed(1);
+      // Shift duration benchmark: 12-hour block (43,200 seconds)
+      const shiftsRequired = (totalTheoreticalSec / 43200).toFixed(1);
 
       document.getElementById('calcTotalQty').innerText = `${totalParts} pcs`;
       document.getElementById('calcTheorTime').innerText = `${(totalTheoreticalSec / 3600).toFixed(1)} hrs`;
-      document.getElementById('calcAdjustedTime').innerText = `${(adjustedSec / 3600).toFixed(1)} hrs`;
-      document.getElementById('calcShiftRequirement').innerText = `${shiftsRequired} shifts`;
+      document.getElementById('calcShiftRequirement').innerText = `${shiftsRequired} shift(s)`;
     }
 
     // --- FORMAL ENGINEERING PDF REPORT ---
@@ -1101,29 +1190,24 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
 
-      // Title Header
       doc.setFillColor(30, 64, 175);
       doc.rect(0, 0, 210, 24, 'F');
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(14);
+      doc.setFontSize(13);
       doc.setFont(undefined, 'bold');
-      doc.text("ALUMEX PLC - CNC PRODUCTION ENGINEERING REPORT", 14, 15);
+      doc.text("ALUMEX PLC - COMPONENT PLANT CNC CYCLE TIME REPORT", 14, 15);
 
-      // Metadata block
       doc.setTextColor(51, 65, 85);
       doc.setFontSize(9);
       doc.setFont(undefined, 'normal');
       doc.text("Report Date: 18 August 2026", 14, 32);
-      doc.text(`Active Recipes: ${records.length}`, 14, 37);
-      doc.text("Prepared By: Production Engineering Department", 140, 32);
+      doc.text(`Active Profiles: ${records.length}`, 14, 37);
+      doc.text("Prepared By: Production Engineering Department", 130, 32);
 
-      // Summary Table
-      const avg = records.length > 0 ? Math.round(records.reduce((a, b) => a + (b.cycle_seconds || 0), 0) / records.length) : 0;
       const tableData = records.map((r, i) => [
         i + 1,
         r.profile,
         r.description || '-',
-        r.machine || 'CNC-01',
         `${r.cycle_seconds}s`,
         formatDuration(r.cycle_seconds),
         r.feed_speeds || '-',
@@ -1132,7 +1216,7 @@
       ]);
 
       doc.autoTable({
-        head: [['#', 'Profile', 'Description', 'Machine', 'Sec', 'Duration', 'Feed Speed', 'Tooling', 'Revision']],
+        head: [['#', 'Profile', 'Description', 'Sec', 'Duration', 'Feed Speed', 'Tooling', 'Revision']],
         body: tableData,
         startY: 42,
         theme: 'striped',
@@ -1140,14 +1224,13 @@
         styles: { fontSize: 8, cellPadding: 2 }
       });
 
-      doc.save("Alumex_CNC_Production_Report.pdf");
+      doc.save("Alumex_Component_Plant_CNC_Report.pdf");
     }
 
     function exportToExcel() {
       const exportData = records.map((r, i) => ({
         "No.": i + 1,
         "Profile Code": r.profile,
-        "Machine ID": r.machine || 'CNC-01',
         "Feature Description": r.description || '',
         "Cycle Time (Seconds)": r.cycle_seconds,
         "Cycle Time (Formatted)": formatDuration(r.cycle_seconds),
@@ -1163,10 +1246,9 @@
       const ws = XLSX.utils.json_to_sheet(exportData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "CNC Production Recipes");
-      XLSX.writeFile(wb, "Alumex_CNC_Production_Log.xlsx");
+      XLSX.writeFile(wb, "Alumex_Component_Plant_CNC_Log.xlsx");
     }
 
-    // Initial boot
     fetchAllData();
   </script>
 </body>
