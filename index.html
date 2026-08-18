@@ -34,49 +34,77 @@
       </div>
     </div>
 
-    <!-- Form -->
-    <form id="logForm" onsubmit="saveEntry(event)" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div>
-        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Main Profile / Name</label>
-        <input type="text" id="profile" placeholder="e.g., AL 527" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+    <!-- Form Section -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <div class="flex justify-between items-center mb-4">
+        <h2 id="formTitle" class="text-lg font-bold text-gray-800">Add New CNC Record</h2>
+        <span id="editBadge" class="hidden bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-amber-300">Editing Mode</span>
       </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feature / Description</label>
-        <input type="text" id="description" placeholder="e.g., Float plane blade (Side 01)" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Length / Dim</label>
-        <input type="text" id="length" placeholder="e.g., 2437.4 mm" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feed Rate Override</label>
-        <input type="text" id="feed_override" placeholder="e.g., 70%" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Cycle Time (Seconds)</label>
-        <input type="number" id="cycle_seconds" placeholder="e.g., 83" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feed Speed (mm/min)</label>
-        <input type="text" id="feed_speeds" placeholder="e.g., Feed 600" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tooling Configuration</label>
-        <input type="text" id="tooling" placeholder="e.g., Single tool" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Remarks</label>
-        <input type="text" id="remarks" placeholder="e.g., Side 01" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-      </div>
-      <div class="col-span-full flex justify-end">
-        <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition">
-          Save to Database
-        </button>
-      </div>
-    </form>
 
-    <!-- Data Table -->
+      <form id="logForm" onsubmit="saveOrUpdateEntry(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <input type="hidden" id="editRowId" value="">
+
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Main Profile / Name *</label>
+          <input type="text" id="profile" placeholder="e.g., AL 527" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feature / Description</label>
+          <input type="text" id="description" placeholder="e.g., Float plane blade (Side 01)" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Length / Dim</label>
+          <input type="text" id="length" placeholder="e.g., 2437.4 mm" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feed Rate Override</label>
+          <input type="text" id="feed_override" placeholder="e.g., 70%" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Cycle Time (Seconds)</label>
+          <input type="number" id="cycle_seconds" placeholder="e.g., 83" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Feed Speed (mm/min)</label>
+          <input type="text" id="feed_speeds" placeholder="e.g., Feed 600" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tooling Configuration</label>
+          <input type="text" id="tooling" placeholder="e.g., Single tool" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Remarks</label>
+          <input type="text" id="remarks" placeholder="e.g., Side 01" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        
+        <div class="col-span-full flex justify-end gap-3 pt-2">
+          <button type="button" id="cancelBtn" onclick="resetFormState()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-5 py-2.5 rounded-lg text-sm transition">
+            Cancel
+          </button>
+          <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition">
+            Save to Database
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Table Section & Sort Controls -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <span class="text-sm font-semibold text-gray-700">Logged Profiles Database</span>
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-semibold uppercase text-gray-500">Order by:</label>
+          <select id="sortBy" onchange="applySorting()" class="border border-gray-300 rounded-lg p-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+            <option value="profile_asc">Profile Name (A to Z)</option>
+            <option value="profile_desc">Profile Name (Z to A)</option>
+            <option value="id_asc">Entry Sequence (Oldest First)</option>
+            <option value="id_desc">Entry Sequence (Newest First)</option>
+            <option value="cycle_asc">Cycle Time (Shortest First)</option>
+            <option value="cycle_desc">Cycle Time (Longest First)</option>
+          </select>
+        </div>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm">
           <thead class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase">
@@ -91,7 +119,7 @@
               <th class="p-3">Feed Speed</th>
               <th class="p-3">Tooling</th>
               <th class="p-3">Remarks</th>
-              <th class="p-3 text-center">Action</th>
+              <th class="p-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody id="tableBody" class="divide-y divide-gray-200">
@@ -104,7 +132,7 @@
   </div>
 
   <script>
-    // Supabase Configuration
+    // --- SUPABASE CONNECTIVITY ---
     const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_s8wnE3RfwJRQxO2NyPdWTg_YBssVkbM";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -112,8 +140,8 @@
     let records = [];
 
     function formatDuration(sec) {
+      if (sec === null || sec === undefined || isNaN(sec) || sec === '') return '-';
       const s = parseInt(sec, 10);
-      if (isNaN(s)) return '-';
       const hrs = Math.floor(s / 3600);
       const mins = Math.floor((s % 3600) / 60);
       const remSec = s % 60;
@@ -127,8 +155,7 @@
     async function fetchRecords() {
       const { data, error } = await supabaseClient
         .from('cnc_cycle_times')
-        .select('*')
-        .order('id', { ascending: true });
+        .select('*');
 
       if (error) {
         console.error('Error fetching data:', error);
@@ -136,6 +163,27 @@
       }
 
       records = data || [];
+      applySorting();
+    }
+
+    function applySorting() {
+      const sortValue = document.getElementById('sortBy').value;
+      records.sort((a, b) => {
+        if (sortValue === 'profile_asc') {
+          return (a.profile || '').localeCompare(b.profile || '', undefined, { numeric: true, sensitivity: 'base' });
+        } else if (sortValue === 'profile_desc') {
+          return (b.profile || '').localeCompare(a.profile || '', undefined, { numeric: true, sensitivity: 'base' });
+        } else if (sortValue === 'id_asc') {
+          return a.id - b.id;
+        } else if (sortValue === 'id_desc') {
+          return b.id - a.id;
+        } else if (sortValue === 'cycle_asc') {
+          return (a.cycle_seconds || 0) - (b.cycle_seconds || 0);
+        } else if (sortValue === 'cycle_desc') {
+          return (b.cycle_seconds || 0) - (a.cycle_seconds || 0);
+        }
+        return 0;
+      });
       renderTable();
     }
 
@@ -151,16 +199,17 @@
         const row = `
           <tr class="hover:bg-gray-50 transition">
             <td class="p-3 font-semibold text-gray-400">${idx + 1}</td>
-            <td class="p-3 font-medium text-gray-900">${r.profile}</td>
+            <td class="p-3 font-medium text-gray-900">${r.profile || '-'}</td>
             <td class="p-3">${r.description || '-'}</td>
             <td class="p-3">${r.length || '-'}</td>
             <td class="p-3">${r.feed_override || '-'}</td>
-            <td class="p-3 font-mono font-medium">${r.cycle_seconds}</td>
+            <td class="p-3 font-mono font-medium">${r.cycle_seconds !== null && r.cycle_seconds !== undefined ? r.cycle_seconds : '-'}</td>
             <td class="p-3">${formatDuration(r.cycle_seconds)}</td>
             <td class="p-3">${r.feed_speeds || '-'}</td>
             <td class="p-3">${r.tooling || '-'}</td>
             <td class="p-3 text-gray-500">${r.remarks || '-'}</td>
-            <td class="p-3 text-center">
+            <td class="p-3 text-center space-x-2">
+              <button onclick="startEdit(${r.id})" class="text-blue-600 hover:text-blue-800 text-xs font-semibold underline">Edit</button>
               <button onclick="deleteEntry(${r.id})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold">Delete</button>
             </td>
           </tr>
@@ -169,34 +218,83 @@
       });
     }
 
-    async function saveEntry(e) {
+    function startEdit(id) {
+      const item = records.find(r => r.id === id);
+      if (!item) return;
+
+      document.getElementById('editRowId').value = item.id;
+      document.getElementById('profile').value = item.profile || '';
+      document.getElementById('description').value = item.description || '';
+      document.getElementById('length').value = item.length || '';
+      document.getElementById('feed_override').value = item.feed_override || '';
+      document.getElementById('cycle_seconds').value = item.cycle_seconds !== null ? item.cycle_seconds : '';
+      document.getElementById('feed_speeds').value = item.feed_speeds || '';
+      document.getElementById('tooling').value = item.tooling || '';
+      document.getElementById('remarks').value = item.remarks || '';
+
+      document.getElementById('formTitle').innerText = "Edit CNC Record";
+      document.getElementById('editBadge').classList.remove('hidden');
+      document.getElementById('cancelBtn').classList.remove('hidden');
+      document.getElementById('submitBtn').innerText = "Update Record";
+      document.getElementById('submitBtn').className = "bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition";
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetFormState() {
+      document.getElementById('editRowId').value = '';
+      document.getElementById('logForm').reset();
+      document.getElementById('formTitle').innerText = "Add New CNC Record";
+      document.getElementById('editBadge').classList.add('hidden');
+      document.getElementById('cancelBtn').classList.add('hidden');
+      document.getElementById('submitBtn').innerText = "Save to Database";
+      document.getElementById('submitBtn').className = "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition";
+    }
+
+    async function saveOrUpdateEntry(e) {
       e.preventDefault();
       const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = "Saving...";
+      const editId = document.getElementById('editRowId').value;
+      const cycleSecVal = document.getElementById('cycle_seconds').value;
 
-      const newRecord = {
+      submitBtn.disabled = true;
+      submitBtn.innerText = editId ? "Updating..." : "Saving...";
+
+      const recordPayload = {
         profile: document.getElementById('profile').value,
-        description: document.getElementById('description').value,
-        length: document.getElementById('length').value,
-        feed_override: document.getElementById('feed_override').value,
-        cycle_seconds: parseInt(document.getElementById('cycle_seconds').value, 10),
-        feed_speeds: document.getElementById('feed_speeds').value,
-        tooling: document.getElementById('tooling').value,
-        remarks: document.getElementById('remarks').value
+        description: document.getElementById('description').value || null,
+        length: document.getElementById('length').value || null,
+        feed_override: document.getElementById('feed_override').value || null,
+        cycle_seconds: cycleSecVal !== '' ? parseInt(cycleSecVal, 10) : 0,
+        feed_speeds: document.getElementById('feed_speeds').value || null,
+        tooling: document.getElementById('tooling').value || null,
+        remarks: document.getElementById('remarks').value || null
       };
 
-      const { error } = await supabaseClient.from('cnc_cycle_times').insert([newRecord]);
+      let error;
+      if (editId) {
+        // Update existing record
+        const res = await supabaseClient
+          .from('cnc_cycle_times')
+          .update(recordPayload)
+          .eq('id', editId);
+        error = res.error;
+      } else {
+        // Insert new record
+        const res = await supabaseClient
+          .from('cnc_cycle_times')
+          .insert([recordPayload]);
+        error = res.error;
+      }
 
       if (error) {
-        alert('Failed to save: ' + error.message);
+        alert('Operation failed: ' + error.message);
       } else {
-        document.getElementById('logForm').reset();
+        resetFormState();
         await fetchRecords();
       }
 
       submitBtn.disabled = false;
-      submitBtn.innerText = "Save to Database";
     }
 
     async function deleteEntry(id) {
@@ -214,11 +312,11 @@
     function exportToExcel() {
       const exportData = records.map((r, i) => ({
         "No.": i + 1,
-        "Main Profile": r.profile,
+        "Main Profile": r.profile || '',
         "Feature / Description": r.description || '',
         "Length / Dim": r.length || '',
         "Feed Rate Override": r.feed_override || '',
-        "Cycle Time (Seconds)": r.cycle_seconds,
+        "Cycle Time (Seconds)": r.cycle_seconds || 0,
         "Cycle Time (Formatted)": formatDuration(r.cycle_seconds),
         "Feed Speed": r.feed_speeds || '',
         "Tooling": r.tooling || '',
@@ -240,11 +338,11 @@
 
       const tableData = records.map((r, i) => [
         i + 1,
-        r.profile,
+        r.profile || '-',
         r.description || '-',
         r.length || '-',
         r.feed_override || '-',
-        r.cycle_seconds,
+        r.cycle_seconds !== null && r.cycle_seconds !== undefined ? r.cycle_seconds : '-',
         formatDuration(r.cycle_seconds),
         r.feed_speeds || '-',
         r.tooling || '-',
