@@ -48,7 +48,7 @@
 
       <!-- Navigation Tabs -->
       <div class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-700 p-1 rounded-xl text-xs font-semibold">
-        <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold">Dashboard</button>
+        <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm">Dashboard</button>
         <button onclick="switchTab('logs')" id="tabBtn-logs" class="px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900">CNC Logs</button>
         <button onclick="switchTab('production')" id="tabBtn-production" class="px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900">Planning & Shifts</button>
         <button onclick="switchTab('trash')" id="tabBtn-trash" class="px-3 py-1.5 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-slate-900 flex items-center gap-1">
@@ -90,46 +90,80 @@
         </div>
       </div>
 
-      <!-- Main Profile Family Analyzer & Variations Graph -->
-      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200 dark:border-slate-700 pb-4">
+      <!-- FEATURE A: QUICK SINGLE-PROFILE INSPECTOR -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
-            <h3 class="font-black text-base text-slate-900 dark:text-white uppercase tracking-wide">Main Profile Family Analyzer</h3>
-            <p class="text-xs text-slate-400">Select a main profile code to inspect all sub-variations, cutting graphs, and machining cycles.</p>
+            <h3 class="font-black text-base text-slate-900 dark:text-white uppercase tracking-wide">Quick Single-Profile Lookup</h3>
+            <p class="text-xs text-slate-400">Search and view complete machining specifications for a single profile entry.</p>
           </div>
-          <select id="dashInspectSelect" onchange="renderProfileInspector()" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-bold outline-none">
-            <option value="">-- Choose Main Profile --</option>
+          <select id="singleInspectSelect" onchange="renderSingleInspector()" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+            <option value="">-- Choose Profile Entry --</option>
           </select>
         </div>
 
-        <div id="inspectorDetails" class="hidden space-y-5">
-          <!-- KPI Summary for this specific Profile Family -->
+        <div id="singleInspectorDetails" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-100 dark:border-blue-900/50">
+            <span class="text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400">Profile & Description</span>
+            <p id="singleInspectName" class="text-base font-black text-slate-900 dark:text-white mt-1">-</p>
+            <p id="singleInspectFeature" class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">-</p>
+          </div>
+
+          <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
+            <span class="text-[10px] font-bold uppercase text-slate-400">Cycle Time</span>
+            <p id="singleInspectCycle" class="text-base font-black text-blue-600 dark:text-blue-400 mt-1">0s</p>
+            <p id="singleInspectFormatted" class="text-xs text-slate-500 mt-0.5">-</p>
+          </div>
+
+          <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
+            <span class="text-[10px] font-bold uppercase text-slate-400">Setup & Speeds</span>
+            <p id="singleInspectTooling" class="text-base font-black text-slate-900 dark:text-white mt-1">-</p>
+            <p id="singleInspectFeed" class="text-xs text-slate-500 mt-0.5">-</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEATURE B: MAIN PROFILE FAMILY & VARIATION ANALYZER WITH VISUAL GRAPH -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <h3 class="font-black text-base text-slate-900 dark:text-white uppercase tracking-wide">Main Profile Family & Variations Analyzer</h3>
+            <p class="text-xs text-slate-400">Analyze sub-profile variations, min/max cycles, comparison charts, and specifications per profile family.</p>
+          </div>
+          <select id="familyInspectSelect" onchange="renderFamilyInspector()" class="bg-blue-50 dark:bg-blue-950/60 border border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-200 rounded-xl px-3 py-2 text-xs font-black outline-none">
+            <option value="">-- Choose Main Profile Family --</option>
+          </select>
+        </div>
+
+        <div id="familyInspectorDetails" class="hidden space-y-5">
+          <!-- KPI Summary for selected Family -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-100 dark:border-blue-900/50">
               <span class="text-[10px] font-bold uppercase text-blue-600 dark:text-blue-400">Total Variations</span>
-              <p id="inspectVariantCount" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
-              <p id="inspectFamilyName" class="text-xs text-slate-500 mt-0.5">-</p>
+              <p id="familyVariantCount" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+              <p id="familyLabelName" class="text-xs text-slate-500 mt-0.5">-</p>
             </div>
 
             <div class="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
-              <span class="text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400">Shortest (Min) Cycle</span>
-              <p id="inspectMinCycle" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0s</p>
-              <p id="inspectMinFormatted" class="text-xs text-slate-500 mt-0.5">-</p>
+              <span class="text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400">Fastest (Min) Cycle</span>
+              <p id="familyMinCycle" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0s</p>
+              <p id="familyMinFormatted" class="text-xs text-slate-500 mt-0.5">-</p>
             </div>
 
             <div class="bg-rose-50 dark:bg-rose-950/40 p-4 rounded-xl border border-rose-100 dark:border-rose-900/50">
               <span class="text-[10px] font-bold uppercase text-rose-600 dark:text-rose-400">Longest (Max) Cycle</span>
-              <p id="inspectMaxCycle" class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">0s</p>
-              <p id="inspectMaxFormatted" class="text-xs text-slate-500 mt-0.5">-</p>
+              <p id="familyMaxCycle" class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">0s</p>
+              <p id="familyMaxFormatted" class="text-xs text-slate-500 mt-0.5">-</p>
             </div>
           </div>
 
-          <!-- Variations Cycle Time Graph -->
-          <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+          <!-- Variations Comparison Visual Chart -->
+          <div class="bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
             <div class="flex justify-between items-center mb-2">
-              <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Variations Cycle Time Comparison (Seconds)</span>
+              <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">Variation Cycle Time Comparison (Seconds)</h4>
+              <span id="chartFamilyBadge" class="text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 rounded-full"></span>
             </div>
-            <div class="h-56 relative w-full">
+            <div class="h-56 w-full">
               <canvas id="chartFamilyVariants"></canvas>
             </div>
           </div>
@@ -137,35 +171,34 @@
           <!-- Variations Breakdown Sub-Table -->
           <div class="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
             <div class="bg-slate-50 dark:bg-slate-700/60 px-4 py-2.5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-              <span class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">All Variations in this Profile Family</span>
-              <span id="inspectTableCount" class="text-[11px] font-semibold text-slate-400"></span>
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">All Variations in this Family</span>
+              <span class="text-[11px] text-slate-400">Direct component sheet view</span>
             </div>
             <div class="overflow-x-auto max-h-72">
               <table class="w-full text-left text-xs">
                 <thead class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-bold sticky top-0">
                   <tr>
                     <th class="p-3">#</th>
-                    <th class="p-3">Variation / Description</th>
+                    <th class="p-3">Variation / Feature Description</th>
                     <th class="p-3">Length / Dim</th>
                     <th class="p-3">Cycle Time</th>
                     <th class="p-3">Feed Speed</th>
-                    <th class="p-3">Override</th>
                     <th class="p-3">Tooling</th>
                     <th class="p-3">Remarks</th>
                   </tr>
                 </thead>
-                <tbody id="inspectVariantsTable" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
+                <tbody id="familyVariantsTable" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Plant-Wide Analytics Overview -->
+      <!-- Overview Charts Row -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wide">Top Profile Cycle Times (Plant-Wide)</h3>
+            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase tracking-wide">Top Profile Cycle Times (Seconds)</h3>
           </div>
           <div class="h-64">
             <canvas id="chartCycleTime"></canvas>
@@ -535,7 +568,7 @@
     let pendingImportRecords = [];
     let chartCycle = null;
     let chartTool = null;
-    let chartFamily = null;
+    let chartFamilyVariantsInstance = null;
 
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toastNotification');
@@ -582,7 +615,7 @@
 
       if (tabId === 'dashboard') {
         renderCharts();
-        renderProfileInspector();
+        renderFamilyInspector();
       }
     }
 
@@ -591,7 +624,7 @@
       const isDark = document.documentElement.classList.contains('dark');
       document.getElementById('themeIcon').innerText = isDark ? '☀' : '🌙';
       renderCharts();
-      renderProfileInspector();
+      renderFamilyInspector();
     }
 
     async function fetchAllData() {
@@ -616,7 +649,8 @@
       }
 
       updateKPIs();
-      populateInspectDropdown();
+      populateSingleInspectDropdown();
+      populateFamilyInspectDropdown();
       populatePlanningDropdown();
       applyFiltersAndRender();
       renderTrashTable();
@@ -630,7 +664,7 @@
       })
       .subscribe();
 
-    // --- DASHBOARD & MAIN PROFILE ANALYZER ---
+    // --- DASHBOARD: KPIS & SINGLE LOOKUP ---
     function updateKPIs() {
       document.getElementById('kpiTotalProfiles').innerText = records.length;
       if (records.length === 0) {
@@ -646,10 +680,41 @@
       document.getElementById('kpiMaxProfileName').innerText = maxItem ? `${maxItem.profile} (${maxItem.description || 'Standard'})` : '-';
     }
 
-    function populateInspectDropdown() {
-      const sel = document.getElementById('dashInspectSelect');
+    function populateSingleInspectDropdown() {
+      const sel = document.getElementById('singleInspectSelect');
+      sel.innerHTML = '<option value="">-- Choose Profile Entry --</option>';
+      records.forEach(r => {
+        sel.innerHTML += `<option value="${r.id}">${r.profile} - ${r.description || 'Standard'}</option>`;
+      });
+    }
+
+    function renderSingleInspector() {
+      const id = document.getElementById('singleInspectSelect').value;
+      const container = document.getElementById('singleInspectorDetails');
+
+      if (!id) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      const item = records.find(r => r.id == id);
+      if (!item) return;
+
+      document.getElementById('singleInspectName').innerText = item.profile;
+      document.getElementById('singleInspectFeature').innerText = item.description || 'Standard profile machining';
+      document.getElementById('singleInspectCycle').innerText = `${item.cycle_seconds}s`;
+      document.getElementById('singleInspectFormatted').innerText = `Duration: ${formatDuration(item.cycle_seconds)}`;
+      document.getElementById('singleInspectTooling').innerText = item.tooling || (item.tool_count ? `${item.tool_count} tools` : 'Single tool');
+      document.getElementById('singleInspectFeed').innerText = `Feed: ${item.feed_speeds || '-'} (${item.feed_override || '100%'})`;
+
+      container.classList.remove('hidden');
+    }
+
+    // --- DASHBOARD: MAIN PROFILE FAMILY & VARIATIONS ANALYZER ---
+    function populateFamilyInspectDropdown() {
+      const sel = document.getElementById('familyInspectSelect');
       const selectedBefore = sel.value;
-      sel.innerHTML = '<option value="">-- Choose Main Profile --</option>';
+      sel.innerHTML = '<option value="">-- Choose Main Profile Family --</option>';
 
       const families = Array.from(new Set(records.map(r => extractMainProfileName(r.profile)))).sort();
       families.forEach(fam => {
@@ -659,15 +724,13 @@
 
       if (selectedBefore && families.includes(selectedBefore)) {
         sel.value = selectedBefore;
-      } else if (families.length > 0 && !selectedBefore) {
-        sel.value = families[0];
+        renderFamilyInspector();
       }
-      renderProfileInspector();
     }
 
-    function renderProfileInspector() {
-      const selectedFam = document.getElementById('dashInspectSelect').value;
-      const container = document.getElementById('inspectorDetails');
+    function renderFamilyInspector() {
+      const selectedFam = document.getElementById('familyInspectSelect').value;
+      const container = document.getElementById('familyInspectorDetails');
 
       if (!selectedFam) {
         container.classList.add('hidden');
@@ -684,37 +747,34 @@
       const minCycle = Math.min(...cycles);
       const maxCycle = Math.max(...cycles);
 
-      document.getElementById('inspectVariantCount').innerText = `${variants.length} Variation${variants.length > 1 ? 's' : ''}`;
-      document.getElementById('inspectFamilyName').innerText = `Profile Family: ${selectedFam}`;
+      document.getElementById('familyVariantCount').innerText = `${variants.length} Variation${variants.length > 1 ? 's' : ''}`;
+      document.getElementById('familyLabelName').innerText = `Main Family: ${selectedFam}`;
       
-      document.getElementById('inspectMinCycle').innerText = `${minCycle}s`;
-      document.getElementById('inspectMinFormatted').innerText = `Duration: ${formatDuration(minCycle)}`;
+      document.getElementById('familyMinCycle').innerText = `${minCycle}s`;
+      document.getElementById('familyMinFormatted').innerText = `Duration: ${formatDuration(minCycle)}`;
 
-      document.getElementById('inspectMaxCycle').innerText = `${maxCycle}s`;
-      document.getElementById('inspectMaxFormatted').innerText = `Duration: ${formatDuration(maxCycle)}`;
-      document.getElementById('inspectTableCount').innerText = `${variants.length} Total Registered`;
+      document.getElementById('familyMaxCycle').innerText = `${maxCycle}s`;
+      document.getElementById('familyMaxFormatted').innerText = `Duration: ${formatDuration(maxCycle)}`;
+      document.getElementById('chartFamilyBadge').innerText = `${selectedFam} (${variants.length} Variants)`;
 
-      // Render Dynamic Family Bar Chart
+      // Render Bar Chart: Variation name vs Time (sec)
       const isDark = document.documentElement.classList.contains('dark');
       const textColor = isDark ? '#cbd5e1' : '#475569';
-      const ctxFam = document.getElementById('chartFamilyVariants').getContext('2d');
+      const ctxVariant = document.getElementById('chartFamilyVariants').getContext('2d');
 
-      const chartLabels = variants.map((v, idx) => {
-        const desc = v.description ? v.description.trim() : v.profile;
-        return desc.length > 20 ? desc.substring(0, 18) + '...' : desc;
-      });
+      if (chartFamilyVariantsInstance) {
+        chartFamilyVariantsInstance.destroy();
+      }
 
-      if (chartFamily) chartFamily.destroy();
-
-      chartFamily = new Chart(ctxFam, {
+      chartFamilyVariantsInstance = new Chart(ctxVariant, {
         type: 'bar',
         data: {
-          labels: chartLabels,
+          labels: variants.map(v => v.description || v.profile),
           datasets: [{
             label: 'Cycle Time (Seconds)',
-            data: cycles,
+            data: variants.map(v => v.cycle_seconds || 0),
             backgroundColor: '#3b82f6',
-            hoverBackgroundColor: '#2563eb',
+            hoverBackgroundColor: '#1d4ed8',
             borderRadius: 6
           }]
         },
@@ -725,25 +785,29 @@
             legend: { display: false },
             tooltip: {
               callbacks: {
-                title: function(context) {
-                  const item = variants[context[0].dataIndex];
-                  return item.description ? `${item.profile} - ${item.description}` : item.profile;
-                },
-                label: function(context) {
-                  return `Cycle Time: ${context.parsed.y}s (${formatDuration(context.parsed.y)})`;
+                afterLabel: function(context) {
+                  const rawSec = variants[context.dataIndex]?.cycle_seconds || 0;
+                  return `Formatted: ${formatDuration(rawSec)}`;
                 }
               }
             }
           },
           scales: {
-            x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: isDark ? '#334155' : '#e2e8f0' } }
+            x: {
+              ticks: { color: textColor, font: { size: 10 } },
+              grid: { display: false }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: textColor, font: { size: 10 } },
+              grid: { color: isDark ? '#334155' : '#e2e8f0' }
+            }
           }
         }
       });
 
-      // Render variants sub-table
-      const tbody = document.getElementById('inspectVariantsTable');
+      // Render variations table
+      const tbody = document.getElementById('familyVariantsTable');
       tbody.innerHTML = '';
       variants.forEach((v, idx) => {
         tbody.innerHTML += `
@@ -755,9 +819,8 @@
             </td>
             <td class="p-3">${v.length || '-'}</td>
             <td class="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">${v.cycle_seconds}s (${formatDuration(v.cycle_seconds)})</td>
-            <td class="p-3 font-mono">${v.feed_speeds || '-'}</td>
-            <td class="p-3">${v.feed_override || '100%'}</td>
-            <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium">${v.tooling || (v.tool_count ? `${v.tool_count} tools` : 'Single tool')}</span></td>
+            <td class="p-3 font-mono">${v.feed_speeds || '-'} <span class="text-slate-400">(${v.feed_override || '100%'})</span></td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200">${v.tooling || (v.tool_count ? `${v.tool_count} tools` : 'Single tool')}</span></td>
             <td class="p-3 text-slate-500">${v.remarks || '-'}</td>
           </tr>
         `;
@@ -766,6 +829,7 @@
       container.classList.remove('hidden');
     }
 
+    // --- OVERVIEW CHARTS ---
     function renderCharts() {
       const isDark = document.documentElement.classList.contains('dark');
       const textColor = isDark ? '#cbd5e1' : '#475569';
@@ -1316,7 +1380,6 @@
         `;
       });
 
-      // Shift duration benchmark: 12-hour block (43,200 seconds)
       const shiftsRequired = (totalTheoreticalSec / 43200).toFixed(1);
 
       document.getElementById('calcTotalQty').innerText = `${totalParts} pcs`;
