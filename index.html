@@ -198,13 +198,13 @@
         </div>
       </div>
 
-      <!-- 30-DAY INTELLIGENCE MODULE -->
+      <!-- 30-DAY FACTORY RUNS INSIGHT -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
           <div>
             <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">30-DAY FACTORY RUNS INSIGHT</span>
             <h3 class="text-base font-black text-slate-900 dark:text-white mt-0.5">Profiles Produced in Last 30 Days (AL 684 &amp; Plant Profiles)</h3>
-            <p class="text-xs text-slate-400">Analyze production volume, shift occurrences, and reject ratios for all produced profiles.</p>
+            <p class="text-xs text-slate-400">Analyze production volume, shift occurrences, and reject ratios for all profiles.</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded-2xl text-xs font-bold">
@@ -479,15 +479,19 @@
         <div id="latestLogCard" class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6"></div>
       </div>
 
-      <!-- Sub-Tab: Add / Edit Form -->
+      <!-- Sub-Tab: Add / Edit Form (Full Match with Physical Paper Slip) -->
       <div id="oeeSub-addlog" class="hidden space-y-4">
         <form id="shiftLogForm" onsubmit="submitShiftLog(event)" class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
           <div class="flex justify-between items-center">
-            <h4 id="shiftLogFormTitle" class="font-black text-sm uppercase text-slate-900 dark:text-white">Record Shift Production Log</h4>
+            <div>
+              <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">DAILY LOG BOOK ENTRY</span>
+              <h4 id="shiftLogFormTitle" class="font-black text-sm uppercase text-slate-900 dark:text-white">CNC Machine — Shift Production Slip</h4>
+            </div>
             <span id="shiftLogEditingBadge" class="hidden text-[10px] font-bold uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 px-2.5 py-1 rounded-full">Editing existing shift</span>
           </div>
           <input type="hidden" id="shiftFormId">
-          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+          
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
             <div>
               <label class="block font-bold mb-1">Date *</label>
               <input type="date" id="logDate" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
@@ -509,32 +513,72 @@
             </div>
             <div>
               <label class="block font-bold mb-1">EPF No.</label>
-              <input type="text" id="logEpf" placeholder="e.g., 4521" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+              <input type="text" id="logEpf" placeholder="e.g., 4521" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
             </div>
             <div>
-              <label class="block font-bold mb-1">Operator</label>
-              <input type="text" id="logOperator" placeholder="Operator Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
-            </div>
-            <div>
-              <label class="block font-bold mb-1">Planned Break (min)</label>
+              <label class="block font-bold mb-1">Break Time (min)</label>
               <input type="number" id="logPlannedBreak" value="90" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
             </div>
           </div>
 
+          <!-- Profiles Produced (Profile 1, 2, 3...) -->
           <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-bold uppercase">Produced Profiles in Shift</span>
-              <button type="button" onclick="addProfileCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Profile Row</button>
+              <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Profiles Produced in Shift (Profile 1, 2, 3...)</span>
+              <button type="button" onclick="addProfileCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Profile Slot</button>
             </div>
             <div id="profileCardsContainer" class="space-y-2"></div>
           </div>
 
+          <!-- Checklist Conditions from Slip -->
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl">
+            <div>
+              <label class="block font-bold mb-1">Was Machine Planned or Not?</label>
+              <select id="logWasPlanned" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-semibold">
+                <option value="yes">Yes (Planned)</option>
+                <option value="no">No (Unplanned)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Other Department Used Machine?</label>
+              <select id="logOtherDept" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-semibold">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">If yes, Time Period</label>
+              <input type="text" id="logOtherDeptPeriod" placeholder="e.g. 10:00 AM - 11:30 AM" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none">
+            </div>
+          </div>
+
+          <!-- Downtime Events from Slip -->
           <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-bold uppercase">Shift Downtime Events</span>
+              <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Down Time (min) &amp; Reason</span>
               <button type="button" onclick="addDowntimeCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Downtime Event</button>
             </div>
             <div id="downtimeCardsContainer" class="space-y-2"></div>
+          </div>
+
+          <!-- Other Notes & Verification Signs -->
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+            <div class="sm:col-span-4">
+              <label class="block font-bold mb-1">Other Notes</label>
+              <input type="text" id="logOtherNotes" placeholder="Special occurrences, tooling observations, material changes..." class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block font-bold mb-1">Operator Sign / Name</label>
+              <input type="text" id="logOperator" placeholder="Operator Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Supervisor Sign</label>
+              <input type="text" id="logSupervisorSign" placeholder="e.g., U.N. Kavinda" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Quality Sign</label>
+              <input type="text" id="logQualitySign" placeholder="QA Officer Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
@@ -858,12 +902,12 @@
   </div>
 
   <script>
-    // --- UNIFIED SUPABASE CLIENT (Points to cnc_cycle_times Project) ---
+    // --- UNIFIED SUPABASE CLIENT (cnc_cycle_times Project) ---
     const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_s8wnE3RfwJRQxO2NyPdWTg_YBssVkbM";
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const toolsClient = supabaseClient; // Re-uses primary client for all tables
+    const toolsClient = supabaseClient; // Unifies both datasets on a single project
 
     let records = [];
     let trashRecords = [];
@@ -1581,7 +1625,7 @@
       fetchAllData();
     }
 
-    // --- PRODUCTION & OEE ---
+    // --- PRODUCTION & OEE (Matching Shift Production Slip) ---
     function switchOeeSubTab(sub) {
       ['latest', 'addlog', 'alllogs', 'oeeanalysis'].forEach(s => {
         document.getElementById(`oeeSub-${s}`)?.classList.add('hidden');
@@ -1662,14 +1706,36 @@
       const cid = cardCounter;
       const container = document.getElementById('profileCardsContainer');
       const div = document.createElement('div');
-      div.className = "p-3 border rounded-2xl bg-slate-50 dark:bg-slate-700/30 flex flex-wrap gap-2 items-center text-xs";
+      div.className = "p-3 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-700/30 grid grid-cols-2 sm:grid-cols-6 gap-2 items-center text-xs";
       div.id = `profCard-${cid}`;
       div.innerHTML = `
-        <input type="text" placeholder="Profile Code (e.g. AL 684)" class="profCodeInput bg-white dark:bg-slate-700 border rounded-xl p-2 font-bold w-40" value="${prefill ? prefill.profile_code : 'AL 684'}">
-        <input type="number" placeholder="Target" class="profTargetInput bg-white dark:bg-slate-700 border rounded-xl p-2 w-24" value="${prefill ? prefill.target : '50'}">
-        <input type="number" placeholder="Produced" class="profProducedInput bg-white dark:bg-slate-700 border rounded-xl p-2 w-24 font-bold text-blue-600" value="${prefill ? prefill.produced : '50'}">
-        <input type="number" placeholder="Rejected" class="profRejectedInput bg-white dark:bg-slate-700 border rounded-xl p-2 w-24 text-rose-600" value="${prefill ? prefill.rejected : '0'}">
-        <button type="button" onclick="document.getElementById('profCard-${cid}').remove()" class="text-rose-500 font-bold px-2">×</button>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Profile Code</label>
+          <input type="text" placeholder="e.g. AL 684" class="profCodeInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2 font-bold" value="${prefill ? prefill.profile_code : 'AL 684'}">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Setup (min)</label>
+          <input type="number" placeholder="0" class="profSetupInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2" value="${prefill && prefill.setup_min !== undefined ? prefill.setup_min : '0'}">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Target (Pcs)</label>
+          <input type="number" placeholder="50" class="profTargetInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2" value="${prefill ? prefill.target : '50'}">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Produced (Pcs)</label>
+          <input type="number" placeholder="50" class="profProducedInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2 font-bold text-blue-600 dark:text-blue-400" value="${prefill ? prefill.produced : '50'}">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Rejected (Pcs)</label>
+          <input type="number" placeholder="0" class="profRejectedInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2 text-rose-600 font-bold" value="${prefill ? prefill.rejected : '0'}">
+        </div>
+        <div class="col-span-2 sm:col-span-1">
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Reject Reason</label>
+          <div class="flex items-center gap-1">
+            <input type="text" placeholder="Reason..." class="profRejectReasonInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2" value="${prefill && prefill.reject_reason ? prefill.reject_reason : ''}">
+            <button type="button" onclick="document.getElementById('profCard-${cid}').remove()" class="text-rose-500 font-bold px-1.5 text-base hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg">×</button>
+          </div>
+        </div>
       `;
       container.appendChild(div);
     }
@@ -1679,15 +1745,15 @@
       const cid = dtCounter;
       const container = document.getElementById('downtimeCardsContainer');
       const div = document.createElement('div');
-      div.className = "p-3 border rounded-2xl bg-slate-50 dark:bg-slate-700/30 flex flex-wrap gap-2 items-center text-xs";
+      div.className = "p-3 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-700/30 flex flex-wrap gap-2 items-center text-xs";
       div.id = `dtCard-${cid}`;
-      const reasons = ['Breakdown', 'Setup', 'Tool Change', 'Material Waiting'];
+      const reasons = ['Breakdown', 'Setup', 'Tool Change', 'Material Waiting', 'Power Outage', 'Other'];
       div.innerHTML = `
-        <select class="dtReasonSelect bg-white dark:bg-slate-700 border rounded-xl p-2">
+        <select class="dtReasonSelect bg-white dark:bg-slate-700 border rounded-xl p-2 font-semibold">
           ${reasons.map(r => `<option value="${r}" ${prefill && prefill.reason === r ? 'selected' : ''}>${r === 'Setup' ? 'Setup / Changeover' : r}</option>`).join('')}
         </select>
         <input type="number" placeholder="Duration (min)" class="dtDurationInput bg-white dark:bg-slate-700 border rounded-xl p-2 w-28 font-bold" value="${prefill ? prefill.duration_min : '15'}">
-        <button type="button" onclick="document.getElementById('dtCard-${cid}').remove()" class="text-rose-500 font-bold px-2">×</button>
+        <button type="button" onclick="document.getElementById('dtCard-${cid}').remove()" class="text-rose-500 font-bold px-2 text-base">×</button>
       `;
       container.appendChild(div);
     }
@@ -1696,11 +1762,15 @@
       document.getElementById('shiftLogForm').reset();
       document.getElementById('shiftFormId').value = '';
       document.getElementById('shiftLogEditingBadge').classList.add('hidden');
-      document.getElementById('shiftLogFormTitle').innerText = 'Record Shift Production Log';
+      document.getElementById('shiftLogFormTitle').innerText = 'CNC Machine — Shift Production Slip';
       document.getElementById('profileCardsContainer').innerHTML = '';
       document.getElementById('downtimeCardsContainer').innerHTML = '';
       document.getElementById('logDate').value = todayISO();
-      addProfileCard();
+      
+      // Auto-load 3 profile slots matching the 3 sections on the physical slip
+      addProfileCard({ profile_code: 'AL 684', setup_min: 0, target: 50, produced: 50, rejected: 0, reject_reason: '' });
+      addProfileCard({ profile_code: '', setup_min: 0, target: 0, produced: 0, rejected: 0, reject_reason: '' });
+      addProfileCard({ profile_code: '', setup_min: 0, target: 0, produced: 0, rejected: 0, reject_reason: '' });
     }
 
     async function submitShiftLog(e) {
@@ -1713,6 +1783,12 @@
         epf_no: document.getElementById('logEpf').value.trim(),
         operator_name: document.getElementById('logOperator').value.trim(),
         planned_break_min: parseInt(document.getElementById('logPlannedBreak').value, 10) || 90,
+        was_planned: document.getElementById('logWasPlanned').value === 'yes',
+        other_dept_used: document.getElementById('logOtherDept').value === 'yes',
+        other_dept_period: document.getElementById('logOtherDeptPeriod').value.trim(),
+        other_notes: document.getElementById('logOtherNotes').value.trim(),
+        supervisor_sign: document.getElementById('logSupervisorSign').value.trim(),
+        quality_sign: document.getElementById('logQualitySign').value.trim(),
         is_deleted: false
       };
 
@@ -1734,11 +1810,13 @@
       const prodPayloads = [];
       profElements.forEach(el => {
         const code = el.querySelector('.profCodeInput').value.trim().toUpperCase();
+        const setup_min = parseInt(el.querySelector('.profSetupInput').value, 10) || 0;
         const target = parseInt(el.querySelector('.profTargetInput').value, 10) || 0;
         const produced = parseInt(el.querySelector('.profProducedInput').value, 10) || 0;
         const rejected = parseInt(el.querySelector('.profRejectedInput').value, 10) || 0;
+        const reject_reason = el.querySelector('.profRejectReasonInput').value.trim();
         if (code) {
-          prodPayloads.push({ shift_id: activeShiftId, profile_code: code, target, produced, rejected });
+          prodPayloads.push({ shift_id: activeShiftId, profile_code: code, setup_min, target, produced, rejected, reject_reason });
         }
       });
 
@@ -1776,6 +1854,13 @@
       document.getElementById('logEpf').value = s.epf_no || '';
       document.getElementById('logOperator').value = s.operator_name || '';
       document.getElementById('logPlannedBreak').value = s.planned_break_min || 90;
+
+      document.getElementById('logWasPlanned').value = (s.was_planned === false) ? 'no' : 'yes';
+      document.getElementById('logOtherDept').value = (s.other_dept_used === true) ? 'yes' : 'no';
+      document.getElementById('logOtherDeptPeriod').value = s.other_dept_period || '';
+      document.getElementById('logOtherNotes').value = s.other_notes || '';
+      document.getElementById('logSupervisorSign').value = s.supervisor_sign || '';
+      document.getElementById('logQualitySign').value = s.quality_sign || '';
 
       document.getElementById('shiftLogFormTitle').innerText = `Edit Shift Record #${s.id}`;
       document.getElementById('shiftLogEditingBadge').classList.remove('hidden');
@@ -2272,8 +2357,7 @@
 
     // --- INITIAL BOOTSTRAP ---
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('logDate').value = todayISO();
-      addProfileCard();
+      resetShiftLogForm();
       fetchAllData();
       fetchToolsData();
     });
