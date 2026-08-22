@@ -784,7 +784,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
             <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">EXECUTIVE AUDITING ENGINE</span>
-            <h3 class="text-lg font-black text-slate-900 dark:text-white mt-0.5">CNC 5000 Plant Intelligence Reports</h3>
+            <h3 class="text-lg font-black text-slate-900 dark:text-white mt-0.5">ALUMEX PLC Plant Intelligence Reports</h3>
           </div>
           <div class="flex items-center gap-2">
             <button onclick="exportReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-sm">Export PDF</button>
@@ -967,12 +967,14 @@
   </div>
 
   <script>
-    // --- UNIFIED SUPABASE CLIENT (cnc_cycle_times Project) ---
+    // --- SUPABASE CONNECTIVITY ---
     const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_s8wnE3RfwJRQxO2NyPdWTg_YBssVkbM";
-
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const toolsClient = supabaseClient; // Unifies both datasets on a single project
+
+    const TOOLS_SUPABASE_URL = "https://cayqxybekaksppzbnnrw.supabase.co";
+    const TOOLS_SUPABASE_ANON_KEY = "sb_publishable_tAP8MprpVsHZtoBapEBnUA_v9uoUZ70";
+    const toolsClient = supabase.createClient(TOOLS_SUPABASE_URL, TOOLS_SUPABASE_ANON_KEY);
 
     let records = [];
     let trashRecords = [];
