@@ -1135,7 +1135,6 @@ const SUPABASE_ANON_KEY = "your-anon-key-here";</pre>
             return supabaseClient.from(table).select('*').order(col, opts);
           },
           single: async () => {
-            // This won't be called directly, but for insert().select().single()
             return { data: null, error: null };
           }
         };
@@ -1174,7 +1173,7 @@ const SUPABASE_ANON_KEY = "your-anon-key-here";</pre>
     let cardCounter = 0, dtCounter = 0;
 
     // ========================================================================
-    // SETUP SQL
+    // SETUP SQL (Updated with Provided Report Data)
     // ========================================================================
     const SETUP_SQL = `-- CNC 5000 Database Schema
 -- Run this in Supabase SQL Editor
@@ -1267,13 +1266,32 @@ CREATE POLICY "Allow all access" ON production_records FOR ALL USING (true) WITH
 CREATE POLICY "Allow all access" ON downtime_events FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all access" ON cnc_tool_bits FOR ALL USING (true) WITH CHECK (true);
 
--- Insert sample data for demo
+-- Insert component plant cycle time profile data
 INSERT INTO cnc_cycle_times (profile, description, length, cycle_seconds, feed_speeds, tooling) VALUES
-  ('AL 684', 'Side milling operation', '2437.4 mm', 93, 'Feed 600', '10mm Flat End Mill'),
-  ('AL 521', 'Top face machining', '1850.0 mm', 127, 'Feed 450', '16mm Face Mill'),
-  ('ST 302', 'Drilling pattern', '800.0 mm', 45, 'Feed 300', '8mm Drill Bit'),
-  ('AL 710', 'Chamfer edges', '1200.0 mm', 68, 'Feed 500', '45° Chamfer Mill'),
-  ('BR 115', 'Tapping M8 holes', '600.0 mm', 82, 'Feed 200', 'M8 Tap');
+  ('AL 527', 'Float Plane Blade (Side 02)', '2437.4 mm', 82, '600', 'Single tool'),
+  ('AL 527', 'Float Pilane Blade (Side 02)', '2437.4 mm', 83, '600', 'Single tool'),
+  ('AL 554', 'Single Rectangle', '1160 mm', 52, '600', 'Single tool'),
+  ('AL 554', 'Three Rectangles', '1160 mm', 147, '600', 'Single tool'),
+  ('AL 554', 'Three Rectangles', '1788 mm', 152, '600', 'Single tool'),
+  ('AL 573', 'H-Bar-4 (4 Holes)', '140 mm', 34, '400', 'Single tool'),
+  ('AL 632', 'VB 70 15-1', '-', 43, '600', 'Single tool'),
+  ('AL 632', 'VB 70 15', '-', 139, '800', 'Two Tools'),
+  ('AL 633', 'VB-01', '-', 84, '600', 'Single tool'),
+  ('AL 633', 'VB 02', '-', 93, '600', 'Single tool'),
+  ('AL 633', 'VB-03', '-', 93, '600', 'Single tool'),
+  ('AL 684', 'Part 70127', '-', 4227, '400', 'Single tool'),
+  ('AL 684', 'Part 70128', '-', 125, '600, 400', 'Two Tools'),
+  ('AL 684', 'Part 70130', '-', 113, '600,400', 'Two Tools'),
+  ('AL 706', 'Single Long Rectangle', '1752 mm', 639, '200', 'Single tool'),
+  ('AL 774', 'Aalco (6 Holes)', '260 mm', 38, '600', 'Single tool'),
+  ('AL 774', 'Aalco (8 Holes)', '361 mm', 49, '600', 'Single tool'),
+  ('AL 778', 'H Bar-1', '200 mm', 41, '800', 'Single tool'),
+  ('AL 1242', 'Swage Handle', '1828.8 mm', 50, '600', 'Single tool'),
+  ('AL 554', 'Three Rectangles', '2296 mm', 103, 'Feed 60 (Test 600)', 'Single tool'),
+  ('AL 554', 'Three Rectangles (Slow)', '1708 mm', 546, '150', 'Single tool'),
+  ('AL 554', 'Three Rectangles', '2298 mm', 106, 'Feed 60 (Test 600)', 'Single tool'),
+  ('AL 1038', 'Long Variant 01', '1824.94 mm', 380, '500, 400 350', 'Single tool'),
+  ('AL 1038', 'Long Variant 02', '1520.14 mm', 386, '500, 300, 350', 'Single tool');
 
 INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, location) VALUES
   ('Milling', 'Flat End Mill', '10.0 mm', 'Slotting & pocketing', 5, 'Rack A-01'),
@@ -1662,7 +1680,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       
       el('dashTotalProfiles').innerText = records.length;
       if (records.length > 0) {
-        const max = Math.max(...records.map(r => r.cycle_seconds || 0));
+        const max = Math.max(...records.map(r => parseInt(r.cycle_seconds || 0, 10)));
         el('dashMaxCycleSummary').innerText = `Max: ${formatDuration(max)}`;
       } else {
         el('dashMaxCycleSummary').innerText = 'Max: -';
@@ -1762,13 +1780,13 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       }
 
       // Cycle Time Chart
-      const topCycleProfiles = [...records].sort((a, b) => (b.cycle_seconds || 0) - (a.cycle_seconds || 0)).slice(0, 8);
+      const topCycleProfiles = [...records].sort((a, b) => (parseInt(b.cycle_seconds || 0, 10)) - (parseInt(a.cycle_seconds || 0, 10))).slice(0, 8);
       chartDashCycleTimeInst = safeDestroyChart(chartDashCycleTimeInst);
       const ctxCycle = document.getElementById('chartDashCycleTime');
       if (ctxCycle) {
         chartDashCycleTimeInst = new Chart(ctxCycle.getContext('2d'), {
           type: 'bar',
-          data: { labels: topCycleProfiles.length ? topCycleProfiles.map(r => r.profile || 'Unknown') : ['No Data'], datasets: [{ label: 'Cycle Time (s)', data: topCycleProfiles.length ? topCycleProfiles.map(r => r.cycle_seconds || 0) : [0], backgroundColor: '#3b82f6', borderRadius: 4 }] },
+          data: { labels: topCycleProfiles.length ? topCycleProfiles.map(r => r.profile || 'Unknown') : ['No Data'], datasets: [{ label: 'Cycle Time (s)', data: topCycleProfiles.length ? topCycleProfiles.map(r => parseInt(r.cycle_seconds || 0, 10)) : [0], backgroundColor: '#3b82f6', borderRadius: 4 }] },
           options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor }, beginAtZero: true }, y: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } } } }
         });
       }
@@ -1973,8 +1991,8 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       const sortVal = document.getElementById('filterSort')?.value || 'profile_asc';
       if (sortVal === 'profile_asc') displayedRecords.sort((a, b) => (a.profile || '').localeCompare(b.profile || ''));
       else if (sortVal === 'profile_desc') displayedRecords.sort((a, b) => (b.profile || '').localeCompare(a.profile || ''));
-      else if (sortVal === 'cycle_asc') displayedRecords.sort((a, b) => (a.cycle_seconds || 0) - (b.cycle_seconds || 0));
-      else if (sortVal === 'cycle_desc') displayedRecords.sort((a, b) => (b.cycle_seconds || 0) - (a.cycle_seconds || 0));
+      else if (sortVal === 'cycle_asc') displayedRecords.sort((a, b) => (parseInt(a.cycle_seconds || 0, 10)) - (parseInt(b.cycle_seconds || 0, 10)));
+      else if (sortVal === 'cycle_desc') displayedRecords.sort((a, b) => (parseInt(b.cycle_seconds || 0, 10)) - (parseInt(a.cycle_seconds || 0, 10)));
       
       const tbody = document.getElementById('logsTableBody');
       if (!tbody) return;
@@ -2024,9 +2042,9 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       if (!item) return;
       try {
         if (IS_DEMO_MODE) {
-          await LocalDB.insert('cnc_cycle_times', [{ profile: `${item.profile || ''} (Copy)`, description: item.description, length: item.length, cycle_seconds: item.cycle_seconds, feed_speeds: item.feed_speeds, tooling: item.tooling, is_deleted: false, record_date: todayISO() }]);
+          await LocalDB.insert('cnc_cycle_times', [{ profile: `${item.profile || ''} (Copy)`, description: item.description, length: item.length, cycle_seconds: parseInt(item.cycle_seconds || 0, 10), feed_speeds: item.feed_speeds, tooling: item.tooling, is_deleted: false, record_date: todayISO() }]);
         } else {
-          const { error } = await supabaseClient.from('cnc_cycle_times').insert([{ profile: `${item.profile || ''} (Copy)`, description: item.description, length: item.length, cycle_seconds: item.cycle_seconds, feed_speeds: item.feed_speeds, tooling: item.tooling, is_deleted: false, record_date: todayISO() }]);
+          const { error } = await supabaseClient.from('cnc_cycle_times').insert([{ profile: `${item.profile || ''} (Copy)`, description: item.description, length: item.length, cycle_seconds: parseInt(item.cycle_seconds || 0, 10), feed_speeds: item.feed_speeds, tooling: item.tooling, is_deleted: false, record_date: todayISO() }]);
           if (error) throw error;
         }
         showToast(`Duplicated ${item.profile}!`);
@@ -2050,7 +2068,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
           document.getElementById('formProfile').value = item.profile || '';
           document.getElementById('formDescription').value = item.description || '';
           document.getElementById('formLength').value = item.length || '';
-          document.getElementById('formCycleSeconds').value = item.cycle_seconds || '';
+          document.getElementById('formCycleSeconds').value = parseInt(item.cycle_seconds || 0, 10);
           document.getElementById('formFeedSpeeds').value = item.feed_speeds || '';
           document.getElementById('formTooling').value = item.tooling || '';
         }
@@ -2296,7 +2314,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       const container = document.getElementById('requisitionItemsContainer');
       if (!container) return;
       if (toolsNoticeList.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 italic">No tools. Click "+ Load Low Stock".</p>';
+        container.innerHTML = '<p class="text-xs text-slate-400 italic">No tools selected. Click "+ Load Low Stock".</p>';
         return;
       }
       container.innerHTML = toolsNoticeList.map((t, idx) => `
@@ -2831,7 +2849,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
         description: rec.description,
         qty,
         handling,
-        cycle_seconds: parseInt(rec.cycle_seconds, 10) || 0
+        cycle_seconds: parseInt(rec.cycle_seconds || 0, 10)
       });
       renderPlanningCart();
     }
@@ -2876,7 +2894,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(records.map(r => ({
         Profile: r.profile || '', Description: r.description || '', Length: r.length || '',
-        Cycle: r.cycle_seconds || 0, Feed: r.feed_speeds || '', Tooling: r.tooling || ''
+        Cycle: parseInt(r.cycle_seconds || 0, 10), Feed: r.feed_speeds || '', Tooling: r.tooling || ''
       }))), 'CNC Profiles');
       XLSX.writeFile(wb, `CNC_5000_Profiles_${localTodayISO()}.xlsx`);
     }
@@ -2901,7 +2919,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       doc.autoTable({
         startY: 30,
         head: [['Profile', 'Description', 'Length', 'Cycle (s)', 'Feed', 'Tooling']],
-        body: records.map(r => [r.profile || '', r.description || '', r.length || '', r.cycle_seconds || 0, r.feed_speeds || '', r.tooling || ''])
+        body: records.map(r => [r.profile || '', r.description || '', r.length || '', parseInt(r.cycle_seconds || 0, 10), r.feed_speeds || '', r.tooling || ''])
       });
       doc.save(`CNC_5000_Catalog_${localTodayISO()}.pdf`);
     }
@@ -3067,13 +3085,32 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
           // Seed demo data if localStorage is empty
           const db = LocalDB._load();
           if (db.cnc_cycle_times.length === 0 && db.cnc_tool_bits.length === 0) {
-            // Insert sample data
+            // Insert component plant profile data extracted from PDF report
             await LocalDB.insert('cnc_cycle_times', [
-              { profile: 'AL 684', description: 'Side milling operation', length: '2437.4 mm', cycle_seconds: 93, feed_speeds: 'Feed 600', tooling: '10mm Flat End Mill', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 521', description: 'Top face machining', length: '1850.0 mm', cycle_seconds: 127, feed_speeds: 'Feed 450', tooling: '16mm Face Mill', is_deleted: false, record_date: todayISO() },
-              { profile: 'ST 302', description: 'Drilling pattern', length: '800.0 mm', cycle_seconds: 45, feed_speeds: 'Feed 300', tooling: '8mm Drill Bit', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 710', description: 'Chamfer edges', length: '1200.0 mm', cycle_seconds: 68, feed_speeds: 'Feed 500', tooling: '45° Chamfer Mill', is_deleted: false, record_date: todayISO() },
-              { profile: 'BR 115', description: 'Tapping M8 holes', length: '600.0 mm', cycle_seconds: 82, feed_speeds: 'Feed 200', tooling: 'M8 Tap', is_deleted: false, record_date: todayISO() }
+              { profile: 'AL 527', description: 'Float Plane Blade (Side 02)', length: '2437.4 mm', cycle_seconds: 82, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 527', description: 'Float Pilane Blade (Side 02)', length: '2437.4 mm', cycle_seconds: 83, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 554', description: 'Single Rectangle', length: '1160 mm', cycle_seconds: 52, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 554', description: 'Three Rectangles', length: '1160 mm', cycle_seconds: 147, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 554', description: 'Three Rectangles', length: '1788 mm', cycle_seconds: 152, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 573', description: 'H-Bar-4 (4 Holes)', length: '140 mm', cycle_seconds: 34, feed_speeds: '400', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 632', description: 'VB 70 15-1', length: '-', cycle_seconds: 43, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 632', description: 'VB 70 15', length: '-', cycle_seconds: 139, feed_speeds: '800', tooling: 'Two Tools', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 633', description: 'VB-01', length: '-', cycle_seconds: 84, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 633', description: 'VB 02', length: '-', cycle_seconds: 93, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 633', description: 'VB-03', length: '-', cycle_seconds: 93, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 684', description: 'Part 70127', length: '-', cycle_seconds: 4227, feed_speeds: '400', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 684', description: 'Part 70128', length: '-', cycle_seconds: 125, feed_speeds: '600, 400', tooling: 'Two Tools', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 684', description: 'Part 70130', length: '-', cycle_seconds: 113, feed_speeds: '600,400', tooling: 'Two Tools', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 706', description: 'Single Long Rectangle', length: '1752 mm', cycle_seconds: 639, feed_speeds: '200', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 774', description: 'Aalco (6 Holes)', length: '260 mm', cycle_seconds: 38, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 774', description: 'Aalco (8 Holes)', length: '361 mm', cycle_seconds: 49, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 778', description: 'H Bar-1', length: '200 mm', cycle_seconds: 41, feed_speeds: '800', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 1242', description: 'Swage Handle', length: '1828.8 mm', cycle_seconds: 50, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 554', description: 'Three Rectangles', length: '2296 mm', cycle_seconds: 103, feed_speeds: 'Feed 60 (Test 600)', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 554', description: 'Three Rectangles (Slow)', length: '1708 mm', cycle_seconds: 546, feed_speeds: '150', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 554', description: 'Three Rectangles', length: '2298 mm', cycle_seconds: 106, feed_speeds: 'Feed 60 (Test 600)', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 1038', description: 'Long Variant 01', length: '1824.94 mm', cycle_seconds: 380, feed_speeds: '500, 400 350', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
+              { profile: 'AL 1038', description: 'Long Variant 02', length: '1520.14 mm', cycle_seconds: 386, feed_speeds: '500, 300, 350', tooling: 'Single tool', is_deleted: false, record_date: todayISO() }
             ]);
             await LocalDB.insert('cnc_tool_bits', [
               { category: 'Milling', sub_type: 'Flat End Mill', diameter: '10.0 mm', description: 'Slotting & pocketing', stock: 5, location: 'Rack A-01', is_deleted: false },
@@ -3114,5 +3151,5 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       bootstrapCnc5000();
     }
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2f3c1d0aff9351b',t:'MTc4NzQyMTQxNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
