@@ -50,7 +50,9 @@
     <span id="toastMessage">Action successful</span>
   </div>
 
+  <!-- ============================================================== -->
   <!-- HEADER & BRAND BAR -->
+  <!-- ============================================================== -->
   <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-800/95 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 md:px-8 py-3 shadow-sm">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       
@@ -74,7 +76,9 @@
     </div>
   </header>
 
+  <!-- ============================================================== -->
   <!-- MAIN VISIBLE NAVIGATION GRID HUB -->
+  <!-- ============================================================== -->
   <div class="max-w-7xl mx-auto px-4 md:px-8 pt-5">
     <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
       
@@ -171,7 +175,9 @@
 
   <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
+    <!-- ============================================================== -->
     <!-- SECTION 1: MASTER DASHBOARD -->
+    <!-- ============================================================== -->
     <section id="view-dashboard" class="space-y-6">
       
       <!-- Primary Metric Cards -->
@@ -289,38 +295,40 @@
       </div>
     </section>
 
+    <!-- ============================================================== -->
     <!-- SECTION 2: CNC PROFILES DATABASE & ANALYTICS -->
+    <!-- ============================================================== -->
     <section id="view-logs" class="hidden space-y-6">
       
       <!-- Profile Performance Analytics Dashboard -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 border-b border-slate-200 dark:border-slate-700 pb-4">
            <div>
-              <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">PROFILE PERFORMANCE ENGINE</span>
-              <h3 class="font-black text-lg text-slate-900 dark:text-white">Individual Yield Analytics</h3>
-              <p class="text-xs text-slate-500">Select a specific profile below to view its historical production yield and scrap data.</p>
+             <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">PROFILE PERFORMANCE ENGINE</span>
+             <h3 class="font-black text-lg text-slate-900 dark:text-white">Individual Yield Analytics</h3>
+             <p class="text-xs text-slate-500">Select a specific profile below to view its historical production yield and scrap data.</p>
            </div>
            <select id="analyticsProfileSelect" onchange="renderProfileAnalytics()" class="w-full sm:w-auto bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2 text-sm font-bold outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
-              <option value="">-- Loading Profiles --</option>
+             <option value="">-- Loading Profiles --</option>
            </select>
         </div>
   
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
            <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center border border-slate-100 dark:border-slate-700">
-              <span class="text-[10px] font-bold text-slate-400 uppercase">Shifts Run</span>
-              <p id="paTotalShifts" class="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">0</p>
+             <span class="text-[10px] font-bold text-slate-400 uppercase">Shifts Run</span>
+             <p id="paTotalShifts" class="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">0</p>
            </div>
            <div class="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-2xl text-center border border-blue-100 dark:border-blue-900/50">
-              <span class="text-[10px] font-bold text-blue-500 uppercase">Total Produced</span>
-              <p id="paTotalProd" class="text-2xl font-black text-blue-600 mt-1">0</p>
+             <span class="text-[10px] font-bold text-blue-500 uppercase">Total Produced</span>
+             <p id="paTotalProd" class="text-2xl font-black text-blue-600 mt-1">0</p>
            </div>
            <div class="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-2xl text-center border border-emerald-100 dark:border-emerald-900/50">
-              <span class="text-[10px] font-bold text-emerald-500 uppercase">Good Parts</span>
-              <p id="paTotalGood" class="text-2xl font-black text-emerald-600 mt-1">0</p>
+             <span class="text-[10px] font-bold text-emerald-500 uppercase">Good Parts</span>
+             <p id="paTotalGood" class="text-2xl font-black text-emerald-600 mt-1">0</p>
            </div>
            <div class="bg-rose-50 dark:bg-rose-950/40 p-4 rounded-2xl text-center border border-rose-100 dark:border-rose-900/50">
-              <span class="text-[10px] font-bold text-rose-500 uppercase">Scrap Rate</span>
-              <p id="paScrapRate" class="text-2xl font-black text-rose-600 mt-1">0.0%</p>
+             <span class="text-[10px] font-bold text-rose-500 uppercase">Scrap Rate</span>
+             <p id="paScrapRate" class="text-2xl font-black text-rose-600 mt-1">0.0%</p>
            </div>
         </div>
   
@@ -378,7 +386,9 @@
       </div>
     </section>
 
+    <!-- ============================================================== -->
     <!-- SECTION 3: PRODUCTION PLANNING & SHIFTS -->
+    <!-- ============================================================== -->
     <section id="view-production" class="hidden space-y-6">
       <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 rounded-3xl shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
         <div>
@@ -458,7 +468,9 @@
       </div>
     </section>
 
+    <!-- ============================================================== -->
     <!-- SECTION 3.5: PRODUCTION LOGS & OEE -->
+    <!-- ============================================================== -->
     <section id="view-oee" class="hidden space-y-6">
       
       <!-- OEE Calculation Explanation Banner -->
@@ -554,6 +566,7 @@
           </div>
 
           <!-- Dynamic Profile Rows -->
+          <!-- DATALIST FOR PROFILE AUTOCOMPLETE -->
           <datalist id="profileDataList"></datalist>
           
           <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
@@ -622,7 +635,7 @@
         </form>
       </div>
 
-      <!-- Sub-Tab: All Logs -->
+      <!-- Sub-Tab: All Logs (Ordered Table with Actions) -->
       <div id="oeeSub-alllogs" class="hidden space-y-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
           <div class="overflow-x-auto">
@@ -658,7 +671,9 @@
       </div>
     </section>
 
-    <!-- SECTION 5: TOOLS INVENTORY -->
+    <!-- ============================================================== -->
+    <!-- SECTION 5: TOOLS INVENTORY (4 CORE CATEGORIES & FULL CRUD) -->
+    <!-- ============================================================== -->
     <section id="view-tools" class="hidden space-y-6">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <div>
@@ -742,7 +757,9 @@
       </div>
     </section>
 
+    <!-- ============================================================== -->
     <!-- SECTION 6: RESTOCK NOTICE -->
+    <!-- ============================================================== -->
     <section id="view-toolsreq" class="hidden space-y-6">
       <div class="bg-slate-900 border border-slate-800 text-white p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl">
         <div>
@@ -752,6 +769,7 @@
         </div>
       </div>
 
+      <!-- DYNAMIC CONFIGURATION BLOCK -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">Document Details & Routing</h4>
         
@@ -767,6 +785,7 @@
             </div>
           </div>
 
+          <!-- Dynamic Recipients Manager -->
           <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col h-full">
             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Address To (Select Recipients)</label>
             <div id="recipientsList" class="flex-grow space-y-2 overflow-y-auto max-h-32 mb-3 pr-1">
@@ -795,7 +814,9 @@
       </div>
     </section>
 
+    <!-- ============================================================== -->
     <!-- SECTION 7: REPORTS & AUDITS -->
+    <!-- ============================================================== -->
     <section id="view-reports" class="hidden space-y-6">
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -814,7 +835,9 @@
       </div>
     </section>
 
+    <!-- ============================================================== -->
     <!-- SECTION 8: RECYCLE & DISPOSAL BIN ARCHIVE -->
+    <!-- ============================================================== -->
     <section id="view-trash" class="hidden space-y-6">
       <div class="bg-gradient-to-r from-amber-600/90 to-rose-700/90 text-white p-5 rounded-3xl shadow-sm flex justify-between items-center">
         <div>
@@ -841,7 +864,11 @@
 
   </main>
 
-  <!-- MODALS -->
+  <!-- ============================================================== -->
+  <!-- MODALS (VIEW, ADD, EDIT) -->
+  <!-- ============================================================== -->
+
+  <!-- Modal: Profile Add/Edit -->
   <div id="modalForm" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
@@ -882,6 +909,7 @@
     </div>
   </div>
 
+  <!-- Modal: Profile Inspector -->
   <div id="modalViewProfile" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
       <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
@@ -898,6 +926,7 @@
     </div>
   </div>
 
+  <!-- Modal: Tool Inspector -->
   <div id="modalViewTool" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
       <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
@@ -914,6 +943,7 @@
     </div>
   </div>
   
+  <!-- Modal: Shift Inspector -->
   <div id="modalViewShift" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-4">
       <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
@@ -930,6 +960,7 @@
     </div>
   </div>
 
+  <!-- Modal: Tool Add / Edit -->
   <div id="toolsModalForm" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
@@ -976,15 +1007,20 @@
   </div>
 
   <script>
-    // --- DATABASE CONNECTIONS ---
+    // ========================================================================
+    // DATABASE CONNECTIONS - SINGLE SUPABASE PROJECT
+    // ========================================================================
+    // IMPORTANT: All tables (cnc_cycle_times, shifts, production_records,
+    // downtime_events, cnc_tool_bits) must be in the SAME Supabase project.
+    // Run the SQL script against this project URL.
+    // ========================================================================
     const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_s8wnE3RfwJRQxO2NyPdWTg_YBssVkbM";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ocmFvYWRmZGVnamZ3Y2tycWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMzUwMDAsImV4cCI6MjA2NDcxMTAwMH0.s8wnE3RfwJRQxO2NyPdWTg_YBssVkbMKvZ8r9oNkLgY";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const TOOLS_SUPABASE_URL = "https://cayqxybekaksppzbnnrw.supabase.co";
-    const TOOLS_SUPABASE_ANON_KEY = "sb_publishable_tAP8MprpVsHZtoBapEBnUA_v9uoUZ70";
-    const toolsClient = supabase.createClient(TOOLS_SUPABASE_URL, TOOLS_SUPABASE_ANON_KEY);
-
+    // ========================================================================
+    // APPLICATION STATE
+    // ========================================================================
     let records = [];
     let trashRecords = [];
     let displayedRecords = [];
@@ -998,23 +1034,30 @@
     let downtimeEvents = [];
     let planningCart = [];
 
-    // --- RECIPIENTS LOGIC (Updated LocalStorage Key to prevent cached names) ---
+    // Memo recipients with updated localStorage key
     let memoRecipients = [
         { id: 1, name: 'Mr. U.N. Kavinda', role: 'Production & Operations Supervisor', selected: true }
     ];
 
+    // Data loading flags - FIXED: track initial load separately
     let profilesLoaded = false;
     let toolsLoaded = false;
+    let initialDashboardRendered = false;
 
+    // Chart instances
     let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null;
     let chartProfile30Inst = null;
     let chartOeeTelemetryInst = null;
-    let chartProfileSpecificInst = null; 
+    let chartProfileSpecificInst = null;
     
+    // UI state
     let profile30CurrentAngle = 'quantity';
     let cardCounter = 0, dtCounter = 0;
 
-    const fmtPct = v => (v === null || v === undefined || isNaN(v)) ? '-' : (v * 100).toFixed(1) + '%';
+    // ========================================================================
+    // UTILITY FUNCTIONS
+    // ========================================================================
+    const fmtPct = v => (v === null || v === undefined || isNaN(v) || !isFinite(v)) ? '-' : (v * 100).toFixed(1) + '%';
     const fmtDateISO = d => (!d ? '' : ((d instanceof Date) ? d : new Date(d)).toISOString().slice(0, 10));
     const todayISO = () => fmtDateISO(new Date());
 
@@ -1034,19 +1077,28 @@
       return 'Milling';
     }
 
-    // --- RECIPIENTS DATA MANAGEMENT ---
+    // FIXED: Normalize profile code for consistent matching
+    function normalizeProfileCode(code) {
+      return (code || '').trim().toUpperCase();
+    }
+
+    // ========================================================================
+    // RECIPIENTS DATA MANAGEMENT
+    // ========================================================================
     function loadRecipients() {
-        const saved = localStorage.getItem('cnc5000_memo_recipients');
+        const saved = localStorage.getItem('cnc5000_memo_recipients_v2');
         if (saved) {
             try {
                 memoRecipients = JSON.parse(saved);
-            } catch(e) {}
+            } catch(e) {
+                console.warn('Failed to parse recipients:', e);
+            }
         }
         renderRecipients();
     }
 
     function saveRecipients() {
-        localStorage.setItem('cnc5000_memo_recipients', JSON.stringify(memoRecipients));
+        localStorage.setItem('cnc5000_memo_recipients_v2', JSON.stringify(memoRecipients));
     }
 
     function renderRecipients() {
@@ -1063,8 +1115,8 @@
                 <label class="flex items-center gap-2 cursor-pointer w-full">
                     <input type="checkbox" onchange="toggleRecipient(${r.id})" ${r.selected ? 'checked' : ''} class="w-4 h-4 text-blue-600 rounded border-slate-300">
                     <div class="flex flex-col">
-                        <span class="text-xs font-bold text-slate-900 dark:text-white">${r.name}</span>
-                        <span class="text-[10px] text-slate-500">${r.role}</span>
+                        <span class="text-xs font-bold text-slate-900 dark:text-white">${escapeHtml(r.name)}</span>
+                        <span class="text-[10px] text-slate-500">${escapeHtml(r.role)}</span>
                     </div>
                 </label>
                 <button onclick="removeRecipient(${r.id})" class="text-rose-500 hover:text-rose-700 font-bold px-2 text-sm">&times;</button>
@@ -1106,6 +1158,9 @@
         roleInp.value = '';
     }
 
+    // ========================================================================
+    // OEE CALCULATION ENGINE
+    // ========================================================================
     function calculateShiftOee(shift) {
       const prods = productionRecords.filter(p => p.shift_id === shift.id);
       const dts = downtimeEvents.filter(d => d.shift_id === shift.id);
@@ -1113,26 +1168,29 @@
       const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
       const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
       const good = Math.max(0, produced - rejected);
-      const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
+      const downtimeMin = dts.reduce((sum, d) => sum + (parseFloat(d.duration_min) || 0), 0);
 
-      const plannedBreak = parseInt(shift.planned_break_min, 10) || 90;
+      const plannedBreak = parseFloat(shift.planned_break_min) || 90;
       const plannedMin = Math.max(0, 720 - plannedBreak);
       const operatingMin = Math.max(0, plannedMin - downtimeMin);
 
       let idealMin = 0;
       prods.forEach(p => {
-        const code = (p.profile_code || '').trim().toUpperCase();
+        const code = normalizeProfileCode(p.profile_code);
         let cycleSec = p.ideal_cycle_seconds;
-        if (cycleSec == null || cycleSec <= 0) {
-            const profileRec = records.find(r => (r.profile || '').trim().toUpperCase() === code);
-            cycleSec = profileRec ? (parseFloat(profileRec.cycle_seconds) || 0) : 0;
+        
+        // FIXED: Check if cycle seconds is valid, otherwise look up from records
+        if (cycleSec == null || cycleSec <= 0 || isNaN(cycleSec)) {
+            const profileRec = records.find(r => normalizeProfileCode(r.profile) === code);
+            cycleSec = profileRec ? (parseInt(profileRec.cycle_seconds, 10) || 0) : 0;
         }
-        idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
+        idealMin += ((parseInt(p.produced) || 0) * (parseInt(cycleSec, 10) || 0)) / 60;
       });
 
-      const availability = plannedMin > 0 ? (operatingMin / plannedMin) : 0;
+      // FIXED: Handle zero operating time gracefully
+      const availability = plannedMin > 0 ? Math.max(0, Math.min(operatingMin / plannedMin, 1)) : 0;
       const performance = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0;
-      const quality = produced > 0 ? (good / produced) : 0;
+      const quality = produced > 0 ? Math.max(0, Math.min(good / produced, 1)) : 0;
       const oee = availability * performance * quality;
 
       return {
@@ -1142,7 +1200,9 @@
       };
     }
 
-    // --- NOTIFICATION ---
+    // ========================================================================
+    // NOTIFICATION SYSTEM
+    // ========================================================================
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toastNotification');
       const text = document.getElementById('toastMessage');
@@ -1155,7 +1215,9 @@
       setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3200);
     }
 
-    // --- TAB SWITCHING ---
+    // ========================================================================
+    // TAB SWITCHING SYSTEM
+    // ========================================================================
     function switchTab(tabId) {
       ['dashboard', 'logs', 'oee', 'production', 'tools', 'toolsreq', 'reports', 'trash'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
@@ -1173,6 +1235,7 @@
         targetTile.className = "p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-blue-600 border-blue-600 text-white shadow-md";
       }
 
+      // Trigger renders when switching to tabs
       if (tabId === 'dashboard') renderMasterDashboard();
       if (tabId === 'logs') { applyFiltersAndRender(); populateProfileAnalyticsDropdown(); }
       if (tabId === 'oee') { renderShiftsTable(); renderLatestShiftCard(); renderOeeTelemetryChart(); }
@@ -1188,7 +1251,7 @@
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
       document.querySelectorAll('.themeIcon').forEach(el => el.innerText = isDark ? '☀' : '🌙');
       renderMasterDashboard();
-      renderProfileAnalytics(); 
+      renderProfileAnalytics();
     }
 
     (function initTheme() {
@@ -1199,70 +1262,105 @@
       }
     })();
 
-    // --- DATA FETCHING ---
+    // ========================================================================
+    // DATA FETCHING - UNIFIED TO SINGLE SUPABASE PROJECT
+    // ========================================================================
     async function fetchAllData() {
-      const { data, error } = await supabaseClient.from('cnc_cycle_times').select('*');
-      if (error) {
-        console.error('Failed to load cnc_cycle_times:', error.message);
-        document.getElementById('syncStatus').innerText = 'Offline';
-        showToast('Failed to load profiles data', true);
-      }
-      records = (data || []).filter(r => !r.is_deleted);
-      trashRecords = (data || []).filter(r => r.is_deleted);
+      try {
+        const { data, error } = await supabaseClient.from('cnc_cycle_times').select('*');
+        if (error) {
+          console.error('Failed to load cnc_cycle_times:', error.message);
+          showToast('Failed to load CNC profiles. Check database connection.', true);
+          document.getElementById('syncStatus').innerText = 'Offline';
+          return;
+        }
+        
+        records = (data || []).filter(r => !r.is_deleted);
+        trashRecords = (data || []).filter(r => r.is_deleted);
+        
+        document.getElementById('syncStatus').innerText = 'Online';
 
-      await fetchOeeData();
-      applyFiltersAndRender();
-      populatePlanningDropdown();
-      profilesLoaded = true;
-      renderMasterDashboard();
+        await fetchOeeData();
+        applyFiltersAndRender();
+        populatePlanningDropdown();
+        
+        profilesLoaded = true;
+        renderMasterDashboard();
+      } catch (err) {
+        console.error('fetchAllData error:', err);
+        showToast('Failed to load data. Please refresh the page.', true);
+      }
     }
 
     async function fetchOeeData() {
-      const [shiftsRes, prodRes, downtimeRes] = await Promise.all([
-        supabaseClient.from('shifts').select('*').order('shift_date', { ascending: false }),
-        supabaseClient.from('production_records').select('*'),
-        supabaseClient.from('downtime_events').select('*')
-      ]);
+      try {
+        const [shiftsRes, prodRes, downtimeRes] = await Promise.all([
+          supabaseClient.from('shifts').select('*').order('shift_date', { ascending: false }),
+          supabaseClient.from('production_records').select('*'),
+          supabaseClient.from('downtime_events').select('*')
+        ]);
 
-      if (!shiftsRes.error) {
-        const allShifts = shiftsRes.data || [];
-        shifts = allShifts.filter(s => !s.is_deleted);
-        trashShifts = allShifts.filter(s => s.is_deleted);
+        if (!shiftsRes.error) {
+          const allShifts = shiftsRes.data || [];
+          shifts = allShifts.filter(s => !s.is_deleted);
+          trashShifts = allShifts.filter(s => s.is_deleted);
+        } else {
+          console.error('Failed to load shifts:', shiftsRes.error.message);
+        }
+
         productionRecords = prodRes.data || [];
         downtimeEvents = downtimeRes.data || [];
-      } else {
-        console.error('Failed to load shifts:', shiftsRes.error.message);
-      }
 
-      renderShiftsTable();
-      renderLatestShiftCard();
-      renderReportPreview();
-      render30DayProfileAnalytics();
-      renderOeeTelemetryChart();
-      populateProfileAnalyticsDropdown(); 
+        renderShiftsTable();
+        renderLatestShiftCard();
+        renderReportPreview();
+        render30DayProfileAnalytics();
+        renderOeeTelemetryChart();
+        populateProfileAnalyticsDropdown();
+      } catch (err) {
+        console.error('fetchOeeData error:', err);
+      }
     }
 
     async function fetchToolsData() {
-      const { data, error } = await toolsClient.from('cnc_tool_bits').select('*');
-      if (error) {
-         console.error('Failed to load cnc_tool_bits:', error.message);
-         showToast('Failed to load tools inventory', true);
-      }
-      // FIXED BUG: Removed the random 'Face Mill' exclusion filter here.
-      const raw = data || []; 
-      toolsList = raw.filter(t => !t.is_deleted);
-      toolsTrash = raw.filter(t => t.is_deleted);
+      try {
+        const { data, error } = await supabaseClient.from('cnc_tool_bits').select('*');
+        
+        if (error) {
+          console.error('Failed to load cnc_tool_bits:', error.message);
+          showToast('Failed to load tools inventory: ' + error.message, true);
+          
+          // Update table to show error state
+          const tbody = document.getElementById('inventoryTableBody');
+          if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-rose-500">Database error: ${error.message}. Ensure SQL script was run.</td></tr>`;
+          }
+          return;
+        }
 
-      toolsLoaded = true;
-      refreshToolsDashboard();
-      applyToolsFiltersAndRender();
-      renderMasterDashboard();
-      renderBinArchive();
+        // FIXED: Removed silent Face Mill filter - show all tools
+        const raw = data || [];
+        toolsList = raw.filter(t => !t.is_deleted);
+        toolsTrash = raw.filter(t => t.is_deleted);
+
+        toolsLoaded = true;
+        refreshToolsDashboard();
+        applyToolsFiltersAndRender();
+        renderMasterDashboard();
+        renderBinArchive();
+      } catch (err) {
+        console.error('fetchToolsData error:', err);
+        showToast('Failed to load tools. Please check database connection.', true);
+      }
     }
 
-    // --- DASHBOARD TELEMETRY ---
+    // ========================================================================
+    // DASHBOARD TELEMETRY
+    // ========================================================================
     function renderMasterDashboard() {
-      if (!profilesLoaded || !toolsLoaded) return;
+      // FIXED: Only require profiles to be loaded for basic dashboard
+      // Tools dashboard updates separately when tools load
+      if (!profilesLoaded) return;
 
       document.getElementById('dashTotalProfiles').innerText = records.length;
       if (records.length > 0) {
@@ -1272,11 +1370,15 @@
         document.getElementById('dashMaxCycleSummary').innerText = 'Max: -';
       }
 
-      const totalStockPcs = toolsList.reduce((acc, t) => acc + (parseInt(t.stock) || 0), 0);
-      const lowStockCount = toolsList.filter(t => (parseInt(t.stock) || 0) < 2).length;
-      document.getElementById('dashToolsStock').innerText = `${totalStockPcs} pcs`;
-      document.getElementById('dashLowStockSummary').innerText = `${lowStockCount} low-stock tool(s)`;
+      // Tools section - only update if loaded
+      if (toolsLoaded) {
+        const totalStockPcs = toolsList.reduce((acc, t) => acc + (parseInt(t.stock) || 0), 0);
+        const lowStockCount = toolsList.filter(t => (parseInt(t.stock) || 0) < 2).length;
+        document.getElementById('dashToolsStock').innerText = `${totalStockPcs} pcs`;
+        document.getElementById('dashLowStockSummary').innerText = `${lowStockCount} low-stock tool(s)`;
+      }
 
+      // OEE section
       if (shifts.length > 0) {
         const oeeResults = shifts.map(s => calculateShiftOee(s));
         const avgA = oeeResults.reduce((s, r) => s + r.availability, 0) / oeeResults.length;
@@ -1296,12 +1398,18 @@
         document.getElementById('dashScrapSummary').innerText = 'Good: 0 | Rej: 0';
       }
 
-      refreshToolsDashboard();
+      // Always refresh tools dashboard when available
+      if (toolsLoaded) {
+        refreshToolsDashboard();
+      }
+      
       renderDashboardCharts();
       render30DayProfileAnalytics();
     }
 
     function refreshToolsDashboard() {
+      if (!toolsLoaded) return;
+      
       const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 };
       toolsList.forEach(t => {
         const norm = normalizeToolCategory(t.category);
@@ -1314,13 +1422,32 @@
       const ch = document.getElementById('catCount-Chamfer'); if (ch) ch.innerText = `${counts.Chamfer} pcs`;
     }
 
+    // ========================================================================
+    // DASHBOARD CHARTS
+    // ========================================================================
+    function safeDestroyChart(chartInstance) {
+      if (chartInstance && typeof chartInstance.destroy === 'function') {
+        try {
+          chartInstance.destroy();
+        } catch (e) {
+          console.warn('Chart destroy error:', e);
+        }
+      }
+      return null;
+    }
+
     function renderDashboardCharts() {
+      if (!profilesLoaded) return;
+      
+      const canvas = document.getElementById('chartDashOee');
+      if (!canvas) return;
+      
       const isDark = document.documentElement.classList.contains('dark');
       const textColor = isDark ? '#cbd5e1' : '#475569';
       const gridColor = isDark ? '#334155' : '#e2e8f0';
 
       const recentShifts = [...shifts].reverse().slice(-8);
-      const shiftLabels = recentShifts.map(s => s.shift_date.slice(5));
+      const shiftLabels = recentShifts.map(s => (s.shift_date || '').slice(5));
       const goodData = recentShifts.map(s => {
         const prods = productionRecords.filter(p => p.shift_id === s.id);
         const prod = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
@@ -1332,7 +1459,7 @@
         return prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
       });
 
-      if (chartDashProductionInst) chartDashProductionInst.destroy();
+      chartDashProductionInst = safeDestroyChart(chartDashProductionInst);
       const ctxProd = document.getElementById('chartDashProduction');
       if (ctxProd) {
         chartDashProductionInst = new Chart(ctxProd.getContext('2d'), {
@@ -1356,7 +1483,7 @@
       }
 
       const oeeSeries = recentShifts.map(s => (calculateShiftOee(s).oee * 100));
-      if (chartDashOeeInst) chartDashOeeInst.destroy();
+      chartDashOeeInst = safeDestroyChart(chartDashOeeInst);
       const ctxOee = document.getElementById('chartDashOee');
       if (ctxOee) {
         chartDashOeeInst = new Chart(ctxOee.getContext('2d'), {
@@ -1385,16 +1512,16 @@
       }
 
       const topCycleProfiles = [...records].sort((a, b) => (b.cycle_seconds || 0) - (a.cycle_seconds || 0)).slice(0, 8);
-      if (chartDashCycleTimeInst) chartDashCycleTimeInst.destroy();
+      chartDashCycleTimeInst = safeDestroyChart(chartDashCycleTimeInst);
       const ctxCycle = document.getElementById('chartDashCycleTime');
       if (ctxCycle) {
         chartDashCycleTimeInst = new Chart(ctxCycle.getContext('2d'), {
           type: 'bar',
           data: {
-            labels: topCycleProfiles.length ? topCycleProfiles.map(r => r.profile) : ['No Profiles'],
+            labels: topCycleProfiles.length ? topCycleProfiles.map(r => r.profile || 'Unknown') : ['No Profiles'],
             datasets: [{
               label: 'Cycle Time (s)',
-              data: topCycleProfiles.length ? topCycleProfiles.map(r => r.cycle_seconds) : [0],
+              data: topCycleProfiles.length ? topCycleProfiles.map(r => r.cycle_seconds || 0) : [0],
               backgroundColor: '#3b82f6',
               borderRadius: 4
             }]
@@ -1411,10 +1538,13 @@
         });
       }
 
+      // Tools chart - only if tools loaded
       const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 };
-      toolsList.forEach(t => { counts[normalizeToolCategory(t.category)] += (parseInt(t.stock) || 0); });
+      if (toolsLoaded) {
+        toolsList.forEach(t => { counts[normalizeToolCategory(t.category)] += (parseInt(t.stock) || 0); });
+      }
 
-      if (chartDashToolsInst) chartDashToolsInst.destroy();
+      chartDashToolsInst = safeDestroyChart(chartDashToolsInst);
       const ctxTools = document.getElementById('chartDashTools');
       if (ctxTools) {
         chartDashToolsInst = new Chart(ctxTools.getContext('2d'), {
@@ -1439,11 +1569,11 @@
       const textColor = isDark ? '#cbd5e1' : '#475569';
       const gridColor = isDark ? '#334155' : '#e2e8f0';
 
-      const chronological = [...shifts].sort((a, b) => a.shift_date.localeCompare(b.shift_date));
-      const labels = chronological.map(s => `${s.shift_date} ${s.shift_type === 'Night' ? '(N)' : '(D)'}`);
+      const chronological = [...shifts].sort((a, b) => (a.shift_date || '').localeCompare(b.shift_date || ''));
+      const labels = chronological.map(s => `${s.shift_date || ''} ${s.shift_type === 'Night' ? '(N)' : '(D)'}`);
       const results = chronological.map(s => calculateShiftOee(s));
 
-      if (chartOeeTelemetryInst) chartOeeTelemetryInst.destroy();
+      chartOeeTelemetryInst = safeDestroyChart(chartOeeTelemetryInst);
       chartOeeTelemetryInst = new Chart(canvas.getContext('2d'), {
         type: 'line',
         data: {
@@ -1480,17 +1610,20 @@
     }
 
     function render30DayProfileAnalytics() {
+      const canvas = document.getElementById('chartProfile30Days');
+      if (!canvas) return;
+      
       const today = new Date();
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const thresholdISO = fmtDateISO(thirtyDaysAgo);
 
-      const recentShifts = shifts.filter(s => s.shift_date >= thresholdISO);
+      const recentShifts = shifts.filter(s => (s.shift_date || '') >= thresholdISO);
       const recentShiftIds = new Set(recentShifts.map(s => s.id));
 
       const profileMap = {};
       productionRecords.filter(p => recentShiftIds.has(p.shift_id)).forEach(p => {
-        const code = (p.profile_code || 'AL 684').trim().toUpperCase();
+        const code = normalizeProfileCode(p.profile_code || 'UNKNOWN');
         if (!profileMap[code]) {
           profileMap[code] = { code, produced: 0, rejected: 0, good: 0, shiftIds: new Set() };
         }
@@ -1521,7 +1654,7 @@
           tbody.innerHTML = profileList.map((p, idx) => `
             <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition">
               <td class="p-3 font-semibold text-slate-400">${idx + 1}</td>
-              <td class="p-3 font-black text-slate-900 dark:text-white">${p.code}</td>
+              <td class="p-3 font-black text-slate-900 dark:text-white">${escapeHtml(p.code)}</td>
               <td class="p-3 text-right font-mono font-bold text-blue-600 dark:text-blue-400">${p.produced}</td>
               <td class="p-3 text-right font-mono text-emerald-600">${p.good}</td>
               <td class="p-3 text-right font-mono text-rose-600">${p.rejected}</td>
@@ -1554,7 +1687,7 @@
         chartColor = '#f43f5e';
       }
 
-      if (chartProfile30Inst) chartProfile30Inst.destroy();
+      chartProfile30Inst = safeDestroyChart(chartProfile30Inst);
       const ctx30 = document.getElementById('chartProfile30Days');
       if (ctx30) {
         chartProfile30Inst = new Chart(ctx30.getContext('2d'), {
@@ -1581,15 +1714,18 @@
       }
     }
 
-    // --- NEW: PROFILE PERFORMANCE ANALYTICS ENGINE ---
+    // ========================================================================
+    // PROFILE PERFORMANCE ANALYTICS ENGINE
+    // ========================================================================
     function populateProfileAnalyticsDropdown() {
        const sel = document.getElementById('analyticsProfileSelect');
        if (!sel) return;
-       const uniqueProfiles = [...new Set(productionRecords.map(p => (p.profile_code||'').toUpperCase()))].sort();
+       
+       const uniqueProfiles = [...new Set(productionRecords.map(p => normalizeProfileCode(p.profile_code)))].filter(p => p);
        
        const currentVal = sel.value;
        sel.innerHTML = '<option value="">-- Select Profile to Analyze --</option>' + 
-           uniqueProfiles.map(p => `<option value="${p}">${p}</option>`).join('');
+           uniqueProfiles.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
        
        if (uniqueProfiles.includes(currentVal)) {
            sel.value = currentVal;
@@ -1601,9 +1737,9 @@
 
     function renderProfileAnalytics() {
        const code = document.getElementById('analyticsProfileSelect')?.value;
-       if (!code) return; 
+       if (!code) return;  
 
-       const relevantProds = productionRecords.filter(p => (p.profile_code || '').toUpperCase() === code);
+       const relevantProds = productionRecords.filter(p => normalizeProfileCode(p.profile_code) === code);
        
        const shiftsRun = relevantProds.length;
        const totalProd = relevantProds.reduce((s, p) => s + (parseInt(p.produced)||0), 0);
@@ -1618,11 +1754,11 @@
 
        const chartData = relevantProds.map(p => {
            const shift = shifts.find(s => s.id === p.shift_id);
-           const date = shift ? shift.shift_date : 'Unknown';
+           const date = shift ? (shift.shift_date || 'Unknown') : 'Unknown';
            const prod = parseInt(p.produced)||0;
            const rej = parseInt(p.rejected)||0;
            return { date, good: prod - rej, rej };
-       }).sort((a,b) => a.date.localeCompare(b.date));
+       }).sort((a,b) => (a.date||'').localeCompare(b.date||''));
 
        const labels = chartData.map(d => d.date);
        const goodData = chartData.map(d => d.good);
@@ -1631,7 +1767,7 @@
        const ctx = document.getElementById('chartProfileSpecific');
        if (!ctx) return;
 
-       if (chartProfileSpecificInst) chartProfileSpecificInst.destroy();
+       chartProfileSpecificInst = safeDestroyChart(chartProfileSpecificInst);
        
        const isDark = document.documentElement.classList.contains('dark');
        const textColor = isDark ? '#cbd5e1' : '#475569';
@@ -1640,7 +1776,7 @@
        chartProfileSpecificInst = new Chart(ctx.getContext('2d'), {
            type: 'bar',
            data: {
-               labels: labels,
+               labels: labels.length ? labels : ['No Data'],
                datasets: [
                    { label: 'Good Parts', data: goodData, backgroundColor: '#10b981', stack: 's' },
                    { label: 'Scrap Parts', data: rejData, backgroundColor: '#f43f5e', stack: 's' }
@@ -1657,10 +1793,22 @@
        });
     }
 
-    // --- PROFILES TABLE ---
+    // ========================================================================
+    // PROFILES TABLE (FULL CRUD)
+    // ========================================================================
     function applyFiltersAndRender() {
       const q = (document.getElementById('logSearchInput')?.value || '').toLowerCase();
-      displayedRecords = records.filter(r => (r.profile || '').toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q));
+      displayedRecords = records.filter(r => 
+        (r.profile || '').toLowerCase().includes(q) || 
+        (r.description || '').toLowerCase().includes(q)
+      );
+
+      // Apply sorting
+      const sortVal = document.getElementById('filterSort')?.value || 'profile_asc';
+      if (sortVal === 'profile_asc') displayedRecords.sort((a, b) => (a.profile || '').localeCompare(b.profile || ''));
+      else if (sortVal === 'profile_desc') displayedRecords.sort((a, b) => (b.profile || '').localeCompare(a.profile || ''));
+      else if (sortVal === 'cycle_asc') displayedRecords.sort((a, b) => (a.cycle_seconds || 0) - (b.cycle_seconds || 0));
+      else if (sortVal === 'cycle_desc') displayedRecords.sort((a, b) => (b.cycle_seconds || 0) - (a.cycle_seconds || 0));
 
       const tbody = document.getElementById('logsTableBody');
       if (!tbody) return;
@@ -1673,12 +1821,12 @@
       tbody.innerHTML = displayedRecords.map((r, i) => `
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
           <td class="p-3.5 font-semibold text-slate-400">${i + 1}</td>
-          <td class="p-3.5 font-bold">${r.profile}</td>
-          <td class="p-3.5">${r.description || '-'}</td>
-          <td class="p-3.5">${r.length || '-'}</td>
-          <td class="p-3.5 font-mono font-bold text-blue-600">${r.cycle_seconds}s</td>
-          <td class="p-3.5 font-mono">${r.feed_speeds || '-'}</td>
-          <td class="p-3.5">${r.tooling || 'Single tool'}</td>
+          <td class="p-3.5 font-bold">${escapeHtml(r.profile || '')}</td>
+          <td class="p-3.5">${escapeHtml(r.description || '-')}</td>
+          <td class="p-3.5">${escapeHtml(r.length || '-')}</td>
+          <td class="p-3.5 font-mono font-bold text-blue-600">${r.cycle_seconds || 0}s</td>
+          <td class="p-3.5 font-mono">${escapeHtml(r.feed_speeds || '-')}</td>
+          <td class="p-3.5">${escapeHtml(r.tooling || 'Single tool')}</td>
           <td class="p-3.5 text-center space-x-2">
             <button onclick="viewProfileDetails(${r.id})" class="text-blue-600 hover:underline font-bold">View</button>
             <button onclick="openFormModal(${r.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
@@ -1692,15 +1840,15 @@
     function viewProfileDetails(id) {
       const r = records.find(item => item.id === id);
       if (!r) return;
-      document.getElementById('viewProfTitle').innerText = r.profile;
+      document.getElementById('viewProfTitle').innerText = escapeHtml(r.profile || '');
       document.getElementById('viewProfBody').innerHTML = `
         <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl">
-          <div><span class="text-slate-400 font-bold">Cycle Time:</span> <b class="text-blue-600 font-mono">${r.cycle_seconds}s</b> (${formatDuration(r.cycle_seconds)})</div>
-          <div><span class="text-slate-400 font-bold">Tooling:</span> <b>${r.tooling || 'Single tool'}</b></div>
-          <div><span class="text-slate-400 font-bold">Feed Speed:</span> <b>${r.feed_speeds || '-'}</b></div>
-          <div><span class="text-slate-400 font-bold">Length:</span> <b>${r.length || '-'}</b></div>
+          <div><span class="text-slate-400 font-bold">Cycle Time:</span> <b class="text-blue-600 font-mono">${r.cycle_seconds || 0}s</b> (${formatDuration(r.cycle_seconds)})</div>
+          <div><span class="text-slate-400 font-bold">Tooling:</span> <b>${escapeHtml(r.tooling || 'Single tool')}</b></div>
+          <div><span class="text-slate-400 font-bold">Feed Speed:</span> <b>${escapeHtml(r.feed_speeds || '-')}</b></div>
+          <div><span class="text-slate-400 font-bold">Length:</span> <b>${escapeHtml(r.length || '-')}</b></div>
         </div>
-        <div class="pt-2"><span class="text-slate-400 font-bold">Description:</span> <p class="text-slate-700 dark:text-slate-200">${r.description || 'No description recorded.'}</p></div>
+        <div class="pt-2"><span class="text-slate-400 font-bold">Description:</span> <p class="text-slate-700 dark:text-slate-200">${escapeHtml(r.description || 'No description recorded.')}</p></div>
       `;
       document.getElementById('modalViewProfile').classList.remove('hidden');
     }
@@ -1709,7 +1857,7 @@
       const item = records.find(r => r.id === id);
       if (!item) return;
       const clonePayload = {
-        profile: `${item.profile} (Copy)`,
+        profile: `${item.profile || ''} (Copy)`,
         description: item.description,
         length: item.length,
         cycle_seconds: item.cycle_seconds,
@@ -1722,8 +1870,9 @@
       const { error } = await supabaseClient.from('cnc_cycle_times').insert([clonePayload]);
       if (error) {
         alert("Failed to duplicate profile: " + error.message);
+        showToast("Failed to duplicate profile", true);
       } else {
-        showToast(`Duplicated ${item.profile} successfully!`);
+        showToast(`Duplicated ${item.profile || 'profile'} successfully!`);
         fetchAllData();
       }
     }
@@ -1738,7 +1887,7 @@
       if (id) {
         const item = records.find(r => r.id === id);
         if (item) {
-          title.innerText = `Edit Profile Recipe: ${item.profile}`;
+          title.innerText = `Edit Profile Recipe: ${item.profile || ''}`;
           document.getElementById('formRowId').value = item.id;
           document.getElementById('formProfile').value = item.profile || '';
           document.getElementById('formDescription').value = item.description || '';
@@ -1784,16 +1933,19 @@
         fetchAllData();
       } catch (error) {
         alert("Database Error: " + error.message);
+        showToast("Database Error: " + error.message, true);
       }
     }
 
     async function softDeleteRecord(id) {
       if (!confirm('Move this CNC Profile to the Recovery Vault?')) return;
-      await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true }).eq('id', id);
+      await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
       fetchAllData();
     }
 
-    // --- TOOLS CRUD MODAL & OPERATIONS ---
+    // ========================================================================
+    // TOOLS CRUD MODAL & OPERATIONS
+    // ========================================================================
     function toolsFilterByCategory(cat) {
       switchTab('tools');
       const select = document.getElementById('filterCategorySelect');
@@ -1807,7 +1959,11 @@
 
       toolsDisplayed = toolsList.filter(t => {
         const norm = normalizeToolCategory(t.category);
-        const matchQ = (t.diameter || '').toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q) || (t.sub_type || '').toLowerCase().includes(q) || (t.location || '').toLowerCase().includes(q);
+        const matchQ = 
+          (t.diameter || '').toLowerCase().includes(q) || 
+          (t.description || '').toLowerCase().includes(q) || 
+          (t.sub_type || '').toLowerCase().includes(q) || 
+          (t.location || '').toLowerCase().includes(q);
         const matchCat = (cat === 'ALL') || (norm === cat);
         return matchQ && matchCat;
       });
@@ -1827,11 +1983,11 @@
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
             <td class="p-3.5 font-semibold text-slate-400">${i + 1}</td>
             <td class="p-3.5 font-bold text-cyan-600">${norm}</td>
-            <td class="p-3.5 text-slate-600 dark:text-slate-300">${t.sub_type || '-'}</td>
-            <td class="p-3.5 font-bold">${t.diameter}</td>
-            <td class="p-3.5 text-slate-600 dark:text-slate-300">${t.description || '-'}</td>
+            <td class="p-3.5 text-slate-600 dark:text-slate-300">${escapeHtml(t.sub_type || '-')}</td>
+            <td class="p-3.5 font-bold">${escapeHtml(t.diameter || '')}</td>
+            <td class="p-3.5 text-slate-600 dark:text-slate-300">${escapeHtml(t.description || '-')}</td>
             <td class="p-3.5 text-center font-bold">${stock} pcs</td>
-            <td class="p-3.5 font-mono text-slate-500">${t.location || '-'}</td>
+            <td class="p-3.5 font-mono text-slate-500">${escapeHtml(t.location || '-')}</td>
             <td class="p-3.5 text-center space-x-2">
               <button onclick="viewToolDetails(${t.id})" class="text-blue-600 hover:underline font-bold">View</button>
               <button onclick="openToolsFormModal(${t.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
@@ -1846,35 +2002,37 @@
     function viewToolDetails(id) {
       const t = toolsList.find(item => item.id === id);
       if (!t) return;
-      document.getElementById('viewToolTitle').innerText = `${normalizeToolCategory(t.category)} (${t.diameter})`;
+      document.getElementById('viewToolTitle').innerText = `${normalizeToolCategory(t.category)} (${t.diameter || ''})`;
       document.getElementById('viewToolBody').innerHTML = `
         <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl">
           <div><span class="text-slate-400 font-bold">Category:</span> <b>${normalizeToolCategory(t.category)}</b></div>
-          <div><span class="text-slate-400 font-bold">Stock In Rack:</span> <b class="text-cyan-600">${t.stock} pcs</b></div>
-          <div><span class="text-slate-400 font-bold">Location:</span> <b>${t.location || 'Main Storage Rack'}</b></div>
-          <div><span class="text-slate-400 font-bold">Sub-Type:</span> <b>${t.sub_type || '-'}</b></div>
-          <div><span class="text-slate-400 font-bold">Diameter:</span> <b>${t.diameter}</b></div>
+          <div><span class="text-slate-400 font-bold">Stock In Rack:</span> <b class="text-cyan-600">${t.stock || 0} pcs</b></div>
+          <div><span class="text-slate-400 font-bold">Location:</span> <b>${escapeHtml(t.location || 'Main Storage Rack')}</b></div>
+          <div><span class="text-slate-400 font-bold">Sub-Type:</span> <b>${escapeHtml(t.sub_type || '-')}</b></div>
+          <div><span class="text-slate-400 font-bold">Diameter:</span> <b>${escapeHtml(t.diameter || '')}</b></div>
         </div>
-        <div class="pt-2"><span class="text-slate-400 font-bold">Machining Description:</span> <p class="text-slate-700 dark:text-slate-200">${t.description || 'No specific description noted.'}</p></div>
+        <div class="pt-2"><span class="text-slate-400 font-bold">Machining Description:</span> <p class="text-slate-700 dark:text-slate-200">${escapeHtml(t.description || 'No specific description noted.')}</p></div>
       `;
       document.getElementById('modalViewTool').classList.remove('hidden');
     }
 
+    // FIXED: Duplicate tool - append "(Copy)" to sub_type, not diameter
     async function duplicateToolDirectly(id) {
       const t = toolsList.find(item => item.id === id);
       if (!t) return;
       const clonePayload = {
         category: t.category,
-        sub_type: t.sub_type || null,
-        diameter: `${t.diameter} (Copy)`,
+        sub_type: t.sub_type ? `${t.sub_type} (Copy)` : 'Copy',
+        diameter: t.diameter,
         description: t.description,
         stock: t.stock,
         location: t.location,
         is_deleted: false
       };
-      const { error } = await toolsClient.from('cnc_tool_bits').insert([clonePayload]);
+      const { error } = await supabaseClient.from('cnc_tool_bits').insert([clonePayload]);
       if (error) {
         alert("Failed to duplicate tool: " + error.message);
+        showToast("Failed to duplicate tool", true);
       } else {
         showToast("Tool duplicated successfully!");
         fetchToolsData();
@@ -1891,7 +2049,7 @@
       if (id) {
         const item = toolsList.find(t => t.id === id);
         if (item) {
-          title.innerText = `Edit Tool: ${item.diameter}`;
+          title.innerText = `Edit Tool: ${item.diameter || ''}`;
           document.getElementById('toolsFormId').value = item.id;
           document.getElementById('toolsFormCategory').value = normalizeToolCategory(item.category);
           document.getElementById('toolsFormSubType').value = item.sub_type || '';
@@ -1926,10 +2084,10 @@
 
       try {
         if (id) {
-          const { error } = await toolsClient.from('cnc_tool_bits').update(payload).eq('id', id);
+          const { error } = await supabaseClient.from('cnc_tool_bits').update(payload).eq('id', id);
           if (error) throw new Error(error.message);
         } else {
-          const { error } = await toolsClient.from('cnc_tool_bits').insert([payload]);
+          const { error } = await supabaseClient.from('cnc_tool_bits').insert([payload]);
           if (error) throw new Error(error.message);
         }
         closeToolsFormModal();
@@ -1937,20 +2095,27 @@
         fetchToolsData();
       } catch (error) {
         alert("Database Error: " + error.message);
+        showToast("Database Error: " + error.message, true);
       }
     }
 
     async function deleteTool(id) {
       if (!confirm('Move this CNC Tool to the Recovery Vault?')) return;
-      await toolsClient.from('cnc_tool_bits').update({ is_deleted: true }).eq('id', id);
+      await supabaseClient.from('cnc_tool_bits').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
       fetchToolsData();
     }
 
-    // --- RESTOCK NOTICES ---
+    // ========================================================================
+    // RESTOCK NOTICES
+    // ========================================================================
     function autoPopulateLowStock() {
+      if (!toolsLoaded) {
+        showToast('Tools data not loaded yet.', true);
+        return;
+      }
       const low = toolsList.filter(t => (parseInt(t.stock) || 0) < 2);
       if (low.length === 0) {
-        alert("No tools currently have stock lower than 2 units.");
+        showToast("No tools currently have stock lower than 2 units.");
         return;
       }
       toolsNoticeList = low.map(t => ({
@@ -1968,14 +2133,14 @@
       if (!container) return;
 
       if (toolsNoticeList.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 italic">No tools selected yet. Click "+ Load Low Stock".</p>`;
+        container.innerHTML = `<p class="text-xs text-slate-400 italic">No tools loaded in notice. Click "+ Load Low Stock".</p>`;
         return;
       }
 
       container.innerHTML = toolsNoticeList.map((t, idx) => `
         <div class="flex flex-wrap justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl text-xs">
           <div>
-            <b class="text-cyan-600 dark:text-cyan-400">${t.category} (${t.diameter})</b>
+            <b class="text-cyan-600 dark:text-cyan-400">${escapeHtml(t.category || '')} (${escapeHtml(t.diameter || '')})</b>
             <span class="text-slate-400 ml-2">Stock: <b class="text-rose-500">${t.stock}</b></span>
           </div>
           <div class="flex items-center gap-2 mt-2 sm:mt-0">
@@ -1987,7 +2152,9 @@
       `).join('');
     }
 
-    // --- RECOVERY BIN VAULT ---
+    // ========================================================================
+    // RECOVERY BIN VAULT
+    // ========================================================================
     function renderBinArchive() {
       const pBody = document.getElementById('trashProfilesTableBody');
       const tBody = document.getElementById('trashToolsTableBody');
@@ -2004,7 +2171,7 @@
         pBody.innerHTML = trashRecords.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted CNC profiles.</p>' :
           trashRecords.map(r => `
             <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs">
-              <span><b>${r.profile}</b> (${r.cycle_seconds}s)</span>
+              <span><b>${escapeHtml(r.profile || '')}</b> (${r.cycle_seconds || 0}s)</span>
               <div class="space-x-2">
                 <button onclick="restoreRecord(${r.id})" class="text-emerald-600 hover:underline font-bold">Restore</button>
                 <button onclick="hardDeleteRecord(${r.id})" class="text-rose-600 hover:underline font-bold">Purge</button>
@@ -2017,7 +2184,7 @@
         tBody.innerHTML = toolsTrash.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted tools.</p>' :
           toolsTrash.map(t => `
             <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs">
-              <span><b>${t.category}</b> — ${t.diameter}</span>
+              <span><b>${escapeHtml(t.category || '')}</b> — ${escapeHtml(t.diameter || '')}</span>
               <div class="space-x-2">
                 <button onclick="restoreTool(${t.id})" class="text-emerald-600 hover:underline font-bold">Restore</button>
                 <button onclick="hardDeleteTool(${t.id})" class="text-rose-600 hover:underline font-bold">Purge</button>
@@ -2030,7 +2197,7 @@
         sBody.innerHTML = trashShifts.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted shifts.</p>' :
           trashShifts.map(s => `
             <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs">
-              <span><b>${s.shift_date}</b> (${s.shift_type} - Team ${s.team})</span>
+              <span><b>${escapeHtml(s.shift_date || '')}</b> (${escapeHtml(s.shift_type || '')} - Team ${escapeHtml(s.team || '')})</span>
               <div class="space-x-2">
                 <button onclick="restoreShift(${s.id})" class="text-emerald-600 hover:underline font-bold">Restore</button>
                 <button onclick="hardDeleteShift(${s.id})" class="text-rose-600 hover:underline font-bold">Purge</button>
@@ -2041,30 +2208,30 @@
     }
 
     async function restoreRecord(id) {
-      await supabaseClient.from('cnc_cycle_times').update({ is_deleted: false }).eq('id', id);
+      await supabaseClient.from('cnc_cycle_times').update({ is_deleted: false, deleted_at: null }).eq('id', id);
       fetchAllData();
     }
     async function hardDeleteRecord(id) {
-      if (!confirm('Permanently purge this profile?')) return;
+      if (!confirm('Permanently purge this profile? This cannot be undone.')) return;
       await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
       fetchAllData();
     }
     async function restoreTool(id) {
-      await toolsClient.from('cnc_tool_bits').update({ is_deleted: false }).eq('id', id);
+      await supabaseClient.from('cnc_tool_bits').update({ is_deleted: false, deleted_at: null }).eq('id', id);
       fetchToolsData();
     }
     async function hardDeleteTool(id) {
-      if (!confirm('Permanently purge this tool?')) return;
-      await toolsClient.from('cnc_tool_bits').delete().eq('id', id);
+      if (!confirm('Permanently purge this tool? This cannot be undone.')) return;
+      await supabaseClient.from('cnc_tool_bits').delete().eq('id', id);
       fetchToolsData();
     }
     async function restoreShift(id) {
-      await supabaseClient.from('shifts').update({ is_deleted: false }).eq('id', id);
+      await supabaseClient.from('shifts').update({ is_deleted: false, deleted_at: null }).eq('id', id);
       await fetchOeeData();
       renderBinArchive();
     }
     async function hardDeleteShift(id) {
-      if (!confirm('Permanently purge this shift and its operational logs?')) return;
+      if (!confirm('Permanently purge this shift and its operational logs? This cannot be undone.')) return;
       await supabaseClient.from('production_records').delete().eq('shift_id', id);
       await supabaseClient.from('downtime_events').delete().eq('shift_id', id);
       await supabaseClient.from('shifts').delete().eq('id', id);
@@ -2072,13 +2239,12 @@
       renderBinArchive();
     }
 
-
-    // ================================================================
-    // CNC 5000 - COMPLETED APPLICATION FUNCTIONS
-    // ================================================================
-
+    // ========================================================================
+    // UTILITY FUNCTIONS
+    // ========================================================================
     function escapeHtml(value) {
-      return String(value ?? '')
+      if (value == null) return '';
+      return String(value)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -2125,7 +2291,7 @@
         return db.localeCompare(da);
       })[0];
       if (!latest) {
-        el.innerHTML = `<div class="text-center py-12 text-slate-400"><div class="text-3xl mb-2">📋</div><p class="font-bold">No shift records yet.</p><p class="text-xs mt-1">Use “Add / Edit Shift Record” to create the first production slip.</p></div>`;
+        el.innerHTML = `<div class="text-center py-12 text-slate-400"><div class="text-3xl mb-2">📋</div><p class="font-bold">No shift records yet.</p><p class="text-xs mt-1">Use "Add / Edit Shift Record" to create the first production slip.</p></div>`;
         return;
       }
       const r = calculateShiftOee(latest);
@@ -2242,7 +2408,7 @@
       return [...document.querySelectorAll('#profileCardsContainer .profile-card-row')].map(row => {
         const get = f => row.querySelector(`[data-field="${f}"]`);
         return {
-          profile_code: get('profile_code')?.value.trim().toUpperCase() || '',
+          profile_code: normalizeProfileCode(get('profile_code')?.value || ''),
           setup_min: parseFloat(get('setup_min')?.value) || 0,
           target: Math.max(0, parseInt(get('target')?.value, 10) || 0),
           produced: Math.max(0, parseInt(get('produced')?.value, 10) || 0),
@@ -2278,7 +2444,7 @@
         team: document.getElementById('logTeam').value,
         epf_no: document.getElementById('logEpf').value.trim() || null,
         operator_name: document.getElementById('logOperator').value.trim() || null,
-        planned_break_min: Math.max(0, parseInt(document.getElementById('logPlannedBreak').value, 10) || 90),
+        planned_break_min: Math.max(0, parseFloat(document.getElementById('logPlannedBreak').value) || 90),
         was_planned: document.getElementById('logWasPlanned').value === 'yes',
         other_dept_used: document.getElementById('logOtherDept').value === 'yes',
         other_dept_period: document.getElementById('logOtherDeptPeriod').value.trim() || null,
@@ -2301,12 +2467,12 @@
           shiftId = data.id;
         }
 
+        // FIXED: Use normalized profile code for matching
         const profilePayload = profileRows.map((p, i) => {
-          const searchCode = (p.profile_code || '').trim().toUpperCase();
-          const rec = records.find(r => (r.profile || '').trim().toUpperCase() === searchCode);
+          const rec = records.find(r => normalizeProfileCode(r.profile) === p.profile_code);
           return {
             shift_id: shiftId,
-            profile_code: searchCode,
+            profile_code: p.profile_code,
             setup_min: p.setup_min,
             target: p.target,
             produced: p.produced,
@@ -2380,8 +2546,8 @@
           <div><span class="text-slate-400 font-bold">Quality:</span> <b>${fmtPct(r.quality)}</b></div>
           <div><span class="text-slate-400 font-bold">Downtime:</span> <b>${r.downtimeMin} min</b></div>
         </div>
-        <div><h5 class="font-black uppercase text-[10px] text-slate-400 mb-2">Production</h5>${prods.length ? prods.map(p => `<div class="flex justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-700/40 mb-1"><span><b>${escapeHtml(p.profile_code)}</b></span><span>Prod ${p.produced} • Reject ${p.rejected}</span></div>`).join('') : '<p class="text-slate-400">No production rows.</p>'}</div>
-        <div><h5 class="font-black uppercase text-[10px] text-slate-400 mb-2">Downtime</h5>${dts.length ? dts.map(d => `<div class="flex justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-700/40 mb-1"><span>${escapeHtml(d.reason)}</span><span>${d.duration_min} min</span></div>`).join('') : '<p class="text-slate-400">No downtime events.</p>'}</div>`;
+        <div><h5 class="font-black uppercase text-[10px] text-slate-400 mb-2">Production</h5>${prods.length ? prods.map(p => `<div class="flex justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-700/40 mb-1"><span><b>${escapeHtml(p.profile_code || '')}</b></span><span>Prod ${p.produced} • Reject ${p.rejected}</span></div>`).join('') : '<p class="text-slate-400">No production rows.</p>'}</div>
+        <div><h5 class="font-black uppercase text-[10px] text-slate-400 mb-2">Downtime</h5>${dts.length ? dts.map(d => `<div class="flex justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-700/40 mb-1"><span>${escapeHtml(d.reason || '')}</span><span>${d.duration_min} min</span></div>`).join('') : '<p class="text-slate-400">No downtime events.</p>'}</div>`;
       document.getElementById('modalViewShift').classList.remove('hidden');
     }
 
@@ -2397,8 +2563,8 @@
     function populatePlanningDropdown() {
       const sel = document.getElementById('planProfileSelect');
       const list = document.getElementById('profileDataList');
-      if (sel) sel.innerHTML = '<option value="">-- Choose Profile --</option>' + records.map(r => `<option value="${escapeHtml(r.profile)}">${escapeHtml(r.profile)} — ${escapeHtml(r.description || '')}</option>`).join('');
-      if (list) list.innerHTML = records.map(r => `<option value="${escapeHtml(r.profile)}"></option>`).join('');
+      if (sel) sel.innerHTML = '<option value="">-- Choose Profile --</option>' + records.map(r => `<option value="${escapeHtml(r.profile || '')}">${escapeHtml(r.profile || '')} — ${escapeHtml(r.description || '')}</option>`).join('');
+      if (list) list.innerHTML = records.map(r => `<option value="${escapeHtml(r.profile || '')}"></option>`).join('');
     }
 
     function addProfileToPlanningCart() {
@@ -2406,7 +2572,7 @@
       const qty = Math.max(1, parseInt(document.getElementById('planBatchQty').value, 10) || 1);
       const handling = Math.max(0, parseInt(document.getElementById('planHandlingSec').value, 10) || 0);
       if (!profile) { showToast('Choose a target profile first.', true); return; }
-      const rec = records.find(r => r.profile === profile);
+      const rec = records.find(r => (r.profile || '') === profile);
       if (!rec) { showToast('Selected profile was not found.', true); return; }
       planningCart.push({ id: `${Date.now()}-${Math.random()}`, profile: rec.profile, description: rec.description, qty, handling, cycle_seconds: parseInt(rec.cycle_seconds,10)||0 });
       renderPlanningCart();
@@ -2422,7 +2588,7 @@
       if (!planningCart.length) {
         list.innerHTML = '<p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p>';
       } else {
-        list.innerHTML = planningCart.map((p,i) => `<div class="flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl"><div><b class="text-xs">${escapeHtml(p.profile)}</b><p class="text-[10px] text-slate-400">${escapeHtml(p.description || '')}</p></div><div class="flex items-center gap-3 text-xs"><span class="font-bold">${p.qty} pcs</span><span class="text-blue-600">${formatDuration((p.cycle_seconds+p.handling)*p.qty)}</span><button onclick="removePlanningItem(${i})" class="text-rose-500 font-black">×</button></div></div>`).join('');
+        list.innerHTML = planningCart.map((p,i) => `<div class="flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl"><div><b class="text-xs">${escapeHtml(p.profile || '')}</b><p class="text-[10px] text-slate-400">${escapeHtml(p.description || '')}</p></div><div class="flex items-center gap-3 text-xs"><span class="font-bold">${p.qty} pcs</span><span class="text-blue-600">${formatDuration((p.cycle_seconds+p.handling)*p.qty)}</span><button onclick="removePlanningItem(${i})" class="text-rose-500 font-black">×</button></div></div>`).join('');
       }
       const totalQty = planningCart.reduce((s,p)=>s+p.qty,0);
       const totalSec = planningCart.reduce((s,p)=>s+(p.cycle_seconds+p.handling)*p.qty,0);
@@ -2431,9 +2597,12 @@
       document.getElementById('calcShiftRequirement').innerText = (totalSec / (630*60)).toFixed(1);
     }
 
+    // ========================================================================
+    // EXPORT FUNCTIONS
+    // ========================================================================
     function exportToExcel() {
       if (!window.XLSX) { showToast('Excel library is unavailable.', true); return; }
-      const rows = records.map(r => ({ Profile:r.profile, Description:r.description||'', Length:r.length||'', Cycle_Seconds:r.cycle_seconds||0, Feed_Speeds:r.feed_speeds||'', Tooling:r.tooling||'' }));
+      const rows = records.map(r => ({ Profile: r.profile || '', Description: r.description||'', Length: r.length||'', Cycle_Seconds: r.cycle_seconds||0, Feed_Speeds: r.feed_speeds||'', Tooling: r.tooling||'' }));
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'CNC Profiles');
       XLSX.writeFile(wb, `CNC_5000_Profiles_${localTodayISO()}.xlsx`);
@@ -2441,7 +2610,7 @@
 
     function exportToolsToExcel() {
       if (!window.XLSX) { showToast('Excel library is unavailable.', true); return; }
-      const rows = toolsList.map(t => ({ Category:normalizeToolCategory(t.category), Sub_Type:t.sub_type||'', Diameter:t.diameter||'', Description:t.description||'', Stock:parseInt(t.stock)||0, Location:t.location||'' }));
+      const rows = toolsList.map(t => ({ Category: normalizeToolCategory(t.category), Sub_Type: t.sub_type||'', Diameter: t.diameter||'', Description: t.description||'', Stock: parseInt(t.stock)||0, Location: t.location||'' }));
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Tool Inventory');
       XLSX.writeFile(wb, `CNC_5000_Tools_${localTodayISO()}.xlsx`);
@@ -2453,7 +2622,7 @@
       const doc = new jsPDF();
       doc.setFontSize(16); doc.text('CNC 5000 - Engineering Profile Catalog', 14, 16);
       doc.setFontSize(9); doc.text(`Generated ${localTodayISO()}`, 14, 23);
-      doc.autoTable({ startY: 30, head:[['Profile','Description','Length','Cycle (s)','Feed','Tooling']], body:records.map(r=>[r.profile,r.description||'',r.length||'',r.cycle_seconds||0,r.feed_speeds||'',r.tooling||'']) });
+      doc.autoTable({ startY: 30, head:[['Profile','Description','Length','Cycle (s)','Feed','Tooling']], body:records.map(r=>[r.profile||'',r.description||'',r.length||'',r.cycle_seconds||0,r.feed_speeds||'',r.tooling||'']) });
       doc.save(`CNC_5000_Engineering_Catalog_${localTodayISO()}.pdf`);
     }
 
@@ -2473,7 +2642,7 @@
       const doc = new jsPDF();
       doc.setFontSize(16); doc.text('CNC 5000 - Production Traveler', 14, 16);
       doc.setFontSize(9); doc.text(`Generated ${localTodayISO()}`, 14, 23);
-      doc.autoTable({ startY:30, head:[['Profile','Description','Quantity','Cycle (s)','Handling (s)','Total Time']], body:planningCart.map(p=>[p.profile,p.description||'',p.qty,p.cycle_seconds,p.handling,formatDuration((p.cycle_seconds+p.handling)*p.qty)]) });
+      doc.autoTable({ startY:30, head:[['Profile','Description','Quantity','Cycle (s)','Handling (s)','Total Time']], body:planningCart.map(p=>[p.profile||'',p.description||'',p.qty,p.cycle_seconds,p.handling,formatDuration((p.cycle_seconds+p.handling)*p.qty)]) });
       doc.save(`CNC_5000_Traveler_${localTodayISO()}.pdf`);
     }
 
@@ -2532,7 +2701,9 @@
       doc.save(`CNC_5000_Restock_Notice_${date}.pdf`);
     }
 
-    // Initial form state and application bootstrap.
+    // ========================================================================
+    // APPLICATION BOOTSTRAP
+    // ========================================================================
     function bootstrapCnc5000() {
       try {
         loadRecipients();
@@ -2540,8 +2711,17 @@
         if (memoDate) memoDate.value = localTodayISO();
         resetShiftLogForm();
         populatePlanningDropdown();
-        fetchAllData().catch(e => showDbError('Profile/OEE load failed', e));
-        fetchToolsData().catch(e => showDbError('Tool inventory load failed', e));
+        
+        // Fetch data with proper error handling
+        fetchAllData().catch(e => {
+          console.error('Profile/OEE load failed:', e);
+          showToast('Failed to load profiles. Please refresh.', true);
+        });
+        
+        fetchToolsData().catch(e => {
+          console.error('Tool inventory load failed:', e);
+          showToast('Failed to load tools. Please refresh.', true);
+        });
       } catch (e) {
         console.error('Bootstrap error', e);
         showToast('Application initialization failed. Check browser console.', true);
@@ -2553,6 +2733,7 @@
     } else {
       bootstrapCnc5000();
     }
+
   </script>
 </body>
 </html>
