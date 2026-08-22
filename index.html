@@ -1439,10 +1439,10 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
               
               const profile = getVal('profile', 'code') || 'UNKNOWN';
               const desc = getVal('desc') || '';
-              const length = getVal('length', 'dim') || '';
+              const length = getVal('length', 'dim') || '-';
               const cycleRaw = getVal('sec', 'cycle', 'duration');
               const cycle = parseInt(cycleRaw, 10) || 0;
-              const feed = getVal('feed', 'speed') || '';
+              const feed = getVal('feed', 'speed') || '600';
               const tooling = getVal('tooling', 'tool') || 'Single tool';
               
               if (profile === 'UNKNOWN' && !desc) return null;
@@ -1477,41 +1477,91 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         const page = await pdf.getPage(pageNum);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map(item => item.str).join(' ');
-        fullText += pageText + " \n";
+        
+        // Reconstruct lines roughly by Y-coordinate
+        let lastY = null;
+        let text = '';
+        
+        for (let item of textContent.items) {
+           const y = item.transform[5];
+           if (lastY !== null && Math.abs(lastY - y) > 3) { // 3 points threshold for new line
+               text += '\n';
+           }
+           text += item.str + ' ';
+           lastY = y;
+        }
+        fullText += text + "\n";
       }
 
-      // Best-effort PDF extraction looking for AL/VB codes and subsequent seconds (e.g. 82s)
       const profiles = [];
-      const words = fullText.split(/\s+/);
+      const lines = fullText.split('\n');
       
-      for (let i = 0; i < words.length; i++) {
-        if ((words[i] === 'AL' || words[i] === 'VB') && /^\d+/.test(words[i+1])) {
-          const profileCode = `${words[i]} ${words[i+1]}`;
-          let cycleSec = 0;
-          
-          // Scan ahead up to 20 tokens to find something ending in 's' like '82s'
-          for (let j = i + 1; j < Math.min(i + 20, words.length); j++) {
-             if (/^\d+s$/.test(words[j])) {
-                cycleSec = parseInt(words[j].replace('s', ''), 10);
-                break;
-             }
-          }
-          
-          // Prevent exact duplication from the same parse loop
-          if (!profiles.find(p => p.profile === profileCode && p.cycle_seconds === cycleSec)) {
-              profiles.push({
-                profile: profileCode,
-                description: 'Imported from PDF',
-                length: '-',
-                cycle_seconds: cycleSec || 60, // fallback
-                feed_speeds: '600',
-                tooling: 'Single tool',
-                is_deleted: false,
-                record_date: todayISO()
-              });
-          }
-          i++; // skip next word as it's part of the profile code
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+        
+        // 1. Profile Code (e.g., AL 527, VB 70, ST 302, AL-684, PART 70127)
+        const profileMatch = line.match(/(AL|VB|ST|BR|PART)\s*-?\s*(\d+)/i);
+        if (!profileMatch) continue; // Skip lines without a recognizable profile code
+        
+        const profileCode = profileMatch[0].toUpperCase().replace('-', ' ');
+        
+        // 2. Length (e.g., 2437.4 mm)
+        const lengthMatch = line.match(/(\d+(?:\.\d+)?)\s*mm/i);
+        const length = lengthMatch ? lengthMatch[0] : '-';
+        
+        // 3. Cycle Time (Seconds) - Look for \d+s (like 82s, 147s, 4227s)
+        const secMatches = [...line.matchAll(/(\d+)s/gi)];
+        let cycleSec = 0;
+        if (secMatches.length > 0) {
+           // Usually the last 's' value in the cell is the total seconds
+           cycleSec = parseInt(secMatches[secMatches.length - 1][1], 10);
+        } else {
+           continue; // If no seconds found, probably not a valid data row
+        }
+        
+        // 4. Tooling
+        let tooling = 'Single tool';
+        if (line.match(/two tool/i)) tooling = 'Two Tools';
+        if (line.match(/three tool/i)) tooling = 'Three Tools';
+        
+        // 5. Feed Speeds
+        // Matches "600", "500, 400 350", "Feed 60", etc.
+        const feedMatch = line.match(/(?:Feed\s*)?(\d{2,3}(?:\s*[, ]\s*\d{2,3})*)/i);
+        let feed = '600';
+        if (feedMatch) {
+            feed = feedMatch[1] || feedMatch[0];
+        }
+
+        // 6. Description (Clean up the line to leave only the description)
+        let desc = line
+            .replace(profileMatch[0], '')
+            .replace(lengthMatch ? lengthMatch[0] : '', '')
+            .replace(/(?:\d+h\s*)?(?:\d+m\s*)?(?:\d+s)/gi, '') // remove times (1h 10m 27s 4227s)
+            .replace(/Single tool|Two tools|Three tools/ig, '') // remove tooling
+            .replace(/Rev\s*\d+/ig, '') // remove Rev 01
+            .replace(new RegExp(feedMatch ? feedMatch[0] : 'Feed', 'ig'), '') // remove feed
+            .replace(/^\d+\s*/, '') // remove leading row number
+            .replace(/\|/g, '') // remove pipe characters
+            .replace(/\s{2,}/g, ' ') // remove extra spaces
+            .trim();
+            
+        // Final cleanup for description
+        desc = desc.replace(/^[-,\s]+|[-,\s]+$/g, ''); // strip leading/trailing garbage
+        if (!desc || desc.length < 2) desc = 'Imported from PDF';
+
+        // Check for duplicates before pushing
+        if (cycleSec > 0 && !profiles.find(p => p.profile === profileCode && p.cycle_seconds === cycleSec)) {
+          profiles.push({
+            profile: profileCode,
+            description: desc,
+            length: length,
+            cycle_seconds: cycleSec,
+            feed_speeds: feed,
+            tooling: tooling,
+            is_deleted: false,
+            record_date: todayISO()
+          });
         }
       }
       return profiles;
