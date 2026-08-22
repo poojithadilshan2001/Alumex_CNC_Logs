@@ -175,9 +175,7 @@
 
   <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
-    <!-- ============================================================== -->
     <!-- SECTION 1: MASTER DASHBOARD -->
-    <!-- ============================================================== -->
     <section id="view-dashboard" class="space-y-6">
       
       <!-- Primary Metric Cards -->
@@ -219,18 +217,18 @@
         </div>
       </div>
 
-      <!-- 30-DAY MULTI-ANGLE PROFILE PRODUCTION INTELLIGENCE MODULE -->
+      <!-- 30-DAY PROFILE PRODUCTION MODULE -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
           <div>
             <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">30-DAY FACTORY RUNS INSIGHT</span>
             <h3 class="text-base font-black text-slate-900 dark:text-white mt-0.5">Profiles Produced in Last 30 Days</h3>
-            <p class="text-xs text-slate-400">Analyze production volume, shift occurrences, and reject ratios for all profiles.</p>
+            <p class="text-xs text-slate-400">Analyze production volume, shift occurrences, and reject ratios.</p>
           </div>
           <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded-2xl text-xs font-bold">
-            <button onclick="setProfile30Angle('quantity')" id="btnAngle-quantity" class="px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold">By Quantity (Pcs)</button>
-            <button onclick="setProfile30Angle('shifts')" id="btnAngle-shifts" class="px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold">By Shift Count</button>
-            <button onclick="setProfile30Angle('rejects')" id="btnAngle-rejects" class="px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold">By Scrap Rate (%)</button>
+            <button onclick="setProfile30Angle('quantity')" id="btnAngle-quantity" class="px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold">By Quantity</button>
+            <button onclick="setProfile30Angle('shifts')" id="btnAngle-shifts" class="px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold">By Shifts</button>
+            <button onclick="setProfile30Angle('rejects')" id="btnAngle-rejects" class="px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold">By Scrap %</button>
           </div>
         </div>
 
@@ -244,69 +242,67 @@
               <tr>
                 <th class="p-3">#</th>
                 <th class="p-3">Profile Code</th>
-                <th class="p-3 text-right">Produced (Pcs)</th>
-                <th class="p-3 text-right text-emerald-600">Good (Pcs)</th>
-                <th class="p-3 text-right text-rose-600">Scrap (Pcs)</th>
-                <th class="p-3 text-right">Shift Runs</th>
-                <th class="p-3 text-right">Avg Pcs / Shift</th>
-                <th class="p-3 text-right">Scrap Rate</th>
+                <th class="p-3 text-right">Produced</th>
+                <th class="p-3 text-right text-emerald-600">Good</th>
+                <th class="p-3 text-right text-rose-600">Scrap</th>
+                <th class="p-3 text-right">Shifts</th>
+                <th class="p-3 text-right">Avg/Shift</th>
+                <th class="p-3 text-right">Scrap %</th>
               </tr>
             </thead>
             <tbody id="profile30TableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium">
-              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading 30-day production history...</td></tr>
+              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading 30-day history...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- Charts Telemetry Matrix -->
+      <!-- Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Plant OEE Telemetry (%)</h3>
-            <span class="text-[10px] text-emerald-500 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">Historical Runs</span>
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Plant OEE %</h3>
+            <span class="text-[10px] text-emerald-500 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">History</span>
           </div>
           <div class="h-60"><canvas id="chartDashOee"></canvas></div>
         </div>
 
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Daily Progress (Good vs Rejects)</h3>
-            <span class="text-[10px] text-indigo-500 font-bold bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-full">Yield Trend</span>
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Daily Progress</h3>
+            <span class="text-[10px] text-indigo-500 font-bold bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-full">Yield</span>
           </div>
           <div class="h-60"><canvas id="chartDashProduction"></canvas></div>
         </div>
 
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Top CNC Cycle Times (Seconds)</h3>
-            <span class="text-[10px] text-blue-500 font-bold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Profile Speeds</span>
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Top Cycle Times</h3>
+            <span class="text-[10px] text-blue-500 font-bold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Speeds</span>
           </div>
           <div class="h-60"><canvas id="chartDashCycleTime"></canvas></div>
         </div>
 
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Tool Stock Distribution (4 Main Types)</h3>
-            <span class="text-[10px] text-cyan-500 font-bold bg-cyan-50 dark:bg-cyan-950/40 px-2 py-0.5 rounded-full">Physical Units</span>
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Tool Distribution</h3>
+            <span class="text-[10px] text-cyan-500 font-bold bg-cyan-50 dark:bg-cyan-950/40 px-2 py-0.5 rounded-full">Units</span>
           </div>
           <div class="h-60 flex items-center justify-center"><canvas id="chartDashTools"></canvas></div>
         </div>
       </div>
     </section>
 
-    <!-- ============================================================== -->
-    <!-- SECTION 2: CNC PROFILES DATABASE & ANALYTICS -->
-    <!-- ============================================================== -->
+    <!-- SECTION 2: CNC PROFILES DATABASE -->
     <section id="view-logs" class="hidden space-y-6">
       
-      <!-- Profile Performance Analytics Dashboard -->
+      <!-- Profile Analytics -->
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 border-b border-slate-200 dark:border-slate-700 pb-4">
            <div>
-             <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">PROFILE PERFORMANCE ENGINE</span>
+             <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">PROFILE PERFORMANCE</span>
              <h3 class="font-black text-lg text-slate-900 dark:text-white">Individual Yield Analytics</h3>
-             <p class="text-xs text-slate-500">Select a specific profile below to view its historical production yield and scrap data.</p>
+             <p class="text-xs text-slate-500">Select profile to view historical data.</p>
            </div>
            <select id="analyticsProfileSelect" onchange="renderProfileAnalytics()" class="w-full sm:w-auto bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2 text-sm font-bold outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
              <option value="">-- Loading Profiles --</option>
@@ -344,22 +340,22 @@
           </button>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">Excel (.xlsx)</button>
-          <button onclick="generateEngineeringReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">PDF Catalog</button>
+          <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">Excel</button>
+          <button onclick="generateEngineeringReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">PDF</button>
         </div>
       </div>
 
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
         <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div class="w-full md:w-80">
-            <input type="text" id="logSearchInput" oninput="applyFiltersAndRender()" placeholder="Search profile code, description..." class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="logSearchInput" oninput="applyFiltersAndRender()" placeholder="Search profile..." class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
           </div>
           <div class="flex items-center gap-2">
             <select id="filterSort" onchange="applyFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none">
-              <option value="profile_asc">Profile Code (A-Z)</option>
-              <option value="profile_desc">Profile Code (Z-A)</option>
-              <option value="cycle_asc">Cycle Time (Fastest)</option>
-              <option value="cycle_desc">Cycle Time (Slowest)</option>
+              <option value="profile_asc">Profile A-Z</option>
+              <option value="profile_desc">Profile Z-A</option>
+              <option value="cycle_asc">Fastest First</option>
+              <option value="cycle_desc">Slowest First</option>
             </select>
           </div>
         </div>
@@ -371,38 +367,36 @@
                 <th class="p-3.5">#</th>
                 <th class="p-3.5">Profile Code</th>
                 <th class="p-3.5">Description</th>
-                <th class="p-3.5">Length / Dim</th>
-                <th class="p-3.5">Cycle Time</th>
-                <th class="p-3.5">Feed Speed</th>
+                <th class="p-3.5">Length</th>
+                <th class="p-3.5">Cycle</th>
+                <th class="p-3.5">Feed</th>
                 <th class="p-3.5">Tooling</th>
                 <th class="p-3.5 text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="logsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs">
-              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading production records...</td></tr>
+              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- ============================================================== -->
-    <!-- SECTION 3: PRODUCTION PLANNING & SHIFTS -->
-    <!-- ============================================================== -->
+    <!-- SECTION 3: PRODUCTION PLANNING -->
     <section id="view-production" class="hidden space-y-6">
       <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 rounded-3xl shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
         <div>
           <h3 class="font-black text-lg">Facility Shift Schedule</h3>
-          <p class="text-xs text-blue-200 mt-1">CNC 5000 Milling Operations Hub</p>
+          <p class="text-xs text-blue-200 mt-1">CNC 5000 Milling Operations</p>
         </div>
-        <div class="grid grid-cols-2 gap-3 text-xs bg-black/20 p-3 rounded-xl border border-white/10 backdrop-blur-sm">
+        <div class="grid grid-cols-2 gap-3 text-xs bg-black/20 p-3 rounded-xl border border-white/10">
           <div>
             <p class="font-bold text-blue-300">DAY SHIFT</p>
-            <p class="text-[11px] text-white font-semibold">6:00 AM – 6:00 PM</p>
+            <p class="text-[11px] text-white">6:00 AM – 6:00 PM</p>
           </div>
           <div>
             <p class="font-bold text-blue-300">NIGHT SHIFT</p>
-            <p class="text-[11px] text-white font-semibold">6:00 PM – 6:00 AM</p>
+            <p class="text-[11px] text-white">6:00 PM – 6:00 AM</p>
           </div>
         </div>
       </div>
@@ -410,10 +404,9 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
           <div class="flex justify-between items-center">
-            <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider">Assemble Job Order</h3>
-            <button onclick="clearPlanningCart()" class="text-xs text-rose-500 hover:underline font-semibold">Clear All</button>
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase">Assemble Job Order</h3>
+            <button onclick="clearPlanningCart()" class="text-xs text-rose-500 hover:underline">Clear All</button>
           </div>
-
           <div class="space-y-3">
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Target Profile</label>
@@ -424,32 +417,27 @@
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Handling (Sec)</label>
-                <input type="number" id="planHandlingSec" value="30" min="0" max="600" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-medium outline-none">
+                <input type="number" id="planHandlingSec" value="30" min="0" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs outline-none">
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Batch Qty (Pcs)</label>
-                <input type="number" id="planBatchQty" value="50" min="1" max="100000" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-medium outline-none">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Batch Qty</label>
+                <input type="number" id="planBatchQty" value="50" min="1" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs outline-none">
               </div>
             </div>
-            <button onclick="addProfileToPlanningCart()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-sm">
-              + Add to Production Run
-            </button>
+            <button onclick="addProfileToPlanningCart()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition">+ Add to Queue</button>
           </div>
         </div>
 
         <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
           <div>
-            <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
-              <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider">Planned Assembly Queue</h3>
-              <button onclick="generateJobSheetPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
-                <span>📄</span> Export Traveler Sheet
-              </button>
+            <div class="flex justify-between items-center mb-3 gap-2">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase">Planned Assembly Queue</h3>
+              <button onclick="generateJobSheetPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">📄 Export</button>
             </div>
             <div id="planningCartList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
-              <p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p>
+              <p class="text-xs text-slate-400 italic">No profiles in queue.</p>
             </div>
           </div>
-
           <div class="mt-6 p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-4 text-center">
             <div>
               <p class="text-[11px] font-bold text-slate-400 uppercase">Total Parts</p>
@@ -457,81 +445,71 @@
             </div>
             <div>
               <p class="text-[11px] font-bold text-slate-400 uppercase">Total Time</p>
-              <p id="calcTheorTime" class="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">0h 0m</p>
+              <p id="calcTheorTime" class="text-xl font-black text-blue-600 mt-0.5">0h 0m</p>
             </div>
             <div>
-              <p class="text-[11px] font-bold text-slate-400 uppercase">Estimated Shifts</p>
-              <p id="calcShiftRequirement" class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">0.0</p>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Est. Shifts</p>
+              <p id="calcShiftRequirement" class="text-xl font-black text-emerald-600 mt-0.5">0.0</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ============================================================== -->
-    <!-- SECTION 3.5: PRODUCTION LOGS & OEE -->
-    <!-- ============================================================== -->
+    <!-- SECTION 4: OEE & SHIFTS -->
     <section id="view-oee" class="hidden space-y-6">
       
-      <!-- OEE Calculation Explanation Banner -->
+      <!-- OEE Banner -->
       <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-6 rounded-3xl shadow-sm space-y-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-white/10 pb-4">
           <div>
-            <span class="text-[10px] font-black uppercase text-blue-300 tracking-widest">CNC 5000 OPERATIONAL STANDARDS</span>
-            <h3 class="text-lg font-black mt-0.5">OEE Calculation Framework &amp; Shifts</h3>
+            <span class="text-[10px] font-black uppercase text-blue-300 tracking-widest">OEE FRAMEWORK</span>
+            <h3 class="text-lg font-black mt-0.5">OEE Calculation &amp; Shifts</h3>
           </div>
-          <span class="bg-blue-950/70 border border-blue-400/30 px-3 py-1 rounded-xl text-xs font-bold">12-Hour Operational Shift Base</span>
+          <span class="bg-blue-950/70 border border-blue-400/30 px-3 py-1 rounded-xl text-xs font-bold">12-Hour Shift Base</span>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm space-y-1">
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
             <span class="text-emerald-400 font-black uppercase text-[10px]">OEE Formula</span>
-            <p class="font-mono font-bold text-white text-sm">OEE = A × P × Q</p>
-            <p class="text-[11px] text-slate-300">Composite score evaluating uptime availability, speed performance, and defect-free quality.</p>
+            <p class="font-mono font-bold text-white text-sm mt-1">OEE = A × P × Q</p>
           </div>
-
-          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm space-y-1">
-            <span class="text-blue-300 font-black uppercase text-[10px]">Availability (A)</span>
-            <p class="font-mono font-bold text-white text-sm">Operating / Planned Min</p>
-            <p class="text-[11px] text-slate-300">Planned = 720m (12h) - 90m breaks = 630m. Operating = Planned - Total Downtime.</p>
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
+            <span class="text-blue-300 font-black uppercase text-[10px]">Availability</span>
+            <p class="font-mono text-white text-sm mt-1">Operating / Planned</p>
           </div>
-
-          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm space-y-1">
-            <span class="text-amber-300 font-black uppercase text-[10px]">Performance (P)</span>
-            <p class="font-mono font-bold text-white text-sm">Ideal Time / Operating Min</p>
-            <p class="text-[11px] text-slate-300">Ideal time = Σ (Parts Produced × Profile Cycle Time) / 60.</p>
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
+            <span class="text-amber-300 font-black uppercase text-[10px]">Performance</span>
+            <p class="font-mono text-white text-sm mt-1">Ideal / Operating</p>
           </div>
-
-          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm space-y-1">
-            <span class="text-purple-300 font-black uppercase text-[10px]">Quality (Q)</span>
-            <p class="font-mono font-bold text-white text-sm">Good Parts / Total Parts</p>
-            <p class="text-[11px] text-slate-300">Good parts = Total parts produced minus scrap and dimensional rejects.</p>
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
+            <span class="text-purple-300 font-black uppercase text-[10px]">Quality</span>
+            <p class="font-mono text-white text-sm mt-1">Good / Total</p>
           </div>
         </div>
       </div>
 
       <!-- OEE Sub-Navigation -->
       <div class="flex flex-wrap gap-1.5 bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm text-xs font-bold">
-        <button onclick="switchOeeSubTab('latest')" id="oeeSubBtn-latest" class="px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm">Latest Shift Log</button>
-        <button onclick="switchOeeSubTab('addlog')" id="oeeSubBtn-addlog" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Add / Edit Shift Record</button>
-        <button onclick="switchOeeSubTab('alllogs')" id="oeeSubBtn-alllogs" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">All Logs (Ordered)</button>
-        <button onclick="switchOeeSubTab('oeeanalysis')" id="oeeSubBtn-oeeanalysis" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">OEE Trend Analytics</button>
+        <button onclick="switchOeeSubTab('latest')" id="oeeSubBtn-latest" class="px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm">Latest Shift</button>
+        <button onclick="switchOeeSubTab('addlog')" id="oeeSubBtn-addlog" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Add/Edit</button>
+        <button onclick="switchOeeSubTab('alllogs')" id="oeeSubBtn-alllogs" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">All Logs</button>
+        <button onclick="switchOeeSubTab('oeeanalysis')" id="oeeSubBtn-oeeanalysis" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">OEE Analytics</button>
       </div>
 
-      <!-- Sub-Tab: Latest Logs -->
+      <!-- Latest Log -->
       <div id="oeeSub-latest" class="space-y-4">
         <div id="latestLogCard" class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6"></div>
       </div>
 
-      <!-- Sub-Tab: Add / Edit Form -->
+      <!-- Add/Edit Form -->
       <div id="oeeSub-addlog" class="hidden space-y-4">
         <form id="shiftLogForm" onsubmit="submitShiftLog(event)" class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
           <div class="flex justify-between items-center">
             <div>
-              <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">DAILY LOG BOOK ENTRY</span>
-              <h4 id="shiftLogFormTitle" class="font-black text-sm uppercase text-slate-900 dark:text-white">CNC Machine — Shift Production Slip</h4>
+              <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">SHIFT LOG</span>
+              <h4 id="shiftLogFormTitle" class="font-black text-sm uppercase text-slate-900 dark:text-white">CNC Machine — Shift Slip</h4>
             </div>
-            <span id="shiftLogEditingBadge" class="hidden text-[10px] font-bold uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 px-2.5 py-1 rounded-full">Editing existing shift</span>
+            <span id="shiftLogEditingBadge" class="hidden text-[10px] font-bold uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 px-2.5 py-1 rounded-full">Editing</span>
           </div>
           <input type="hidden" id="shiftFormId">
           
@@ -543,8 +521,8 @@
             <div>
               <label class="block font-bold mb-1">Shift *</label>
               <select id="logShiftType" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 font-bold outline-none">
-                <option value="Day">Day (6:00 AM – 6:00 PM)</option>
-                <option value="Night">Night (6:00 PM – 6:00 AM)</option>
+                <option value="Day">Day (6AM-6PM)</option>
+                <option value="Night">Night (6PM-6AM)</option>
               </select>
             </div>
             <div>
@@ -560,82 +538,77 @@
               <input type="text" id="logEpf" placeholder="e.g., 4521" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
             </div>
             <div>
-              <label class="block font-bold mb-1">Break Time (min)</label>
+              <label class="block font-bold mb-1">Break (min)</label>
               <input type="number" id="logPlannedBreak" value="90" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
             </div>
           </div>
 
-          <!-- Dynamic Profile Rows -->
-          <!-- DATALIST FOR PROFILE AUTOCOMPLETE -->
           <datalist id="profileDataList"></datalist>
           
           <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Profiles Produced in Shift</span>
-              <button type="button" onclick="addProfileCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Profile Slot</button>
+              <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Profiles Produced</span>
+              <button type="button" onclick="addProfileCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Profile</button>
             </div>
             <div id="profileCardsContainer" class="space-y-2"></div>
           </div>
 
-          <!-- Checklist Conditions from Slip -->
           <div class="border-t border-slate-200 dark:border-slate-700 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl">
             <div>
-              <label class="block font-bold mb-1">Was Machine Planned or Not?</label>
+              <label class="block font-bold mb-1">Planned?</label>
               <select id="logWasPlanned" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-semibold">
-                <option value="yes">Yes (Planned)</option>
-                <option value="no">No (Unplanned)</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
               </select>
             </div>
             <div>
-              <label class="block font-bold mb-1">Other Department Used Machine?</label>
+              <label class="block font-bold mb-1">Other Dept Used?</label>
               <select id="logOtherDept" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-semibold">
                 <option value="no">No</option>
                 <option value="yes">Yes</option>
               </select>
             </div>
             <div>
-              <label class="block font-bold mb-1">If yes, Time Period</label>
-              <input type="text" id="logOtherDeptPeriod" placeholder="e.g. 10:00 AM - 11:30 AM" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none">
+              <label class="block font-bold mb-1">If Yes, Time Period</label>
+              <input type="text" id="logOtherDeptPeriod" placeholder="e.g. 10:00-11:30" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none">
             </div>
           </div>
 
-          <!-- Downtime Events from Slip -->
           <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Down Time (min) &amp; Reason</span>
-              <button type="button" onclick="addDowntimeCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Downtime Event</button>
+              <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Down Time</span>
+              <button type="button" onclick="addDowntimeCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Downtime</button>
             </div>
             <div id="downtimeCardsContainer" class="space-y-2"></div>
           </div>
 
-          <!-- Other Notes & Verification Signs -->
           <div class="border-t border-slate-200 dark:border-slate-700 pt-3 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
             <div class="sm:col-span-4">
               <label class="block font-bold mb-1">Other Notes</label>
-              <input type="text" id="logOtherNotes" placeholder="Special occurrences, tooling observations, material changes..." class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+              <input type="text" id="logOtherNotes" placeholder="Special occurrences..." class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
             </div>
             <div class="sm:col-span-2">
               <label class="block font-bold mb-1">Operator Name</label>
               <input type="text" id="logOperator" placeholder="Operator Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
             </div>
             <div>
-              <label class="block font-bold mb-1">Supervisor Sign</label>
-              <input type="text" id="logSupervisorSign" placeholder="e.g., U.N. Kavinda" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+              <label class="block font-bold mb-1">Supervisor</label>
+              <input type="text" id="logSupervisorSign" placeholder="Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
             </div>
             <div>
-              <label class="block font-bold mb-1">Quality Sign</label>
-              <input type="text" id="logQualitySign" placeholder="QA Officer Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+              <label class="block font-bold mb-1">Quality</label>
+              <input type="text" id="logQualitySign" placeholder="QA Officer" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
             </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
             <button type="button" onclick="resetShiftLogForm()" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl text-xs font-bold">Clear</button>
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-sm">Save Shift Record</button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-sm">Save Shift</button>
           </div>
         </form>
       </div>
 
-      <!-- Sub-Tab: All Logs (Ordered Table with Actions) -->
+      <!-- All Logs -->
       <div id="oeeSub-alllogs" class="hidden space-y-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
           <div class="overflow-x-auto">
@@ -645,74 +618,68 @@
                   <th class="p-3.5">Date</th>
                   <th class="p-3.5">Shift</th>
                   <th class="p-3.5">Team</th>
-                  <th class="p-3.5">EPF</th>
                   <th class="p-3.5 text-right">Produced</th>
                   <th class="p-3.5 text-right">Good</th>
                   <th class="p-3.5 text-right">Reject</th>
-                  <th class="p-3.5 text-right">Downtime</th>
+                  <th class="p-3.5 text-right">Down</th>
                   <th class="p-3.5 text-right">OEE</th>
                   <th class="p-3.5 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody id="shiftsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
-                <tr><td colspan="10" class="p-6 text-center text-slate-400">Loading shift logs...</td></tr>
+                <tr><td colspan="9" class="p-6 text-center text-slate-400">Loading...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- Sub-Tab: OEE Analysis -->
+      <!-- OEE Analysis -->
       <div id="oeeSub-oeeanalysis" class="hidden space-y-4">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-          <h4 class="font-bold text-xs uppercase">Overall Production Telemetry (A / P / Q / OEE by Shift)</h4>
+          <h4 class="font-bold text-xs uppercase">OEE Telemetry (A / P / Q / OEE)</h4>
           <div class="h-72"><canvas id="chartOeeTelemetryFull"></canvas></div>
         </div>
       </div>
     </section>
 
-    <!-- ============================================================== -->
-    <!-- SECTION 5: TOOLS INVENTORY (4 CORE CATEGORIES & FULL CRUD) -->
-    <!-- ============================================================== -->
+    <!-- SECTION 5: TOOLS INVENTORY -->
     <section id="view-tools" class="hidden space-y-6">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <div>
           <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">CNC Tools Inventory</h3>
-          <p class="text-[11px] text-slate-400">4 Main Operational Categories: Milling, Drilling, Tapping &amp; Chamfering</p>
+          <p class="text-[11px] text-slate-400">4 Main Categories: Milling, Drilling, Tapping, Chamfering</p>
         </div>
         <button onclick="openToolsFormModal()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2.5 rounded-2xl text-xs font-black transition flex items-center gap-1.5 shadow-md shadow-cyan-600/20">
           <span>+</span> Add New Tool
         </button>
       </div>
 
-      <!-- 4 Category Tiles -->
+      <!-- Category Tiles -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div onclick="toolsFilterByCategory('Milling')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
           <span class="text-2xl">🌀</span>
-          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Milling Bits</p>
-          <p id="catCount-Milling" class="text-sm font-black text-slate-700 dark:text-slate-200 font-mono mt-0.5">0 pcs</p>
-          <span class="text-[10px] text-slate-400 block mt-1">Flat &amp; Ball Nose</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Milling</p>
+          <p id="catCount-Milling" class="text-sm font-black text-slate-700 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Flat & Ball Nose</span>
         </div>
-
         <div onclick="toolsFilterByCategory('Drilling')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
           <span class="text-2xl">🔩</span>
-          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Drilling Bits</p>
-          <p id="catCount-Drilling" class="text-sm font-black text-slate-700 dark:text-slate-200 font-mono mt-0.5">0 pcs</p>
-          <span class="text-[10px] text-slate-400 block mt-1">Through &amp; Blind Holes</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Drilling</p>
+          <p id="catCount-Drilling" class="text-sm font-black text-slate-700 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Through & Blind</span>
         </div>
-
         <div onclick="toolsFilterByCategory('Tapping')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
           <span class="text-2xl">📐</span>
-          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Tapping Bits</p>
-          <p id="catCount-Tapping" class="text-sm font-black text-slate-700 dark:text-slate-200 font-mono mt-0.5">0 pcs</p>
-          <span class="text-[10px] text-slate-400 block mt-1">Threading &amp; Helical</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Tapping</p>
+          <p id="catCount-Tapping" class="text-sm font-black text-slate-700 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Threading</span>
         </div>
-
         <div onclick="toolsFilterByCategory('Chamfer')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
           <span class="text-2xl">✂</span>
-          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Chamfer Tools</p>
-          <p id="catCount-Chamfer" class="text-sm font-black text-slate-700 dark:text-slate-200 font-mono mt-0.5">0 pcs</p>
-          <span class="text-[10px] text-slate-400 block mt-1">Edge Deburring</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Chamfer</p>
+          <p id="catCount-Chamfer" class="text-sm font-black text-slate-700 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Deburring</span>
         </div>
       </div>
 
@@ -720,21 +687,20 @@
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
         <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap items-center gap-2">
-            <input type="text" id="toolSearchInput" oninput="applyToolsFiltersAndRender()" placeholder="Search diameter, sub-type, rack..." class="w-64 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-medium outline-none">
+            <input type="text" id="toolSearchInput" oninput="applyToolsFiltersAndRender()" placeholder="Search diameter, sub-type..." class="w-64 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs outline-none">
             <select id="filterCategorySelect" onchange="applyToolsFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-bold outline-none">
-              <option value="ALL">All 4 Categories</option>
-              <option value="Milling">Milling (Flat &amp; Ball Nose)</option>
+              <option value="ALL">All Categories</option>
+              <option value="Milling">Milling</option>
               <option value="Drilling">Drilling</option>
               <option value="Tapping">Tapping</option>
               <option value="Chamfer">Chamfering</option>
             </select>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="exportToolsToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">Export Excel</button>
-            <button onclick="generateToolsInventoryPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">PDF Catalog</button>
+            <button onclick="exportToolsToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">Excel</button>
+            <button onclick="generateToolsInventoryPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">PDF</button>
           </div>
         </div>
-
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-bold uppercase border-b border-slate-200 dark:border-slate-700">
@@ -750,29 +716,25 @@
               </tr>
             </thead>
             <tbody id="inventoryTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
-              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading tools from database...</td></tr>
+              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading tools...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- ============================================================== -->
     <!-- SECTION 6: RESTOCK NOTICE -->
-    <!-- ============================================================== -->
     <section id="view-toolsreq" class="hidden space-y-6">
       <div class="bg-slate-900 border border-slate-800 text-white p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl">
         <div>
-          <span class="text-[10px] font-black uppercase text-cyan-400 tracking-widest">OFFICIAL MEMORANDUM</span>
-          <h3 class="text-lg font-black mt-0.5">CNC Machine Tools Restocking Notice</h3>
-          <p class="text-xs text-slate-400 mt-1">Formal notice addressed to supervisor(s) for tools below safe operating levels (&lt; 2 pcs)</p>
+          <span class="text-[10px] font-black uppercase text-cyan-400 tracking-widest">MEMORANDUM</span>
+          <h3 class="text-lg font-black mt-0.5">CNC Tool Restocking Notice</h3>
+          <p class="text-xs text-slate-400 mt-1">For tools below safe operating levels (&lt; 2 pcs)</p>
         </div>
       </div>
 
-      <!-- DYNAMIC CONFIGURATION BLOCK -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-        <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">Document Details & Routing</h4>
-        
+        <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">Document Details</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-4">
             <div>
@@ -780,21 +742,17 @@
               <input type="date" id="memoDate" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Prepared By (Sender)</label>
-              <input type="text" id="memoSender" value="Poojitha Dilshan" placeholder="Your Name" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none">
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Prepared By</label>
+              <input type="text" id="memoSender" value="Poojitha Dilshan" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none">
             </div>
           </div>
-
-          <!-- Dynamic Recipients Manager -->
-          <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col h-full">
-            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Address To (Select Recipients)</label>
-            <div id="recipientsList" class="flex-grow space-y-2 overflow-y-auto max-h-32 mb-3 pr-1">
-               <!-- Checkboxes inject here -->
-            </div>
+          <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Address To</label>
+            <div id="recipientsList" class="flex-grow space-y-2 overflow-y-auto max-h-32 mb-3 pr-1"></div>
             <div class="flex gap-2 mt-auto pt-3 border-t border-slate-200 dark:border-slate-700">
-               <input type="text" id="newRecipName" placeholder="Name" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-1.5 text-xs outline-none">
-               <input type="text" id="newRecipRole" placeholder="Role/Title" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-1.5 text-xs outline-none">
-               <button type="button" onclick="addNewRecipient()" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">Add</button>
+               <input type="text" id="newRecipName" placeholder="Name" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 text-xs outline-none">
+               <input type="text" id="newRecipRole" placeholder="Role" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 text-xs outline-none">
+               <button type="button" onclick="addNewRecipient()" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold">Add</button>
             </div>
           </div>
         </div>
@@ -802,11 +760,11 @@
 
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <div class="flex justify-between items-center">
-          <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Selected Tools for Notice</h4>
-          <button onclick="autoPopulateLowStock()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ Load Low Stock (&lt;2)</button>
+          <h4 class="text-xs font-black uppercase text-slate-900 dark:text-white">Selected Tools</h4>
+          <button onclick="autoPopulateLowStock()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ Load Low Stock</button>
         </div>
         <div id="requisitionItemsContainer" class="space-y-2 max-h-64 overflow-y-auto pr-1">
-          <p class="text-xs text-slate-400 italic">No tools selected yet. Click "+ Load Low Stock".</p>
+          <p class="text-xs text-slate-400 italic">No tools selected. Click "+ Load Low Stock".</p>
         </div>
         <div class="pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-end">
           <button onclick="generateFormalSupervisorLetterPDF()" class="bg-rose-600 hover:bg-rose-700 text-white font-black px-6 py-2.5 rounded-xl text-xs transition shadow-lg shadow-rose-600/20">Export PDF Letter</button>
@@ -814,38 +772,31 @@
       </div>
     </section>
 
-    <!-- ============================================================== -->
-    <!-- SECTION 7: REPORTS & AUDITS -->
-    <!-- ============================================================== -->
+    <!-- SECTION 7: REPORTS -->
     <section id="view-reports" class="hidden space-y-6">
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
-            <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">EXECUTIVE AUDITING ENGINE</span>
-            <h3 class="text-lg font-black text-slate-900 dark:text-white mt-0.5">CNC 5000 Plant Intelligence Reports</h3>
+            <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">EXECUTIVE AUDITING</span>
+            <h3 class="text-lg font-black text-slate-900 dark:text-white mt-0.5">Plant Intelligence Reports</h3>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="exportReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-sm">Export PDF Report</button>
-            <button onclick="exportReportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-sm">Export Multi-Sheet Excel</button>
+            <button onclick="exportReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-sm">PDF</button>
+            <button onclick="exportReportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-sm">Excel</button>
           </div>
         </div>
-        <div id="reportPreviewCard" class="space-y-6 pt-2">
-          <!-- Rich Web Analytics Rendered Here -->
-        </div>
+        <div id="reportPreviewCard" class="space-y-6 pt-2"></div>
       </div>
     </section>
 
-    <!-- ============================================================== -->
-    <!-- SECTION 8: RECYCLE & DISPOSAL BIN ARCHIVE -->
-    <!-- ============================================================== -->
+    <!-- SECTION 8: RECOVERY BIN -->
     <section id="view-trash" class="hidden space-y-6">
       <div class="bg-gradient-to-r from-amber-600/90 to-rose-700/90 text-white p-5 rounded-3xl shadow-sm flex justify-between items-center">
         <div>
-          <span class="text-[10px] font-black uppercase tracking-widest text-amber-200">CENTRAL RECOVERY VAULT</span>
-          <h3 class="text-lg font-black mt-0.5">Recycle &amp; Disposal Bin Archive</h3>
+          <span class="text-[10px] font-black uppercase tracking-widest text-amber-200">RECOVERY VAULT</span>
+          <h3 class="text-lg font-black mt-0.5">Recycle & Disposal Bin</h3>
         </div>
       </div>
-
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 space-y-4">
         <div>
           <h4 class="text-xs font-black uppercase text-slate-500 mb-2">CNC Profiles</h4>
@@ -864,11 +815,9 @@
 
   </main>
 
-  <!-- ============================================================== -->
-  <!-- MODALS (VIEW, ADD, EDIT) -->
-  <!-- ============================================================== -->
+  <!-- MODALS -->
 
-  <!-- Modal: Profile Add/Edit -->
+  <!-- Profile Add/Edit Modal -->
   <div id="modalForm" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
@@ -882,39 +831,39 @@
           <input type="text" id="formProfile" required placeholder="e.g., AL 684" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
         </div>
         <div>
-          <label class="block font-bold mb-1">Description / Feature</label>
-          <input type="text" id="formDescription" placeholder="e.g., Side milling & slotting" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+          <label class="block font-bold mb-1">Description</label>
+          <input type="text" id="formDescription" placeholder="e.g., Side milling" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
         </div>
         <div>
-          <label class="block font-bold mb-1">Length / Dimensions</label>
+          <label class="block font-bold mb-1">Length</label>
           <input type="text" id="formLength" placeholder="e.g., 2437.4 mm" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
         </div>
         <div>
           <label class="block font-bold mb-1">Cycle Time (Seconds) *</label>
-          <input type="number" id="formCycleSeconds" min="1" max="7200" required placeholder="e.g., 93" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-mono font-bold">
+          <input type="number" id="formCycleSeconds" min="1" required placeholder="e.g., 93" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-mono font-bold">
         </div>
         <div>
-          <label class="block font-bold mb-1">Feed Speed (mm/min)</label>
+          <label class="block font-bold mb-1">Feed Speed</label>
           <input type="text" id="formFeedSpeeds" placeholder="e.g., Feed 600" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
         </div>
         <div>
-          <label class="block font-bold mb-1">Tooling Configuration</label>
-          <input type="text" id="formTooling" placeholder="e.g., Single tool / Two tools" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+          <label class="block font-bold mb-1">Tooling</label>
+          <input type="text" id="formTooling" placeholder="e.g., 10mm Flat End Mill" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
         </div>
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="closeFormModal()" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Cancel</button>
-          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold">Save Recipe</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold">Save</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal: Profile Inspector -->
+  <!-- Profile Inspector Modal -->
   <div id="modalViewProfile" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
       <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
         <div>
-          <span class="text-[10px] font-black uppercase text-blue-600">PROFILE RECIPE INSPECTOR</span>
+          <span class="text-[10px] font-black uppercase text-blue-600">PROFILE INSPECTOR</span>
           <h3 id="viewProfTitle" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">-</h3>
         </div>
         <button onclick="document.getElementById('modalViewProfile').classList.add('hidden')" class="text-slate-400 text-xl font-bold">×</button>
@@ -926,12 +875,12 @@
     </div>
   </div>
 
-  <!-- Modal: Tool Inspector -->
+  <!-- Tool Inspector Modal -->
   <div id="modalViewTool" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
       <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
         <div>
-          <span class="text-[10px] font-black uppercase text-cyan-600">TOOL SPECIFICATION INSPECTOR</span>
+          <span class="text-[10px] font-black uppercase text-cyan-600">TOOL INSPECTOR</span>
           <h3 id="viewToolTitle" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">-</h3>
         </div>
         <button onclick="document.getElementById('modalViewTool').classList.add('hidden')" class="text-slate-400 text-xl font-bold">×</button>
@@ -942,13 +891,13 @@
       </div>
     </div>
   </div>
-  
-  <!-- Modal: Shift Inspector -->
+
+  <!-- Shift Inspector Modal -->
   <div id="modalViewShift" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-4">
       <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
         <div>
-          <span class="text-[10px] font-black uppercase text-indigo-600">SHIFT PERFORMANCE INSPECTOR</span>
+          <span class="text-[10px] font-black uppercase text-indigo-600">SHIFT INSPECTOR</span>
           <h3 id="viewShiftTitle" class="text-lg font-black text-slate-900 dark:text-white mt-0.5">-</h3>
         </div>
         <button onclick="document.getElementById('modalViewShift').classList.add('hidden')" class="text-slate-400 text-xl font-bold">×</button>
@@ -960,7 +909,7 @@
     </div>
   </div>
 
-  <!-- Modal: Tool Add / Edit -->
+  <!-- Tool Add/Edit Modal -->
   <div id="toolsModalForm" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
@@ -972,7 +921,7 @@
         <div>
           <label class="block font-bold mb-1">Category *</label>
           <select id="toolsFormCategory" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 font-bold outline-none">
-            <option value="Milling">Milling (Flat &amp; Ball Nose)</option>
+            <option value="Milling">Milling (Flat & Ball Nose)</option>
             <option value="Drilling">Drilling</option>
             <option value="Tapping">Tapping</option>
             <option value="Chamfer">Chamfering</option>
@@ -995,7 +944,7 @@
           <input type="number" id="toolsFormStock" min="0" required placeholder="e.g., 5" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold text-cyan-600">
         </div>
         <div>
-          <label class="block font-bold mb-1">Storage Location / Rack</label>
+          <label class="block font-bold mb-1">Location / Rack</label>
           <input type="text" id="toolsFormLocation" placeholder="e.g., Rack A-02" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
         </div>
         <div class="flex justify-end gap-2 pt-2">
@@ -1008,14 +957,18 @@
 
   <script>
     // ========================================================================
-    // DATABASE CONNECTIONS - SINGLE SUPABASE PROJECT
+    // ⚠️⚠️⚠️  IMPORTANT: UPDATE THESE CREDENTIALS  ⚠️⚠️⚠️
     // ========================================================================
-    // IMPORTANT: All tables (cnc_cycle_times, shifts, production_records,
-    // downtime_events, cnc_tool_bits) must be in the SAME Supabase project.
-    // Run the SQL script against this project URL.
+    // Replace with YOUR actual Supabase project credentials
+    // Find these in: Supabase Dashboard → Settings → API
     // ========================================================================
-    const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ocmFvYWRmZGVnamZ3Y2tycWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMzUwMDAsImV4cCI6MjA2NDcxMTAwMH0.s8wnE3RfwJRQxO2NyPdWTg_YBssVkbMKvZ8r9oNkLgY";
+    
+    // Your Supabase Project URL (e.g., https://xxxxx.supabase.co)
+    const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co";
+    
+    // Your Supabase Anon/Public Key
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
+    
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ========================================================================
@@ -1034,28 +987,23 @@
     let downtimeEvents = [];
     let planningCart = [];
 
-    // Memo recipients with updated localStorage key
     let memoRecipients = [
         { id: 1, name: 'Mr. U.N. Kavinda', role: 'Production & Operations Supervisor', selected: true }
     ];
 
-    // Data loading flags - FIXED: track initial load separately
     let profilesLoaded = false;
     let toolsLoaded = false;
-    let initialDashboardRendered = false;
 
-    // Chart instances
     let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null;
     let chartProfile30Inst = null;
     let chartOeeTelemetryInst = null;
     let chartProfileSpecificInst = null;
     
-    // UI state
     let profile30CurrentAngle = 'quantity';
     let cardCounter = 0, dtCounter = 0;
 
     // ========================================================================
-    // UTILITY FUNCTIONS
+    // UTILITIES
     // ========================================================================
     const fmtPct = v => (v === null || v === undefined || isNaN(v) || !isFinite(v)) ? '-' : (v * 100).toFixed(1) + '%';
     const fmtDateISO = d => (!d ? '' : ((d instanceof Date) ? d : new Date(d)).toISOString().slice(0, 10));
@@ -1077,22 +1025,39 @@
       return 'Milling';
     }
 
-    // FIXED: Normalize profile code for consistent matching
     function normalizeProfileCode(code) {
       return (code || '').trim().toUpperCase();
     }
 
+    function escapeHtml(value) {
+      if (value == null) return '';
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function localTodayISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function safeDestroyChart(chartInstance) {
+      if (chartInstance && typeof chartInstance.destroy === 'function') {
+        try { chartInstance.destroy(); } catch (e) {}
+      }
+      return null;
+    }
+
     // ========================================================================
-    // RECIPIENTS DATA MANAGEMENT
+    // RECIPIENTS
     // ========================================================================
     function loadRecipients() {
         const saved = localStorage.getItem('cnc5000_memo_recipients_v2');
         if (saved) {
-            try {
-                memoRecipients = JSON.parse(saved);
-            } catch(e) {
-                console.warn('Failed to parse recipients:', e);
-            }
+            try { memoRecipients = JSON.parse(saved); } catch(e) {}
         }
         renderRecipients();
     }
@@ -1104,12 +1069,10 @@
     function renderRecipients() {
         const container = document.getElementById('recipientsList');
         if (!container) return;
-        
         if (memoRecipients.length === 0) {
-            container.innerHTML = `<p class="text-xs text-slate-400 italic">No recipients added.</p>`;
+            container.innerHTML = `<p class="text-xs text-slate-400 italic">No recipients.</p>`;
             return;
         }
-
         container.innerHTML = memoRecipients.map(r => `
             <div class="flex items-center justify-between bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
                 <label class="flex items-center gap-2 cursor-pointer w-full">
@@ -1119,17 +1082,14 @@
                         <span class="text-[10px] text-slate-500">${escapeHtml(r.role)}</span>
                     </div>
                 </label>
-                <button onclick="removeRecipient(${r.id})" class="text-rose-500 hover:text-rose-700 font-bold px-2 text-sm">&times;</button>
+                <button onclick="removeRecipient(${r.id})" class="text-rose-500 hover:text-rose-700 font-bold px-2 text-sm">×</button>
             </div>
         `).join('');
     }
 
     function toggleRecipient(id) {
         const r = memoRecipients.find(x => x.id === id);
-        if (r) {
-            r.selected = !r.selected;
-            saveRecipients();
-        }
+        if (r) { r.selected = !r.selected; saveRecipients(); }
     }
 
     function removeRecipient(id) {
@@ -1139,37 +1099,27 @@
     }
 
     function addNewRecipient() {
-        const nameInp = document.getElementById('newRecipName');
-        const roleInp = document.getElementById('newRecipRole');
-        const name = nameInp.value.trim();
-        const role = roleInp.value.trim();
-        
-        if (!name || !role) {
-            alert("Please enter both Name and Role/Title.");
-            return;
-        }
-
+        const name = document.getElementById('newRecipName').value.trim();
+        const role = document.getElementById('newRecipRole').value.trim();
+        if (!name || !role) { alert("Enter both Name and Role."); return; }
         const newId = memoRecipients.length > 0 ? Math.max(...memoRecipients.map(r => r.id)) + 1 : 1;
         memoRecipients.push({ id: newId, name, role, selected: true });
         saveRecipients();
         renderRecipients();
-        
-        nameInp.value = '';
-        roleInp.value = '';
+        document.getElementById('newRecipName').value = '';
+        document.getElementById('newRecipRole').value = '';
     }
 
     // ========================================================================
-    // OEE CALCULATION ENGINE
+    // OEE CALCULATION
     // ========================================================================
     function calculateShiftOee(shift) {
       const prods = productionRecords.filter(p => p.shift_id === shift.id);
       const dts = downtimeEvents.filter(d => d.shift_id === shift.id);
-
       const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
       const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
       const good = Math.max(0, produced - rejected);
       const downtimeMin = dts.reduce((sum, d) => sum + (parseFloat(d.duration_min) || 0), 0);
-
       const plannedBreak = parseFloat(shift.planned_break_min) || 90;
       const plannedMin = Math.max(0, 720 - plannedBreak);
       const operatingMin = Math.max(0, plannedMin - downtimeMin);
@@ -1178,8 +1128,6 @@
       prods.forEach(p => {
         const code = normalizeProfileCode(p.profile_code);
         let cycleSec = p.ideal_cycle_seconds;
-        
-        // FIXED: Check if cycle seconds is valid, otherwise look up from records
         if (cycleSec == null || cycleSec <= 0 || isNaN(cycleSec)) {
             const profileRec = records.find(r => normalizeProfileCode(r.profile) === code);
             cycleSec = profileRec ? (parseInt(profileRec.cycle_seconds, 10) || 0) : 0;
@@ -1187,55 +1135,48 @@
         idealMin += ((parseInt(p.produced) || 0) * (parseInt(cycleSec, 10) || 0)) / 60;
       });
 
-      // FIXED: Handle zero operating time gracefully
       const availability = plannedMin > 0 ? Math.max(0, Math.min(operatingMin / plannedMin, 1)) : 0;
       const performance = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0;
       const quality = produced > 0 ? Math.max(0, Math.min(good / produced, 1)) : 0;
       const oee = availability * performance * quality;
 
-      return {
-        produced, rejected, good, downtimeMin,
-        plannedMin, operatingMin, idealMin,
-        availability, performance, quality, oee
-      };
+      return { produced, rejected, good, downtimeMin, plannedMin, operatingMin, idealMin, availability, performance, quality, oee };
     }
 
     // ========================================================================
-    // NOTIFICATION SYSTEM
+    // NOTIFICATIONS
     // ========================================================================
     function showToast(msg, isError = false) {
       const toast = document.getElementById('toastNotification');
-      const text = document.getElementById('toastMessage');
-      const icon = document.getElementById('toastIcon');
-      text.innerText = msg;
-      icon.innerText = isError ? "⚠" : "✓";
+      document.getElementById('toastMessage').innerText = msg;
+      document.getElementById('toastIcon').innerText = isError ? "⚠" : "✓";
       toast.className = isError 
         ? "fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-0 opacity-100 bg-rose-600 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-rose-500"
         : "fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-0 opacity-100 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-slate-700";
       setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3200);
     }
 
+    function showDbError(context, error) {
+      const msg = error?.message || String(error || 'Unknown error');
+      console.error(context, error);
+      showToast(`${context}: ${msg}`, true);
+    }
+
     // ========================================================================
-    // TAB SWITCHING SYSTEM
+    // TABS
     // ========================================================================
     function switchTab(tabId) {
       ['dashboard', 'logs', 'oee', 'production', 'tools', 'toolsreq', 'reports', 'trash'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const navTile = document.getElementById(`navTile-${t}`);
         if (view) view.classList.add('hidden');
-        if (navTile) {
-          navTile.className = "p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400";
-        }
+        if (navTile) navTile.className = "p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400";
       });
-
       const targetView = document.getElementById(`view-${tabId}`);
       const targetTile = document.getElementById(`navTile-${tabId}`);
       if (targetView) targetView.classList.remove('hidden');
-      if (targetTile) {
-        targetTile.className = "p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-blue-600 border-blue-600 text-white shadow-md";
-      }
+      if (targetTile) targetTile.className = "p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-blue-600 border-blue-600 text-white shadow-md";
 
-      // Trigger renders when switching to tabs
       if (tabId === 'dashboard') renderMasterDashboard();
       if (tabId === 'logs') { applyFiltersAndRender(); populateProfileAnalyticsDropdown(); }
       if (tabId === 'oee') { renderShiftsTable(); renderLatestShiftCard(); renderOeeTelemetryChart(); }
@@ -1255,41 +1196,40 @@
     }
 
     (function initTheme() {
-      const saved = localStorage.getItem('theme');
-      if (saved === 'dark') {
+      if (localStorage.getItem('theme') === 'dark') {
         document.documentElement.classList.add('dark');
         document.querySelectorAll('.themeIcon').forEach(el => el.innerText = '☀');
       }
     })();
 
+    function switchOeeSubTab(tab) {
+      ['latest', 'addlog', 'alllogs', 'oeeanalysis'].forEach(id => {
+        const panel = document.getElementById(`oeeSub-${id}`);
+        const btn = document.getElementById(`oeeSubBtn-${id}`);
+        if (panel) panel.classList.toggle('hidden', id !== tab);
+        if (btn) btn.className = id === tab ? 'px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm' : 'px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700';
+      });
+      if (tab === 'latest') renderLatestShiftCard();
+      if (tab === 'alllogs') renderShiftsTable();
+      if (tab === 'oeeanalysis') renderOeeTelemetryChart();
+    }
+
     // ========================================================================
-    // DATA FETCHING - UNIFIED TO SINGLE SUPABASE PROJECT
+    // DATA FETCHING
     // ========================================================================
     async function fetchAllData() {
       try {
         const { data, error } = await supabaseClient.from('cnc_cycle_times').select('*');
-        if (error) {
-          console.error('Failed to load cnc_cycle_times:', error.message);
-          showToast('Failed to load CNC profiles. Check database connection.', true);
-          document.getElementById('syncStatus').innerText = 'Offline';
-          return;
-        }
-        
+        if (error) { console.error('Profile load error:', error.message); showToast('Failed to load profiles', true); document.getElementById('syncStatus').innerText = 'Offline'; return; }
         records = (data || []).filter(r => !r.is_deleted);
         trashRecords = (data || []).filter(r => r.is_deleted);
-        
         document.getElementById('syncStatus').innerText = 'Online';
-
         await fetchOeeData();
         applyFiltersAndRender();
         populatePlanningDropdown();
-        
         profilesLoaded = true;
         renderMasterDashboard();
-      } catch (err) {
-        console.error('fetchAllData error:', err);
-        showToast('Failed to load data. Please refresh the page.', true);
-      }
+      } catch (err) { console.error('fetchAllData error:', err); showToast('Data load failed', true); }
     }
 
     async function fetchOeeData() {
@@ -1299,86 +1239,60 @@
           supabaseClient.from('production_records').select('*'),
           supabaseClient.from('downtime_events').select('*')
         ]);
-
         if (!shiftsRes.error) {
           const allShifts = shiftsRes.data || [];
           shifts = allShifts.filter(s => !s.is_deleted);
           trashShifts = allShifts.filter(s => s.is_deleted);
-        } else {
-          console.error('Failed to load shifts:', shiftsRes.error.message);
         }
-
         productionRecords = prodRes.data || [];
         downtimeEvents = downtimeRes.data || [];
-
         renderShiftsTable();
         renderLatestShiftCard();
         renderReportPreview();
         render30DayProfileAnalytics();
         renderOeeTelemetryChart();
         populateProfileAnalyticsDropdown();
-      } catch (err) {
-        console.error('fetchOeeData error:', err);
-      }
+      } catch (err) { console.error('fetchOeeData error:', err); }
     }
 
     async function fetchToolsData() {
       try {
         const { data, error } = await supabaseClient.from('cnc_tool_bits').select('*');
-        
-        if (error) {
-          console.error('Failed to load cnc_tool_bits:', error.message);
-          showToast('Failed to load tools inventory: ' + error.message, true);
-          
-          // Update table to show error state
+        if (error) { console.error('Tool load error:', error.message); showToast('Tool load failed: ' + error.message, true);
           const tbody = document.getElementById('inventoryTableBody');
-          if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-rose-500">Database error: ${error.message}. Ensure SQL script was run.</td></tr>`;
-          }
+          if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-rose-500">DB Error: ${error.message}</td></tr>`;
           return;
         }
-
-        // FIXED: Removed silent Face Mill filter - show all tools
         const raw = data || [];
         toolsList = raw.filter(t => !t.is_deleted);
         toolsTrash = raw.filter(t => t.is_deleted);
-
         toolsLoaded = true;
         refreshToolsDashboard();
         applyToolsFiltersAndRender();
         renderMasterDashboard();
         renderBinArchive();
-      } catch (err) {
-        console.error('fetchToolsData error:', err);
-        showToast('Failed to load tools. Please check database connection.', true);
-      }
+      } catch (err) { console.error('fetchToolsData error:', err); showToast('Tool load failed', true); }
     }
 
     // ========================================================================
-    // DASHBOARD TELEMETRY
+    // DASHBOARD
     // ========================================================================
     function renderMasterDashboard() {
-      // FIXED: Only require profiles to be loaded for basic dashboard
-      // Tools dashboard updates separately when tools load
       if (!profilesLoaded) return;
-
       document.getElementById('dashTotalProfiles').innerText = records.length;
       if (records.length > 0) {
         const max = Math.max(...records.map(r => r.cycle_seconds || 0));
         document.getElementById('dashMaxCycleSummary').innerText = `Max: ${formatDuration(max)}`;
-      } else {
-        document.getElementById('dashMaxCycleSummary').innerText = 'Max: -';
-      }
+      } else { document.getElementById('dashMaxCycleSummary').innerText = 'Max: -'; }
 
-      // Tools section - only update if loaded
       if (toolsLoaded) {
         const totalStockPcs = toolsList.reduce((acc, t) => acc + (parseInt(t.stock) || 0), 0);
         const lowStockCount = toolsList.filter(t => (parseInt(t.stock) || 0) < 2).length;
         document.getElementById('dashToolsStock').innerText = `${totalStockPcs} pcs`;
-        document.getElementById('dashLowStockSummary').innerText = `${lowStockCount} low-stock tool(s)`;
+        document.getElementById('dashLowStockSummary').innerText = `${lowStockCount} low-stock`;
+        refreshToolsDashboard();
       }
 
-      // OEE section
       if (shifts.length > 0) {
         const oeeResults = shifts.map(s => calculateShiftOee(s));
         const avgA = oeeResults.reduce((s, r) => s + r.availability, 0) / oeeResults.length;
@@ -1387,7 +1301,6 @@
         const avgOee = oeeResults.reduce((s, r) => s + r.oee, 0) / oeeResults.length;
         document.getElementById('dashOeeAvg').innerText = fmtPct(avgOee);
         document.getElementById('dashApqSummary').innerText = `A: ${fmtPct(avgA)} | P: ${fmtPct(avgP)} | Q: ${fmtPct(avgQ)}`;
-
         const latest = oeeResults[0];
         document.getElementById('dashProducedToday').innerText = `${latest.produced} pcs`;
         document.getElementById('dashScrapSummary').innerText = `Good: ${latest.good} | Rej: ${latest.rejected}`;
@@ -1397,214 +1310,72 @@
         document.getElementById('dashProducedToday').innerText = '0 pcs';
         document.getElementById('dashScrapSummary').innerText = 'Good: 0 | Rej: 0';
       }
-
-      // Always refresh tools dashboard when available
-      if (toolsLoaded) {
-        refreshToolsDashboard();
-      }
-      
       renderDashboardCharts();
       render30DayProfileAnalytics();
     }
 
     function refreshToolsDashboard() {
       if (!toolsLoaded) return;
-      
       const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 };
-      toolsList.forEach(t => {
-        const norm = normalizeToolCategory(t.category);
-        counts[norm] += (parseInt(t.stock) || 0);
+      toolsList.forEach(t => { counts[normalizeToolCategory(t.category)] += (parseInt(t.stock) || 0); });
+      ['Milling', 'Drilling', 'Tapping', 'Chamfer'].forEach(cat => {
+        const el = document.getElementById(`catCount-${cat}`);
+        if (el) el.innerText = `${counts[cat]} pcs`;
       });
-
-      const m = document.getElementById('catCount-Milling'); if (m) m.innerText = `${counts.Milling} pcs`;
-      const d = document.getElementById('catCount-Drilling'); if (d) d.innerText = `${counts.Drilling} pcs`;
-      const tp = document.getElementById('catCount-Tapping'); if (tp) tp.innerText = `${counts.Tapping} pcs`;
-      const ch = document.getElementById('catCount-Chamfer'); if (ch) ch.innerText = `${counts.Chamfer} pcs`;
-    }
-
-    // ========================================================================
-    // DASHBOARD CHARTS
-    // ========================================================================
-    function safeDestroyChart(chartInstance) {
-      if (chartInstance && typeof chartInstance.destroy === 'function') {
-        try {
-          chartInstance.destroy();
-        } catch (e) {
-          console.warn('Chart destroy error:', e);
-        }
-      }
-      return null;
     }
 
     function renderDashboardCharts() {
       if (!profilesLoaded) return;
-      
       const canvas = document.getElementById('chartDashOee');
       if (!canvas) return;
-      
       const isDark = document.documentElement.classList.contains('dark');
       const textColor = isDark ? '#cbd5e1' : '#475569';
       const gridColor = isDark ? '#334155' : '#e2e8f0';
 
       const recentShifts = [...shifts].reverse().slice(-8);
       const shiftLabels = recentShifts.map(s => (s.shift_date || '').slice(5));
-      const goodData = recentShifts.map(s => {
-        const prods = productionRecords.filter(p => p.shift_id === s.id);
-        const prod = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
-        const rej = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
-        return Math.max(0, prod - rej);
-      });
-      const rejData = recentShifts.map(s => {
-        const prods = productionRecords.filter(p => p.shift_id === s.id);
-        return prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
-      });
+      const goodData = recentShifts.map(s => { const prods = productionRecords.filter(p => p.shift_id === s.id); return Math.max(0, prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0) - prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0)); });
+      const rejData = recentShifts.map(s => { const prods = productionRecords.filter(p => p.shift_id === s.id); return prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0); });
 
       chartDashProductionInst = safeDestroyChart(chartDashProductionInst);
       const ctxProd = document.getElementById('chartDashProduction');
-      if (ctxProd) {
-        chartDashProductionInst = new Chart(ctxProd.getContext('2d'), {
-          type: 'bar',
-          data: {
-            labels: shiftLabels.length ? shiftLabels : ['No Shifts'],
-            datasets: [
-              { label: 'Good', data: goodData.length ? goodData : [0], backgroundColor: '#10b981', borderRadius: 4, stack: 's' },
-              { label: 'Rejects', data: rejData.length ? rejData : [0], backgroundColor: '#f43f5e', borderRadius: 4, stack: 's' }
-            ]
-          },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 9 } } } },
-            scales: {
-              x: { stacked: true, ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } },
-              y: { stacked: true, ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor }, beginAtZero: true }
-            }
-          }
-        });
-      }
+      if (ctxProd) chartDashProductionInst = new Chart(ctxProd.getContext('2d'), { type: 'bar', data: { labels: shiftLabels.length ? shiftLabels : ['No Data'], datasets: [{ label: 'Good', data: goodData.length ? goodData : [0], backgroundColor: '#10b981', borderRadius: 4, stack: 's' }, { label: 'Rejects', data: rejData.length ? rejData : [0], backgroundColor: '#f43f5e', borderRadius: 4, stack: 's' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 9 } } } }, scales: { x: { stacked: true, ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } }, y: { stacked: true, ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor }, beginAtZero: true } } } });
 
       const oeeSeries = recentShifts.map(s => (calculateShiftOee(s).oee * 100));
       chartDashOeeInst = safeDestroyChart(chartDashOeeInst);
       const ctxOee = document.getElementById('chartDashOee');
-      if (ctxOee) {
-        chartDashOeeInst = new Chart(ctxOee.getContext('2d'), {
-          type: 'line',
-          data: {
-            labels: shiftLabels.length ? shiftLabels : ['No Shifts'],
-            datasets: [{
-              label: 'OEE %',
-              data: oeeSeries.length ? oeeSeries : [0],
-              borderColor: '#10b981',
-              backgroundColor: 'rgba(16,185,129,0.15)',
-              fill: true,
-              tension: 0.3,
-              pointRadius: 3
-            }]
-          },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } },
-              y: { ticks: { color: textColor, font: { size: 9 }, callback: v => v + '%' }, grid: { color: gridColor }, beginAtZero: true, max: 100 }
-            }
-          }
-        });
-      }
+      if (ctxOee) chartDashOeeInst = new Chart(ctxOee.getContext('2d'), { type: 'line', data: { labels: shiftLabels.length ? shiftLabels : ['No Data'], datasets: [{ label: 'OEE %', data: oeeSeries.length ? oeeSeries : [0], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)', fill: true, tension: 0.3, pointRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } }, y: { ticks: { color: textColor, font: { size: 9 }, callback: v => v + '%' }, grid: { color: gridColor }, beginAtZero: true, max: 100 } } } });
 
       const topCycleProfiles = [...records].sort((a, b) => (b.cycle_seconds || 0) - (a.cycle_seconds || 0)).slice(0, 8);
       chartDashCycleTimeInst = safeDestroyChart(chartDashCycleTimeInst);
       const ctxCycle = document.getElementById('chartDashCycleTime');
-      if (ctxCycle) {
-        chartDashCycleTimeInst = new Chart(ctxCycle.getContext('2d'), {
-          type: 'bar',
-          data: {
-            labels: topCycleProfiles.length ? topCycleProfiles.map(r => r.profile || 'Unknown') : ['No Profiles'],
-            datasets: [{
-              label: 'Cycle Time (s)',
-              data: topCycleProfiles.length ? topCycleProfiles.map(r => r.cycle_seconds || 0) : [0],
-              backgroundColor: '#3b82f6',
-              borderRadius: 4
-            }]
-          },
-          options: {
-            indexAxis: 'y',
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor }, beginAtZero: true },
-              y: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } }
-            }
-          }
-        });
-      }
+      if (ctxCycle) chartDashCycleTimeInst = new Chart(ctxCycle.getContext('2d'), { type: 'bar', data: { labels: topCycleProfiles.length ? topCycleProfiles.map(r => r.profile || 'Unknown') : ['No Data'], datasets: [{ label: 'Cycle Time (s)', data: topCycleProfiles.length ? topCycleProfiles.map(r => r.cycle_seconds || 0) : [0], backgroundColor: '#3b82f6', borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor }, beginAtZero: true }, y: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } } } });
 
-      // Tools chart - only if tools loaded
       const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 };
-      if (toolsLoaded) {
-        toolsList.forEach(t => { counts[normalizeToolCategory(t.category)] += (parseInt(t.stock) || 0); });
-      }
-
+      if (toolsLoaded) toolsList.forEach(t => { counts[normalizeToolCategory(t.category)] += (parseInt(t.stock) || 0); });
       chartDashToolsInst = safeDestroyChart(chartDashToolsInst);
       const ctxTools = document.getElementById('chartDashTools');
-      if (ctxTools) {
-        chartDashToolsInst = new Chart(ctxTools.getContext('2d'), {
-          type: 'doughnut',
-          data: {
-            labels: ['Milling', 'Drilling', 'Tapping', 'Chamfer'],
-            datasets: [{ data: [counts.Milling, counts.Drilling, counts.Tapping, counts.Chamfer], backgroundColor: ['#0284c7', '#0ea5e9', '#10b981', '#8b5cf6'], borderWidth: 0 }]
-          },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 9 } } } }
-          }
-        });
-      }
+      if (ctxTools) chartDashToolsInst = new Chart(ctxTools.getContext('2d'), { type: 'doughnut', data: { labels: ['Milling', 'Drilling', 'Tapping', 'Chamfer'], datasets: [{ data: [counts.Milling, counts.Drilling, counts.Tapping, counts.Chamfer], backgroundColor: ['#0284c7', '#0ea5e9', '#10b981', '#8b5cf6'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 9 } } } } });
     }
 
     function renderOeeTelemetryChart() {
       const canvas = document.getElementById('chartOeeTelemetryFull');
       if (!canvas) return;
-
       const isDark = document.documentElement.classList.contains('dark');
       const textColor = isDark ? '#cbd5e1' : '#475569';
       const gridColor = isDark ? '#334155' : '#e2e8f0';
-
       const chronological = [...shifts].sort((a, b) => (a.shift_date || '').localeCompare(b.shift_date || ''));
       const labels = chronological.map(s => `${s.shift_date || ''} ${s.shift_type === 'Night' ? '(N)' : '(D)'}`);
       const results = chronological.map(s => calculateShiftOee(s));
-
       chartOeeTelemetryInst = safeDestroyChart(chartOeeTelemetryInst);
-      chartOeeTelemetryInst = new Chart(canvas.getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: labels.length ? labels : ['No shifts logged'],
-          datasets: [
-            { label: 'OEE', data: results.length ? results.map(r => r.oee * 100) : [0], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.3 },
-            { label: 'Availability', data: results.length ? results.map(r => r.availability * 100) : [0], borderColor: '#3b82f6', borderDash: [4, 4], fill: false, tension: 0.3 },
-            { label: 'Performance', data: results.length ? results.map(r => r.performance * 100) : [0], borderColor: '#f59e0b', borderDash: [4, 4], fill: false, tension: 0.3 },
-            { label: 'Quality', data: results.length ? results.map(r => r.quality * 100) : [0], borderColor: '#8b5cf6', borderDash: [4, 4], fill: false, tension: 0.3 }
-          ]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } } },
-          scales: {
-            x: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } },
-            y: { ticks: { color: textColor, font: { size: 9 }, callback: v => v + '%' }, grid: { color: gridColor }, min: 0, max: 120 }
-          }
-        }
-      });
+      chartOeeTelemetryInst = new Chart(canvas.getContext('2d'), { type: 'line', data: { labels: labels.length ? labels : ['No Data'], datasets: [{ label: 'OEE', data: results.map(r => r.oee * 100), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.3 }, { label: 'Availability', data: results.map(r => r.availability * 100), borderColor: '#3b82f6', borderDash: [4, 4], fill: false, tension: 0.3 }, { label: 'Performance', data: results.map(r => r.performance * 100), borderColor: '#f59e0b', borderDash: [4, 4], fill: false, tension: 0.3 }, { label: 'Quality', data: results.map(r => r.quality * 100), borderColor: '#8b5cf6', borderDash: [4, 4], fill: false, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } } }, scales: { x: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } }, y: { ticks: { color: textColor, font: { size: 9 }, callback: v => v + '%' }, grid: { color: gridColor }, min: 0, max: 120 } } });
     }
 
     function setProfile30Angle(angle) {
       profile30CurrentAngle = angle;
       ['quantity', 'shifts', 'rejects'].forEach(a => {
         const btn = document.getElementById(`btnAngle-${a}`);
-        if (btn) {
-          btn.className = a === angle
-            ? "px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold"
-            : "px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold";
-        }
+        if (btn) btn.className = a === angle ? "px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold" : "px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold";
       });
       render30DayProfileAnalytics();
     }
@@ -1612,21 +1383,16 @@
     function render30DayProfileAnalytics() {
       const canvas = document.getElementById('chartProfile30Days');
       if (!canvas) return;
-      
       const today = new Date();
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const thresholdISO = fmtDateISO(thirtyDaysAgo);
-
       const recentShifts = shifts.filter(s => (s.shift_date || '') >= thresholdISO);
       const recentShiftIds = new Set(recentShifts.map(s => s.id));
-
       const profileMap = {};
       productionRecords.filter(p => recentShiftIds.has(p.shift_id)).forEach(p => {
         const code = normalizeProfileCode(p.profile_code || 'UNKNOWN');
-        if (!profileMap[code]) {
-          profileMap[code] = { code, produced: 0, rejected: 0, good: 0, shiftIds: new Set() };
-        }
+        if (!profileMap[code]) profileMap[code] = { code, produced: 0, rejected: 0, good: 0, shiftIds: new Set() };
         const prodQty = parseInt(p.produced) || 0;
         const rejQty = parseInt(p.rejected) || 0;
         profileMap[code].produced += prodQty;
@@ -1634,247 +1400,96 @@
         profileMap[code].good += Math.max(0, prodQty - rejQty);
         profileMap[code].shiftIds.add(p.shift_id);
       });
-
-      const profileList = Object.values(profileMap).map(item => ({
-        ...item,
-        shiftsCount: item.shiftIds.size,
-        avgPerShift: item.shiftIds.size > 0 ? (item.produced / item.shiftIds.size).toFixed(1) : '0',
-        scrapRatePct: item.produced > 0 ? ((item.rejected / item.produced) * 100).toFixed(1) : '0.0'
-      }));
-
+      const profileList = Object.values(profileMap).map(item => ({ ...item, shiftsCount: item.shiftIds.size, avgPerShift: item.shiftIds.size > 0 ? (item.produced / item.shiftIds.size).toFixed(1) : '0', scrapRatePct: item.produced > 0 ? ((item.rejected / item.produced) * 100).toFixed(1) : '0.0' }));
       if (profile30CurrentAngle === 'quantity') profileList.sort((a, b) => b.produced - a.produced);
       else if (profile30CurrentAngle === 'shifts') profileList.sort((a, b) => b.shiftsCount - a.shiftsCount);
       else if (profile30CurrentAngle === 'rejects') profileList.sort((a, b) => parseFloat(b.scrapRatePct) - parseFloat(a.scrapRatePct));
 
       const tbody = document.getElementById('profile30TableBody');
       if (tbody) {
-        if (profileList.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No profile production logs found in the last 30 days.</td></tr>`;
-        } else {
-          tbody.innerHTML = profileList.map((p, idx) => `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition">
-              <td class="p-3 font-semibold text-slate-400">${idx + 1}</td>
-              <td class="p-3 font-black text-slate-900 dark:text-white">${escapeHtml(p.code)}</td>
-              <td class="p-3 text-right font-mono font-bold text-blue-600 dark:text-blue-400">${p.produced}</td>
-              <td class="p-3 text-right font-mono text-emerald-600">${p.good}</td>
-              <td class="p-3 text-right font-mono text-rose-600">${p.rejected}</td>
-              <td class="p-3 text-right font-bold">${p.shiftsCount} shift(s)</td>
-              <td class="p-3 text-right font-mono">${p.avgPerShift}</td>
-              <td class="p-3 text-right font-mono font-bold ${parseFloat(p.scrapRatePct) > 5 ? 'text-rose-500' : 'text-slate-600 dark:text-slate-300'}">${p.scrapRatePct}%</td>
-            </tr>
-          `).join('');
-        }
+        if (profileList.length === 0) { tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No data in last 30 days.</td></tr>`; }
+        else { tbody.innerHTML = profileList.map((p, idx) => `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40"><td class="p-3 font-semibold text-slate-400">${idx + 1}</td><td class="p-3 font-black text-slate-900 dark:text-white">${escapeHtml(p.code)}</td><td class="p-3 text-right font-mono font-bold text-blue-600">${p.produced}</td><td class="p-3 text-right font-mono text-emerald-600">${p.good}</td><td class="p-3 text-right font-mono text-rose-600">${p.rejected}</td><td class="p-3 text-right font-bold">${p.shiftsCount}</td><td class="p-3 text-right font-mono">${p.avgPerShift}</td><td class="p-3 text-right font-mono font-bold ${parseFloat(p.scrapRatePct) > 5 ? 'text-rose-500' : 'text-slate-600'}">${p.scrapRatePct}%</td></tr>`).join(''); }
       }
 
       const isDark = document.documentElement.classList.contains('dark');
       const textColor = isDark ? '#cbd5e1' : '#475569';
       const gridColor = isDark ? '#334155' : '#e2e8f0';
-
       const chartLabels = profileList.slice(0, 10).map(p => p.code);
       let chartData = [], chartDatasetLabel = '', chartColor = '#3b82f6';
-
-      if (profile30CurrentAngle === 'quantity') {
-        chartData = profileList.slice(0, 10).map(p => p.produced);
-        chartDatasetLabel = 'Total Produced (Pcs)';
-        chartColor = '#3b82f6';
-      } else if (profile30CurrentAngle === 'shifts') {
-        chartData = profileList.slice(0, 10).map(p => p.shiftsCount);
-        chartDatasetLabel = 'Shift Count';
-        chartColor = '#10b981';
-      } else if (profile30CurrentAngle === 'rejects') {
-        chartData = profileList.slice(0, 10).map(p => parseFloat(p.scrapRatePct));
-        chartDatasetLabel = 'Scrap Rate (%)';
-        chartColor = '#f43f5e';
-      }
+      if (profile30CurrentAngle === 'quantity') { chartData = profileList.slice(0, 10).map(p => p.produced); chartDatasetLabel = 'Total Produced'; chartColor = '#3b82f6'; }
+      else if (profile30CurrentAngle === 'shifts') { chartData = profileList.slice(0, 10).map(p => p.shiftsCount); chartDatasetLabel = 'Shift Count'; chartColor = '#10b981'; }
+      else if (profile30CurrentAngle === 'rejects') { chartData = profileList.slice(0, 10).map(p => parseFloat(p.scrapRatePct)); chartDatasetLabel = 'Scrap Rate %'; chartColor = '#f43f5e'; }
 
       chartProfile30Inst = safeDestroyChart(chartProfile30Inst);
       const ctx30 = document.getElementById('chartProfile30Days');
-      if (ctx30) {
-        chartProfile30Inst = new Chart(ctx30.getContext('2d'), {
-          type: 'bar',
-          data: {
-            labels: chartLabels.length ? chartLabels : ['No Data'],
-            datasets: [{
-              label: chartDatasetLabel,
-              data: chartData.length ? chartData : [0],
-              backgroundColor: chartColor,
-              borderRadius: 6
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { ticks: { color: textColor, font: { size: 10, weight: 'bold' } }, grid: { display: false } },
-              y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, beginAtZero: true }
-            }
-          }
-        });
-      }
+      if (ctx30) chartProfile30Inst = new Chart(ctx30.getContext('2d'), { type: 'bar', data: { labels: chartLabels.length ? chartLabels : ['No Data'], datasets: [{ label: chartDatasetLabel, data: chartData.length ? chartData : [0], backgroundColor: chartColor, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, font: { size: 10, weight: 'bold' } }, grid: { display: false } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, beginAtZero: true } } });
     }
 
     // ========================================================================
-    // PROFILE PERFORMANCE ANALYTICS ENGINE
+    // PROFILE ANALYTICS
     // ========================================================================
     function populateProfileAnalyticsDropdown() {
        const sel = document.getElementById('analyticsProfileSelect');
        if (!sel) return;
-       
        const uniqueProfiles = [...new Set(productionRecords.map(p => normalizeProfileCode(p.profile_code)))].filter(p => p);
-       
-       const currentVal = sel.value;
-       sel.innerHTML = '<option value="">-- Select Profile to Analyze --</option>' + 
-           uniqueProfiles.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
-       
-       if (uniqueProfiles.includes(currentVal)) {
-           sel.value = currentVal;
-       } else if (uniqueProfiles.length > 0) {
-           sel.value = uniqueProfiles[0];
-       }
+       sel.innerHTML = '<option value="">-- Select Profile --</option>' + uniqueProfiles.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+       if (uniqueProfiles.length > 0) sel.value = uniqueProfiles[0];
        renderProfileAnalytics();
     }
 
     function renderProfileAnalytics() {
        const code = document.getElementById('analyticsProfileSelect')?.value;
-       if (!code) return;  
-
+       if (!code) return;
        const relevantProds = productionRecords.filter(p => normalizeProfileCode(p.profile_code) === code);
-       
        const shiftsRun = relevantProds.length;
        const totalProd = relevantProds.reduce((s, p) => s + (parseInt(p.produced)||0), 0);
        const totalRej = relevantProds.reduce((s, p) => s + (parseInt(p.rejected)||0), 0);
        const totalGood = Math.max(0, totalProd - totalRej);
        const scrapRate = totalProd > 0 ? ((totalRej/totalProd)*100).toFixed(1) : 0.0;
-
        document.getElementById('paTotalShifts').innerText = shiftsRun;
        document.getElementById('paTotalProd').innerText = `${totalProd}`;
        document.getElementById('paTotalGood').innerText = `${totalGood}`;
        document.getElementById('paScrapRate').innerText = `${scrapRate}%`;
-
-       const chartData = relevantProds.map(p => {
-           const shift = shifts.find(s => s.id === p.shift_id);
-           const date = shift ? (shift.shift_date || 'Unknown') : 'Unknown';
-           const prod = parseInt(p.produced)||0;
-           const rej = parseInt(p.rejected)||0;
-           return { date, good: prod - rej, rej };
-       }).sort((a,b) => (a.date||'').localeCompare(b.date||''));
-
-       const labels = chartData.map(d => d.date);
-       const goodData = chartData.map(d => d.good);
-       const rejData = chartData.map(d => d.rej);
-
+       const chartData = relevantProds.map(p => { const shift = shifts.find(s => s.id === p.shift_id); return { date: shift ? (shift.shift_date || 'Unknown') : 'Unknown', good: (parseInt(p.produced)||0) - (parseInt(p.rejected)||0), rej: parseInt(p.rejected)||0 }; }).sort((a,b) => (a.date||'').localeCompare(b.date||''));
        const ctx = document.getElementById('chartProfileSpecific');
        if (!ctx) return;
-
        chartProfileSpecificInst = safeDestroyChart(chartProfileSpecificInst);
-       
        const isDark = document.documentElement.classList.contains('dark');
-       const textColor = isDark ? '#cbd5e1' : '#475569';
-       const gridColor = isDark ? '#334155' : '#e2e8f0';
-
-       chartProfileSpecificInst = new Chart(ctx.getContext('2d'), {
-           type: 'bar',
-           data: {
-               labels: labels.length ? labels : ['No Data'],
-               datasets: [
-                   { label: 'Good Parts', data: goodData, backgroundColor: '#10b981', stack: 's' },
-                   { label: 'Scrap Parts', data: rejData, backgroundColor: '#f43f5e', stack: 's' }
-               ]
-           },
-           options: {
-               responsive: true, maintainAspectRatio: false,
-               plugins: { legend: { position: 'bottom', labels: { color: textColor } } },
-               scales: {
-                   x: { stacked: true, ticks: { color: textColor }, grid: { display: false } },
-                   y: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor }, beginAtZero: true }
-               }
-           }
-       });
+       chartProfileSpecificInst = new Chart(ctx.getContext('2d'), { type: 'bar', data: { labels: chartData.map(d => d.date), datasets: [{ label: 'Good', data: chartData.map(d => d.good), backgroundColor: '#10b981', stack: 's' }, { label: 'Scrap', data: chartData.map(d => d.rej), backgroundColor: '#f43f5e', stack: 's' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } });
     }
 
     // ========================================================================
-    // PROFILES TABLE (FULL CRUD)
+    // PROFILES CRUD
     // ========================================================================
     function applyFiltersAndRender() {
       const q = (document.getElementById('logSearchInput')?.value || '').toLowerCase();
-      displayedRecords = records.filter(r => 
-        (r.profile || '').toLowerCase().includes(q) || 
-        (r.description || '').toLowerCase().includes(q)
-      );
-
-      // Apply sorting
+      displayedRecords = records.filter(r => (r.profile || '').toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q));
       const sortVal = document.getElementById('filterSort')?.value || 'profile_asc';
       if (sortVal === 'profile_asc') displayedRecords.sort((a, b) => (a.profile || '').localeCompare(b.profile || ''));
       else if (sortVal === 'profile_desc') displayedRecords.sort((a, b) => (b.profile || '').localeCompare(a.profile || ''));
       else if (sortVal === 'cycle_asc') displayedRecords.sort((a, b) => (a.cycle_seconds || 0) - (b.cycle_seconds || 0));
       else if (sortVal === 'cycle_desc') displayedRecords.sort((a, b) => (b.cycle_seconds || 0) - (a.cycle_seconds || 0));
-
       const tbody = document.getElementById('logsTableBody');
       if (!tbody) return;
-
-      if (displayedRecords.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No profile logs found.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = displayedRecords.map((r, i) => `
-        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-          <td class="p-3.5 font-semibold text-slate-400">${i + 1}</td>
-          <td class="p-3.5 font-bold">${escapeHtml(r.profile || '')}</td>
-          <td class="p-3.5">${escapeHtml(r.description || '-')}</td>
-          <td class="p-3.5">${escapeHtml(r.length || '-')}</td>
-          <td class="p-3.5 font-mono font-bold text-blue-600">${r.cycle_seconds || 0}s</td>
-          <td class="p-3.5 font-mono">${escapeHtml(r.feed_speeds || '-')}</td>
-          <td class="p-3.5">${escapeHtml(r.tooling || 'Single tool')}</td>
-          <td class="p-3.5 text-center space-x-2">
-            <button onclick="viewProfileDetails(${r.id})" class="text-blue-600 hover:underline font-bold">View</button>
-            <button onclick="openFormModal(${r.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
-            <button onclick="duplicateProfileDirectly(${r.id})" class="text-emerald-600 hover:underline font-bold">Duplicate</button>
-            <button onclick="softDeleteRecord(${r.id})" class="text-rose-600 hover:underline font-bold">Delete</button>
-          </td>
-        </tr>
-      `).join('');
+      if (displayedRecords.length === 0) { tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No profiles found.</td></tr>`; return; }
+      tbody.innerHTML = displayedRecords.map((r, i) => `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50"><td class="p-3.5 font-semibold text-slate-400">${i + 1}</td><td class="p-3.5 font-bold">${escapeHtml(r.profile || '')}</td><td class="p-3.5">${escapeHtml(r.description || '-')}</td><td class="p-3.5">${escapeHtml(r.length || '-')}</td><td class="p-3.5 font-mono font-bold text-blue-600">${r.cycle_seconds || 0}s</td><td class="p-3.5 font-mono">${escapeHtml(r.feed_speeds || '-')}</td><td class="p-3.5">${escapeHtml(r.tooling || 'Single tool')}</td><td class="p-3.5 text-center space-x-2"><button onclick="viewProfileDetails(${r.id})" class="text-blue-600 hover:underline font-bold">View</button><button onclick="openFormModal(${r.id})" class="text-amber-600 hover:underline font-bold">Edit</button><button onclick="duplicateProfileDirectly(${r.id})" class="text-emerald-600 hover:underline font-bold">Dup</button><button onclick="softDeleteRecord(${r.id})" class="text-rose-600 hover:underline font-bold">Del</button></td></tr>`).join('');
     }
 
     function viewProfileDetails(id) {
       const r = records.find(item => item.id === id);
       if (!r) return;
       document.getElementById('viewProfTitle').innerText = escapeHtml(r.profile || '');
-      document.getElementById('viewProfBody').innerHTML = `
-        <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl">
-          <div><span class="text-slate-400 font-bold">Cycle Time:</span> <b class="text-blue-600 font-mono">${r.cycle_seconds || 0}s</b> (${formatDuration(r.cycle_seconds)})</div>
-          <div><span class="text-slate-400 font-bold">Tooling:</span> <b>${escapeHtml(r.tooling || 'Single tool')}</b></div>
-          <div><span class="text-slate-400 font-bold">Feed Speed:</span> <b>${escapeHtml(r.feed_speeds || '-')}</b></div>
-          <div><span class="text-slate-400 font-bold">Length:</span> <b>${escapeHtml(r.length || '-')}</b></div>
-        </div>
-        <div class="pt-2"><span class="text-slate-400 font-bold">Description:</span> <p class="text-slate-700 dark:text-slate-200">${escapeHtml(r.description || 'No description recorded.')}</p></div>
-      `;
+      document.getElementById('viewProfBody').innerHTML = `<div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl"><div><span class="text-slate-400 font-bold">Cycle:</span> <b class="text-blue-600 font-mono">${r.cycle_seconds || 0}s</b></div><div><span class="text-slate-400 font-bold">Tooling:</span> <b>${escapeHtml(r.tooling || 'Single')}</b></div><div><span class="text-slate-400 font-bold">Feed:</span> <b>${escapeHtml(r.feed_speeds || '-')}</b></div><div><span class="text-slate-400 font-bold">Length:</span> <b>${escapeHtml(r.length || '-')}</b></div></div><div class="pt-2"><span class="text-slate-400 font-bold">Description:</span> <p class="text-slate-700 dark:text-slate-200">${escapeHtml(r.description || 'No description.')}</p></div>`;
       document.getElementById('modalViewProfile').classList.remove('hidden');
     }
 
     async function duplicateProfileDirectly(id) {
       const item = records.find(r => r.id === id);
       if (!item) return;
-      const clonePayload = {
-        profile: `${item.profile || ''} (Copy)`,
-        description: item.description,
-        length: item.length,
-        cycle_seconds: item.cycle_seconds,
-        feed_speeds: item.feed_speeds,
-        tooling: item.tooling,
-        is_deleted: false,
-        record_date: todayISO()
-      };
-      
-      const { error } = await supabaseClient.from('cnc_cycle_times').insert([clonePayload]);
-      if (error) {
-        alert("Failed to duplicate profile: " + error.message);
-        showToast("Failed to duplicate profile", true);
-      } else {
-        showToast(`Duplicated ${item.profile || 'profile'} successfully!`);
-        fetchAllData();
-      }
+      const { error } = await supabaseClient.from('cnc_cycle_times').insert([{ profile: `${item.profile || ''} (Copy)`, description: item.description, length: item.length, cycle_seconds: item.cycle_seconds, feed_speeds: item.feed_speeds, tooling: item.tooling, is_deleted: false, record_date: todayISO() }]);
+      if (error) { showToast("Duplicate failed: " + error.message, true); return; }
+      showToast(`Duplicated ${item.profile}!`);
+      fetchAllData();
     }
 
     function openFormModal(id = null) {
@@ -1883,11 +1498,10 @@
       const form = document.getElementById('recordForm');
       form.reset();
       document.getElementById('formRowId').value = '';
-
       if (id) {
         const item = records.find(r => r.id === id);
         if (item) {
-          title.innerText = `Edit Profile Recipe: ${item.profile || ''}`;
+          title.innerText = `Edit: ${item.profile}`;
           document.getElementById('formRowId').value = item.id;
           document.getElementById('formProfile').value = item.profile || '';
           document.getElementById('formDescription').value = item.description || '';
@@ -1896,29 +1510,16 @@
           document.getElementById('formFeedSpeeds').value = item.feed_speeds || '';
           document.getElementById('formTooling').value = item.tooling || '';
         }
-      } else {
-        title.innerText = 'Log New CNC Profile Recipe';
-      }
+      } else { title.innerText = 'Log New Profile'; }
       modal.classList.remove('hidden');
     }
 
-    function closeFormModal() {
-      document.getElementById('modalForm').classList.add('hidden');
-    }
+    function closeFormModal() { document.getElementById('modalForm').classList.add('hidden'); }
 
     async function submitForm(e) {
       e.preventDefault();
       const id = document.getElementById('formRowId').value;
-      const payload = {
-        profile: document.getElementById('formProfile').value.trim().toUpperCase(),
-        description: document.getElementById('formDescription').value.trim(),
-        length: document.getElementById('formLength').value.trim(),
-        cycle_seconds: parseInt(document.getElementById('formCycleSeconds').value, 10) || 0,
-        feed_speeds: document.getElementById('formFeedSpeeds').value.trim(),
-        tooling: document.getElementById('formTooling').value.trim() || 'Single tool',
-        is_deleted: false
-      };
-
+      const payload = { profile: document.getElementById('formProfile').value.trim().toUpperCase(), description: document.getElementById('formDescription').value.trim(), length: document.getElementById('formLength').value.trim(), cycle_seconds: parseInt(document.getElementById('formCycleSeconds').value, 10) || 0, feed_speeds: document.getElementById('formFeedSpeeds').value.trim(), tooling: document.getElementById('formTooling').value.trim() || 'Single tool', is_deleted: false };
       try {
         if (id) {
           const { error } = await supabaseClient.from('cnc_cycle_times').update(payload).eq('id', id);
@@ -1929,114 +1530,47 @@
           if (error) throw new Error(error.message);
         }
         closeFormModal();
-        showToast("Profile saved successfully!");
+        showToast("Profile saved!");
         fetchAllData();
-      } catch (error) {
-        alert("Database Error: " + error.message);
-        showToast("Database Error: " + error.message, true);
-      }
+      } catch (error) { showToast("Error: " + error.message, true); }
     }
 
     async function softDeleteRecord(id) {
-      if (!confirm('Move this CNC Profile to the Recovery Vault?')) return;
+      if (!confirm('Move to Recovery Vault?')) return;
       await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
       fetchAllData();
     }
 
     // ========================================================================
-    // TOOLS CRUD MODAL & OPERATIONS
+    // TOOLS CRUD
     // ========================================================================
-    function toolsFilterByCategory(cat) {
-      switchTab('tools');
-      const select = document.getElementById('filterCategorySelect');
-      if (select) select.value = cat;
-      applyToolsFiltersAndRender();
-    }
+    function toolsFilterByCategory(cat) { switchTab('tools'); const select = document.getElementById('filterCategorySelect'); if (select) select.value = cat; applyToolsFiltersAndRender(); }
 
     function applyToolsFiltersAndRender() {
       const q = (document.getElementById('toolSearchInput')?.value || '').toLowerCase();
       const cat = document.getElementById('filterCategorySelect')?.value || 'ALL';
-
-      toolsDisplayed = toolsList.filter(t => {
-        const norm = normalizeToolCategory(t.category);
-        const matchQ = 
-          (t.diameter || '').toLowerCase().includes(q) || 
-          (t.description || '').toLowerCase().includes(q) || 
-          (t.sub_type || '').toLowerCase().includes(q) || 
-          (t.location || '').toLowerCase().includes(q);
-        const matchCat = (cat === 'ALL') || (norm === cat);
-        return matchQ && matchCat;
-      });
-
+      toolsDisplayed = toolsList.filter(t => { const norm = normalizeToolCategory(t.category); const matchQ = (t.diameter || '').toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q) || (t.sub_type || '').toLowerCase().includes(q); const matchCat = (cat === 'ALL') || (norm === cat); return matchQ && matchCat; });
       const tbody = document.getElementById('inventoryTableBody');
       if (!tbody) return;
-
-      if (toolsDisplayed.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No tools found matching criteria.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = toolsDisplayed.map((t, i) => {
-        const stock = parseInt(t.stock) || 0;
-        const norm = normalizeToolCategory(t.category);
-        return `
-          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-            <td class="p-3.5 font-semibold text-slate-400">${i + 1}</td>
-            <td class="p-3.5 font-bold text-cyan-600">${norm}</td>
-            <td class="p-3.5 text-slate-600 dark:text-slate-300">${escapeHtml(t.sub_type || '-')}</td>
-            <td class="p-3.5 font-bold">${escapeHtml(t.diameter || '')}</td>
-            <td class="p-3.5 text-slate-600 dark:text-slate-300">${escapeHtml(t.description || '-')}</td>
-            <td class="p-3.5 text-center font-bold">${stock} pcs</td>
-            <td class="p-3.5 font-mono text-slate-500">${escapeHtml(t.location || '-')}</td>
-            <td class="p-3.5 text-center space-x-2">
-              <button onclick="viewToolDetails(${t.id})" class="text-blue-600 hover:underline font-bold">View</button>
-              <button onclick="openToolsFormModal(${t.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
-              <button onclick="duplicateToolDirectly(${t.id})" class="text-emerald-600 hover:underline font-bold">Duplicate</button>
-              <button onclick="deleteTool(${t.id})" class="text-rose-500 hover:underline font-bold">Dispose</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      if (toolsDisplayed.length === 0) { tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No tools found.</td></tr>`; return; }
+      tbody.innerHTML = toolsDisplayed.map((t, i) => { const stock = parseInt(t.stock) || 0; return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40"><td class="p-3.5 font-semibold text-slate-400">${i + 1}</td><td class="p-3.5 font-bold text-cyan-600">${normalizeToolCategory(t.category)}</td><td class="p-3.5">${escapeHtml(t.sub_type || '-')}</td><td class="p-3.5 font-bold">${escapeHtml(t.diameter || '')}</td><td class="p-3.5">${escapeHtml(t.description || '-')}</td><td class="p-3.5 text-center font-bold">${stock} pcs</td><td class="p-3.5 font-mono text-slate-500">${escapeHtml(t.location || '-')}</td><td class="p-3.5 text-center space-x-2"><button onclick="viewToolDetails(${t.id})" class="text-blue-600 hover:underline font-bold">View</button><button onclick="openToolsFormModal(${t.id})" class="text-amber-600 hover:underline font-bold">Edit</button><button onclick="duplicateToolDirectly(${t.id})" class="text-emerald-600 hover:underline font-bold">Dup</button><button onclick="deleteTool(${t.id})" class="text-rose-500 hover:underline font-bold">Del</button></td></tr>`; }).join('');
     }
 
     function viewToolDetails(id) {
       const t = toolsList.find(item => item.id === id);
       if (!t) return;
       document.getElementById('viewToolTitle').innerText = `${normalizeToolCategory(t.category)} (${t.diameter || ''})`;
-      document.getElementById('viewToolBody').innerHTML = `
-        <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl">
-          <div><span class="text-slate-400 font-bold">Category:</span> <b>${normalizeToolCategory(t.category)}</b></div>
-          <div><span class="text-slate-400 font-bold">Stock In Rack:</span> <b class="text-cyan-600">${t.stock || 0} pcs</b></div>
-          <div><span class="text-slate-400 font-bold">Location:</span> <b>${escapeHtml(t.location || 'Main Storage Rack')}</b></div>
-          <div><span class="text-slate-400 font-bold">Sub-Type:</span> <b>${escapeHtml(t.sub_type || '-')}</b></div>
-          <div><span class="text-slate-400 font-bold">Diameter:</span> <b>${escapeHtml(t.diameter || '')}</b></div>
-        </div>
-        <div class="pt-2"><span class="text-slate-400 font-bold">Machining Description:</span> <p class="text-slate-700 dark:text-slate-200">${escapeHtml(t.description || 'No specific description noted.')}</p></div>
-      `;
+      document.getElementById('viewToolBody').innerHTML = `<div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl"><div><span class="text-slate-400 font-bold">Stock:</span> <b class="text-cyan-600">${t.stock || 0} pcs</b></div><div><span class="text-slate-400 font-bold">Location:</span> <b>${escapeHtml(t.location || 'Main Rack')}</b></div><div><span class="text-slate-400 font-bold">Sub-Type:</span> <b>${escapeHtml(t.sub_type || '-')}</b></div><div><span class="text-slate-400 font-bold">Diameter:</span> <b>${escapeHtml(t.diameter || '')}</b></div></div><div class="pt-2"><span class="text-slate-400 font-bold">Description:</span> <p class="text-slate-700 dark:text-slate-200">${escapeHtml(t.description || 'No description.')}</p></div>`;
       document.getElementById('modalViewTool').classList.remove('hidden');
     }
 
-    // FIXED: Duplicate tool - append "(Copy)" to sub_type, not diameter
     async function duplicateToolDirectly(id) {
       const t = toolsList.find(item => item.id === id);
       if (!t) return;
-      const clonePayload = {
-        category: t.category,
-        sub_type: t.sub_type ? `${t.sub_type} (Copy)` : 'Copy',
-        diameter: t.diameter,
-        description: t.description,
-        stock: t.stock,
-        location: t.location,
-        is_deleted: false
-      };
-      const { error } = await supabaseClient.from('cnc_tool_bits').insert([clonePayload]);
-      if (error) {
-        alert("Failed to duplicate tool: " + error.message);
-        showToast("Failed to duplicate tool", true);
-      } else {
-        showToast("Tool duplicated successfully!");
-        fetchToolsData();
-      }
+      const { error } = await supabaseClient.from('cnc_tool_bits').insert([{ category: t.category, sub_type: t.sub_type ? `${t.sub_type} (Copy)` : 'Copy', diameter: t.diameter, description: t.description, stock: t.stock, location: t.location, is_deleted: false }]);
+      if (error) { showToast("Duplicate failed: " + error.message, true); return; }
+      showToast("Tool duplicated!");
+      fetchToolsData();
     }
 
     function openToolsFormModal(id = null) {
@@ -2045,11 +1579,10 @@
       const form = document.getElementById('toolsToolForm');
       form.reset();
       document.getElementById('toolsFormId').value = '';
-
       if (id) {
         const item = toolsList.find(t => t.id === id);
         if (item) {
-          title.innerText = `Edit Tool: ${item.diameter || ''}`;
+          title.innerText = `Edit: ${item.diameter}`;
           document.getElementById('toolsFormId').value = item.id;
           document.getElementById('toolsFormCategory').value = normalizeToolCategory(item.category);
           document.getElementById('toolsFormSubType').value = item.sub_type || '';
@@ -2058,30 +1591,16 @@
           document.getElementById('toolsFormStock').value = item.stock || 0;
           document.getElementById('toolsFormLocation').value = item.location || '';
         }
-      } else {
-        title.innerText = 'Log Tool to Inventory';
-      }
+      } else { title.innerText = 'Add New Tool'; }
       modal.classList.remove('hidden');
     }
 
-    function closeToolsFormModal() {
-      document.getElementById('toolsModalForm').classList.add('hidden');
-    }
+    function closeToolsFormModal() { document.getElementById('toolsModalForm').classList.add('hidden'); }
 
     async function submitToolForm(e) {
       e.preventDefault();
       const id = document.getElementById('toolsFormId').value;
-      
-      const payload = {
-        category: document.getElementById('toolsFormCategory').value.trim(),
-        sub_type: document.getElementById('toolsFormSubType').value.trim() || null,
-        diameter: document.getElementById('toolsFormDiameter').value.trim(),
-        description: document.getElementById('toolsFormDescription').value.trim() || null,
-        stock: Math.max(0, parseInt(document.getElementById('toolsFormStock').value, 10) || 0),
-        location: document.getElementById('toolsFormLocation').value.trim() || null,
-        is_deleted: false
-      };
-
+      const payload = { category: document.getElementById('toolsFormCategory').value.trim(), sub_type: document.getElementById('toolsFormSubType').value.trim() || null, diameter: document.getElementById('toolsFormDiameter').value.trim(), description: document.getElementById('toolsFormDescription').value.trim() || null, stock: Math.max(0, parseInt(document.getElementById('toolsFormStock').value, 10) || 0), location: document.getElementById('toolsFormLocation').value.trim() || null, is_deleted: false };
       try {
         if (id) {
           const { error } = await supabaseClient.from('cnc_tool_bits').update(payload).eq('id', id);
@@ -2091,269 +1610,75 @@
           if (error) throw new Error(error.message);
         }
         closeToolsFormModal();
-        showToast("Tool saved successfully!");
+        showToast("Tool saved!");
         fetchToolsData();
-      } catch (error) {
-        alert("Database Error: " + error.message);
-        showToast("Database Error: " + error.message, true);
-      }
+      } catch (error) { showToast("Error: " + error.message, true); }
     }
 
     async function deleteTool(id) {
-      if (!confirm('Move this CNC Tool to the Recovery Vault?')) return;
+      if (!confirm('Move to Recovery Vault?')) return;
       await supabaseClient.from('cnc_tool_bits').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
       fetchToolsData();
     }
 
     // ========================================================================
-    // RESTOCK NOTICES
+    // RESTOCK NOTICE
     // ========================================================================
     function autoPopulateLowStock() {
-      if (!toolsLoaded) {
-        showToast('Tools data not loaded yet.', true);
-        return;
-      }
+      if (!toolsLoaded) { showToast('Tools not loaded.', true); return; }
       const low = toolsList.filter(t => (parseInt(t.stock) || 0) < 2);
-      if (low.length === 0) {
-        showToast("No tools currently have stock lower than 2 units.");
-        return;
-      }
-      toolsNoticeList = low.map(t => ({
-        id: t.id,
-        category: t.category,
-        diameter: t.diameter,
-        stock: t.stock,
-        req_qty: Math.max(2, 5 - (parseInt(t.stock) || 0))
-      }));
+      if (low.length === 0) { showToast("No low-stock tools."); return; }
+      toolsNoticeList = low.map(t => ({ id: t.id, category: t.category, diameter: t.diameter, stock: t.stock, req_qty: Math.max(2, 5 - (parseInt(t.stock) || 0)) }));
       renderToolsNoticeList();
     }
 
     function renderToolsNoticeList() {
       const container = document.getElementById('requisitionItemsContainer');
       if (!container) return;
-
-      if (toolsNoticeList.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 italic">No tools loaded in notice. Click "+ Load Low Stock".</p>`;
-        return;
-      }
-
-      container.innerHTML = toolsNoticeList.map((t, idx) => `
-        <div class="flex flex-wrap justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl text-xs">
-          <div>
-            <b class="text-cyan-600 dark:text-cyan-400">${escapeHtml(t.category || '')} (${escapeHtml(t.diameter || '')})</b>
-            <span class="text-slate-400 ml-2">Stock: <b class="text-rose-500">${t.stock}</b></span>
-          </div>
-          <div class="flex items-center gap-2 mt-2 sm:mt-0">
-            <span class="text-slate-500">Order Qty:</span>
-            <input type="number" class="w-16 bg-white dark:bg-slate-700 border rounded-lg p-1 font-bold text-center" value="${t.req_qty}" onchange="toolsNoticeList[${idx}].req_qty = parseInt(this.value,10) || 1">
-            <button onclick="toolsNoticeList.splice(${idx},1); renderToolsNoticeList();" class="text-rose-500 font-bold px-1.5">×</button>
-          </div>
-        </div>
-      `).join('');
+      if (toolsNoticeList.length === 0) { container.innerHTML = `<p class="text-xs text-slate-400 italic">No tools. Click "+ Load Low Stock".</p>`; return; }
+      container.innerHTML = toolsNoticeList.map((t, idx) => `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl text-xs"><div><b class="text-cyan-600">${escapeHtml(t.category || '')} (${escapeHtml(t.diameter || '')})</b> <span class="text-slate-400 ml-2">Stock: <b class="text-rose-500">${t.stock}</b></span></div><div class="flex items-center gap-2"><span class="text-slate-500">Order:</span><input type="number" class="w-16 bg-white dark:bg-slate-700 border rounded-lg p-1 font-bold text-center" value="${t.req_qty}" onchange="toolsNoticeList[${idx}].req_qty = parseInt(this.value,10)||1"><button onclick="toolsNoticeList.splice(${idx},1);renderToolsNoticeList();" class="text-rose-500 font-bold px-1.5">×</button></div></div>`).join('');
     }
 
     // ========================================================================
-    // RECOVERY BIN VAULT
+    // RECOVERY BIN
     // ========================================================================
     function renderBinArchive() {
       const pBody = document.getElementById('trashProfilesTableBody');
       const tBody = document.getElementById('trashToolsTableBody');
       const sBody = document.getElementById('trashShiftsTableBody');
-
       const totalDeleted = trashRecords.length + toolsTrash.length + trashShifts.length;
       const badge = document.getElementById('trashCountBadge');
-      if (badge) {
-        badge.innerText = totalDeleted;
-        badge.classList.toggle('hidden', totalDeleted === 0);
-      }
-
-      if (pBody) {
-        pBody.innerHTML = trashRecords.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted CNC profiles.</p>' :
-          trashRecords.map(r => `
-            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs">
-              <span><b>${escapeHtml(r.profile || '')}</b> (${r.cycle_seconds || 0}s)</span>
-              <div class="space-x-2">
-                <button onclick="restoreRecord(${r.id})" class="text-emerald-600 hover:underline font-bold">Restore</button>
-                <button onclick="hardDeleteRecord(${r.id})" class="text-rose-600 hover:underline font-bold">Purge</button>
-              </div>
-            </div>
-          `).join('');
-      }
-
-      if (tBody) {
-        tBody.innerHTML = toolsTrash.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted tools.</p>' :
-          toolsTrash.map(t => `
-            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs">
-              <span><b>${escapeHtml(t.category || '')}</b> — ${escapeHtml(t.diameter || '')}</span>
-              <div class="space-x-2">
-                <button onclick="restoreTool(${t.id})" class="text-emerald-600 hover:underline font-bold">Restore</button>
-                <button onclick="hardDeleteTool(${t.id})" class="text-rose-600 hover:underline font-bold">Purge</button>
-              </div>
-            </div>
-          `).join('');
-      }
-
-      if (sBody) {
-        sBody.innerHTML = trashShifts.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted shifts.</p>' :
-          trashShifts.map(s => `
-            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs">
-              <span><b>${escapeHtml(s.shift_date || '')}</b> (${escapeHtml(s.shift_type || '')} - Team ${escapeHtml(s.team || '')})</span>
-              <div class="space-x-2">
-                <button onclick="restoreShift(${s.id})" class="text-emerald-600 hover:underline font-bold">Restore</button>
-                <button onclick="hardDeleteShift(${s.id})" class="text-rose-600 hover:underline font-bold">Purge</button>
-              </div>
-            </div>
-          `).join('');
-      }
+      if (badge) { badge.innerText = totalDeleted; badge.classList.toggle('hidden', totalDeleted === 0); }
+      if (pBody) pBody.innerHTML = trashRecords.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted profiles.</p>' : trashRecords.map(r => `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs"><span><b>${escapeHtml(r.profile || '')}</b> (${r.cycle_seconds || 0}s)</span><div class="space-x-2"><button onclick="restoreRecord(${r.id})" class="text-emerald-600 hover:underline font-bold">Restore</button><button onclick="hardDeleteRecord(${r.id})" class="text-rose-600 hover:underline font-bold">Purge</button></div></div>`).join('');
+      if (tBody) tBody.innerHTML = toolsTrash.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted tools.</p>' : toolsTrash.map(t => `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs"><span><b>${escapeHtml(t.category || '')}</b> — ${escapeHtml(t.diameter || '')}</span><div class="space-x-2"><button onclick="restoreTool(${t.id})" class="text-emerald-600 hover:underline font-bold">Restore</button><button onclick="hardDeleteTool(${t.id})" class="text-rose-600 hover:underline font-bold">Purge</button></div></div>`).join('');
+      if (sBody) sBody.innerHTML = trashShifts.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted shifts.</p>' : trashShifts.map(s => `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs"><span><b>${escapeHtml(s.shift_date || '')}</b> (${escapeHtml(s.shift_type || '')} - Team ${escapeHtml(s.team || '')})</span><div class="space-x-2"><button onclick="restoreShift(${s.id})" class="text-emerald-600 hover:underline font-bold">Restore</button><button onclick="hardDeleteShift(${s.id})" class="text-rose-600 hover:underline font-bold">Purge</button></div></div>`).join('');
     }
 
-    async function restoreRecord(id) {
-      await supabaseClient.from('cnc_cycle_times').update({ is_deleted: false, deleted_at: null }).eq('id', id);
-      fetchAllData();
-    }
-    async function hardDeleteRecord(id) {
-      if (!confirm('Permanently purge this profile? This cannot be undone.')) return;
-      await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
-      fetchAllData();
-    }
-    async function restoreTool(id) {
-      await supabaseClient.from('cnc_tool_bits').update({ is_deleted: false, deleted_at: null }).eq('id', id);
-      fetchToolsData();
-    }
-    async function hardDeleteTool(id) {
-      if (!confirm('Permanently purge this tool? This cannot be undone.')) return;
-      await supabaseClient.from('cnc_tool_bits').delete().eq('id', id);
-      fetchToolsData();
-    }
-    async function restoreShift(id) {
-      await supabaseClient.from('shifts').update({ is_deleted: false, deleted_at: null }).eq('id', id);
-      await fetchOeeData();
-      renderBinArchive();
-    }
-    async function hardDeleteShift(id) {
-      if (!confirm('Permanently purge this shift and its operational logs? This cannot be undone.')) return;
-      await supabaseClient.from('production_records').delete().eq('shift_id', id);
-      await supabaseClient.from('downtime_events').delete().eq('shift_id', id);
-      await supabaseClient.from('shifts').delete().eq('id', id);
-      await fetchOeeData();
-      renderBinArchive();
-    }
+    async function restoreRecord(id) { await supabaseClient.from('cnc_cycle_times').update({ is_deleted: false, deleted_at: null }).eq('id', id); fetchAllData(); }
+    async function hardDeleteRecord(id) { if (!confirm('Permanently delete?')) return; await supabaseClient.from('cnc_cycle_times').delete().eq('id', id); fetchAllData(); }
+    async function restoreTool(id) { await supabaseClient.from('cnc_tool_bits').update({ is_deleted: false, deleted_at: null }).eq('id', id); fetchToolsData(); }
+    async function hardDeleteTool(id) { if (!confirm('Permanently delete?')) return; await supabaseClient.from('cnc_tool_bits').delete().eq('id', id); fetchToolsData(); }
+    async function restoreShift(id) { await supabaseClient.from('shifts').update({ is_deleted: false, deleted_at: null }).eq('id', id); await fetchOeeData(); renderBinArchive(); }
+    async function hardDeleteShift(id) { if (!confirm('Permanently delete shift?')) return; await supabaseClient.from('production_records').delete().eq('shift_id', id); await supabaseClient.from('downtime_events').delete().eq('shift_id', id); await supabaseClient.from('shifts').delete().eq('id', id); await fetchOeeData(); renderBinArchive(); }
 
     // ========================================================================
-    // UTILITY FUNCTIONS
+    // SHIFTS / OEE
     // ========================================================================
-    function escapeHtml(value) {
-      if (value == null) return '';
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function showDbError(context, error) {
-      const msg = error?.message || String(error || 'Unknown database error');
-      console.error(context, error);
-      showToast(`${context}: ${msg}`, true);
-    }
-
-    function localTodayISO() {
-      const d = new Date();
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-    }
-
-    function switchOeeSubTab(tab) {
-      ['latest', 'addlog', 'alllogs', 'oeeanalysis'].forEach(id => {
-        const panel = document.getElementById(`oeeSub-${id}`);
-        const btn = document.getElementById(`oeeSubBtn-${id}`);
-        if (panel) panel.classList.toggle('hidden', id !== tab);
-        if (btn) {
-          btn.className = id === tab
-            ? 'px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm'
-            : 'px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700';
-        }
-      });
-      if (tab === 'latest') renderLatestShiftCard();
-      if (tab === 'alllogs') renderShiftsTable();
-      if (tab === 'oeeanalysis') renderOeeTelemetryChart();
-    }
-
     function renderLatestShiftCard() {
       const el = document.getElementById('latestLogCard');
       if (!el) return;
-      const latest = [...shifts].sort((a,b) => {
-        const da = `${a.shift_date || ''} ${a.created_at || ''}`;
-        const db = `${b.shift_date || ''} ${b.created_at || ''}`;
-        return db.localeCompare(da);
-      })[0];
-      if (!latest) {
-        el.innerHTML = `<div class="text-center py-12 text-slate-400"><div class="text-3xl mb-2">📋</div><p class="font-bold">No shift records yet.</p><p class="text-xs mt-1">Use "Add / Edit Shift Record" to create the first production slip.</p></div>`;
-        return;
-      }
+      const latest = [...shifts].sort((a,b) => `${b.shift_date || ''} ${b.created_at || ''}`.localeCompare(`${a.shift_date || ''} ${a.created_at || ''}`))[0];
+      if (!latest) { el.innerHTML = `<div class="text-center py-12 text-slate-400"><div class="text-3xl mb-2">📋</div><p class="font-bold">No shift records yet.</p></div>`; return; }
       const r = calculateShiftOee(latest);
-      el.innerHTML = `
-        <div class="flex flex-col md:flex-row justify-between gap-4">
-          <div>
-            <span class="text-[10px] font-black uppercase text-blue-600 tracking-widest">LATEST SHIFT</span>
-            <h4 class="text-xl font-black text-slate-900 dark:text-white mt-1">${escapeHtml(latest.shift_date)} — ${escapeHtml(latest.shift_type)} Shift</h4>
-            <p class="text-xs text-slate-500 mt-1">Team ${escapeHtml(latest.team)} ${latest.epf_no ? `• EPF ${escapeHtml(latest.epf_no)}` : ''} ${latest.operator_name ? `• ${escapeHtml(latest.operator_name)}` : ''}</p>
-          </div>
-          <div class="text-right">
-            <span class="text-[10px] font-bold uppercase text-slate-400">OEE</span>
-            <div class="text-3xl font-black text-emerald-600">${fmtPct(r.oee)}</div>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mt-5">
-          ${[
-            ['Produced', r.produced, 'text-blue-600'],
-            ['Good', r.good, 'text-emerald-600'],
-            ['Reject', r.rejected, 'text-rose-600'],
-            ['Downtime', `${r.downtimeMin}m`, 'text-amber-600'],
-            ['Availability', fmtPct(r.availability), 'text-blue-600'],
-            ['Quality', fmtPct(r.quality), 'text-purple-600']
-          ].map(x => `<div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl text-center"><span class="text-[9px] font-bold uppercase text-slate-400">${x[0]}</span><div class="text-lg font-black ${x[2]} mt-1">${x[1]}</div></div>`).join('')}
-        </div>
-        <div class="mt-4 flex justify-end gap-2">
-          <button onclick="editShift(${latest.id})" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold">Edit</button>
-          <button onclick="viewShiftDetails(${latest.id})" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold">View Details</button>
-        </div>`;
+      el.innerHTML = `<div class="flex flex-col md:flex-row justify-between gap-4"><div><span class="text-[10px] font-black uppercase text-blue-600 tracking-widest">LATEST SHIFT</span><h4 class="text-xl font-black text-slate-900 dark:text-white mt-1">${escapeHtml(latest.shift_date)} — ${escapeHtml(latest.shift_type)}</h4><p class="text-xs text-slate-500 mt-1">Team ${escapeHtml(latest.team)}${latest.epf_no ? ` • EPF ${escapeHtml(latest.epf_no)}` : ''}</p></div><div class="text-right"><span class="text-[10px] font-bold uppercase text-slate-400">OEE</span><div class="text-3xl font-black text-emerald-600">${fmtPct(r.oee)}</div></div></div><div class="grid grid-cols-2 md:grid-cols-6 gap-3 mt-5">${[['Produced',r.produced,'text-blue-600'],['Good',r.good,'text-emerald-600'],['Reject',r.rejected,'text-rose-600'],['Down',`${r.downtimeMin}m`,'text-amber-600'],['A',fmtPct(r.availability),'text-blue-600'],['Q',fmtPct(r.quality),'text-purple-600']].map(x=>`<div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl text-center"><span class="text-[9px] font-bold uppercase text-slate-400">${x[0]}</span><div class="text-lg font-black ${x[2]} mt-1">${x[1]}</div></div>`).join('')}</div><div class="mt-4 flex justify-end gap-2"><button onclick="editShift(${latest.id})" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold">Edit</button><button onclick="viewShiftDetails(${latest.id})" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold">View</button></div>`;
     }
 
     function renderShiftsTable() {
       const tbody = document.getElementById('shiftsTableBody');
       if (!tbody) return;
-      const sorted = [...shifts].sort((a,b) => {
-        const da = `${a.shift_date || ''} ${a.created_at || ''}`;
-        const db = `${b.shift_date || ''} ${b.created_at || ''}`;
-        return db.localeCompare(da);
-      });
-      if (!sorted.length) {
-        tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">No shift logs found.</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = sorted.map(s => {
-        const r = calculateShiftOee(s);
-        return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
-          <td class="p-3.5 font-bold">${escapeHtml(s.shift_date)}</td>
-          <td class="p-3.5">${escapeHtml(s.shift_type)}</td>
-          <td class="p-3.5">${escapeHtml(s.team)}</td>
-          <td class="p-3.5">${escapeHtml(s.epf_no || '-')}</td>
-          <td class="p-3.5 text-right font-mono font-bold">${r.produced}</td>
-          <td class="p-3.5 text-right font-mono text-emerald-600">${r.good}</td>
-          <td class="p-3.5 text-right font-mono text-rose-600">${r.rejected}</td>
-          <td class="p-3.5 text-right font-mono text-amber-600">${r.downtimeMin}m</td>
-          <td class="p-3.5 text-right font-black text-emerald-600">${fmtPct(r.oee)}</td>
-          <td class="p-3.5 text-center space-x-2 whitespace-nowrap">
-            <button onclick="viewShiftDetails(${s.id})" class="text-blue-600 hover:underline font-bold">View</button>
-            <button onclick="editShift(${s.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
-            <button onclick="deleteShift(${s.id})" class="text-rose-600 hover:underline font-bold">Delete</button>
-          </td>
-        </tr>`;
-      }).join('');
+      const sorted = [...shifts].sort((a,b) => `${b.shift_date || ''} ${b.created_at || ''}`.localeCompare(`${a.shift_date || ''} ${a.created_at || ''}`));
+      if (!sorted.length) { tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No shifts.</td></tr>`; return; }
+      tbody.innerHTML = sorted.map(s => { const r = calculateShiftOee(s); return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40"><td class="p-3.5 font-bold">${escapeHtml(s.shift_date)}</td><td class="p-3.5">${escapeHtml(s.shift_type)}</td><td class="p-3.5">${escapeHtml(s.team)}</td><td class="p-3.5 text-right font-mono font-bold">${r.produced}</td><td class="p-3.5 text-right font-mono text-emerald-600">${r.good}</td><td class="p-3.5 text-right font-mono text-rose-600">${r.rejected}</td><td class="p-3.5 text-right font-mono text-amber-600">${r.downtimeMin}m</td><td class="p-3.5 text-right font-black text-emerald-600">${fmtPct(r.oee)}</td><td class="p-3.5 text-center space-x-2"><button onclick="viewShiftDetails(${s.id})" class="text-blue-600 hover:underline font-bold">View</button><button onclick="editShift(${s.id})" class="text-amber-600 hover:underline font-bold">Edit</button><button onclick="deleteShift(${s.id})" class="text-rose-600 hover:underline font-bold">Del</button></td></tr>`; }).join('');
     }
 
     function addProfileCard(data = null) {
@@ -2362,30 +1687,16 @@
       const idx = ++cardCounter;
       const row = document.createElement('div');
       row.className = 'profile-card-row grid grid-cols-1 sm:grid-cols-12 gap-2 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-700';
-      row.dataset.cardId = idx;
-      row.innerHTML = `
-        <div class="sm:col-span-3"><label class="block text-[10px] font-bold text-slate-400 mb-1">Profile Code *</label><input required list="profileDataList" data-field="profile_code" value="${escapeHtml(data?.profile_code || '')}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-bold uppercase" placeholder="e.g. AL 684"></div>
-        <div class="sm:col-span-2"><label class="block text-[10px] font-bold text-slate-400 mb-1">Setup (min)</label><input type="number" min="0" step="0.1" data-field="setup_min" value="${data?.setup_min ?? 0}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div>
-        <div class="sm:col-span-2"><label class="block text-[10px] font-bold text-slate-400 mb-1">Target</label><input type="number" min="0" data-field="target" value="${data?.target ?? 0}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div>
-        <div class="sm:col-span-2"><label class="block text-[10px] font-bold text-slate-400 mb-1">Produced</label><input type="number" min="0" data-field="produced" value="${data?.produced ?? 0}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div>
-        <div class="sm:col-span-2"><label class="block text-[10px] font-bold text-slate-400 mb-1">Rejected</label><input type="number" min="0" data-field="rejected" value="${data?.rejected ?? 0}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div>
-        <div class="sm:col-span-1 flex items-end justify-end"><button type="button" onclick="this.closest('.profile-card-row').remove()" class="w-full sm:w-auto bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300 rounded-xl px-3 py-2 font-black">×</button></div>
-        <div class="sm:col-span-12"><input type="text" data-field="reject_reason" value="${escapeHtml(data?.reject_reason || '')}" placeholder="Reject reason (optional)" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none text-xs"></div>`;
+      row.innerHTML = `<div class="sm:col-span-3"><label class="block text-[10px] font-bold text-slate-400 mb-1">Profile Code *</label><input required list="profileDataList" data-field="profile_code" value="${escapeHtml(data?.profile_code || '')}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-bold uppercase" placeholder="e.g. AL 684"></div><div class="sm:col-span-2"><label class="block text-[10px] font-bold text-slate-400 mb-1">Setup (min)</label><input type="number" min="0" step="0.1" data-field="setup_min" value="${data?.setup_min ?? 0}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div><div class="sm:col-span-2"><label class="block text-[10px] font-bold text-slate-400 mb-1">Target</label><input type="number" min="0" data-field="target" value="${data?.target ?? 0}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div><div class="sm:col-span-2"><label class="block text-[10px] font-bold text-slate-400 mb-1">Produced</label><input type="number" min="0" data-field="produced" value="${data?.produced ?? 0}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div><div class="sm:col-span-2"><label class="block text-[10px] font-bold text-slate-400 mb-1">Rejected</label><input type="number" min="0" data-field="rejected" value="${data?.rejected ?? 0}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div><div class="sm:col-span-1 flex items-end justify-end"><button type="button" onclick="this.closest('.profile-card-row').remove()" class="w-full sm:w-auto bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300 rounded-xl px-3 py-2 font-black">×</button></div><div class="sm:col-span-12"><input type="text" data-field="reject_reason" value="${escapeHtml(data?.reject_reason || '')}" placeholder="Reject reason" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none text-xs"></div>`;
       container.appendChild(row);
     }
 
     function addDowntimeCard(data = null) {
       const container = document.getElementById('downtimeCardsContainer');
       if (!container) return;
-      const idx = ++dtCounter;
       const row = document.createElement('div');
       row.className = 'downtime-card-row grid grid-cols-1 sm:grid-cols-12 gap-2 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-700';
-      row.dataset.cardId = idx;
-      row.innerHTML = `
-        <div class="sm:col-span-3"><label class="block text-[10px] font-bold text-slate-400 mb-1">Reason *</label><input data-field="reason" required value="${escapeHtml(data?.reason || '')}" placeholder="Machine / material / quality..." class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div>
-        <div class="sm:col-span-3"><label class="block text-[10px] font-bold text-slate-400 mb-1">Duration (min) *</label><input type="number" min="0" step="0.1" data-field="duration_min" required value="${data?.duration_min ?? 0}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-bold"></div>
-        <div class="sm:col-span-5"><label class="block text-[10px] font-bold text-slate-400 mb-1">Notes</label><input data-field="notes" value="${escapeHtml(data?.notes || '')}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div>
-        <div class="sm:col-span-1 flex items-end"><button type="button" onclick="this.closest('.downtime-card-row').remove()" class="w-full bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300 rounded-xl px-3 py-2 font-black">×</button></div>`;
+      row.innerHTML = `<div class="sm:col-span-3"><label class="block text-[10px] font-bold text-slate-400 mb-1">Reason *</label><input data-field="reason" required value="${escapeHtml(data?.reason || '')}" placeholder="Reason..." class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div><div class="sm:col-span-3"><label class="block text-[10px] font-bold text-slate-400 mb-1">Duration (min) *</label><input type="number" min="0" step="0.1" data-field="duration_min" required value="${data?.duration_min ?? 0}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-bold"></div><div class="sm:col-span-5"><label class="block text-[10px] font-bold text-slate-400 mb-1">Notes</label><input data-field="notes" value="${escapeHtml(data?.notes || '')}" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none"></div><div class="sm:col-span-1 flex items-end"><button type="button" onclick="this.closest('.downtime-card-row').remove()" class="w-full bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300 rounded-xl px-3 py-2 font-black">×</button></div>`;
       container.appendChild(row);
     }
 
@@ -2393,13 +1704,13 @@
       const form = document.getElementById('shiftLogForm');
       if (form) form.reset();
       document.getElementById('shiftFormId').value = '';
-      document.getElementById('shiftLogFormTitle').innerText = 'CNC Machine — Shift Production Slip';
+      document.getElementById('shiftLogFormTitle').innerText = 'CNC Machine — Shift Slip';
       document.getElementById('shiftLogEditingBadge').classList.add('hidden');
       document.getElementById('logDate').value = localTodayISO();
       document.getElementById('logPlannedBreak').value = 90;
       document.getElementById('profileCardsContainer').innerHTML = '';
       document.getElementById('downtimeCardsContainer').innerHTML = '';
-      cardCounter = 0; dtCounter = 0;
+      cardCounter = 0;
       addProfileCard();
       addDowntimeCard();
     }
@@ -2407,25 +1718,14 @@
     function collectProfileCards() {
       return [...document.querySelectorAll('#profileCardsContainer .profile-card-row')].map(row => {
         const get = f => row.querySelector(`[data-field="${f}"]`);
-        return {
-          profile_code: normalizeProfileCode(get('profile_code')?.value || ''),
-          setup_min: parseFloat(get('setup_min')?.value) || 0,
-          target: Math.max(0, parseInt(get('target')?.value, 10) || 0),
-          produced: Math.max(0, parseInt(get('produced')?.value, 10) || 0),
-          rejected: Math.max(0, parseInt(get('rejected')?.value, 10) || 0),
-          reject_reason: get('reject_reason')?.value.trim() || null
-        };
+        return { profile_code: normalizeProfileCode(get('profile_code')?.value || ''), setup_min: parseFloat(get('setup_min')?.value) || 0, target: Math.max(0, parseInt(get('target')?.value, 10) || 0), produced: Math.max(0, parseInt(get('produced')?.value, 10) || 0), rejected: Math.max(0, parseInt(get('rejected')?.value, 10) || 0), reject_reason: get('reject_reason')?.value.trim() || null };
       }).filter(x => x.profile_code);
     }
 
     function collectDowntimeCards() {
       return [...document.querySelectorAll('#downtimeCardsContainer .downtime-card-row')].map(row => {
         const get = f => row.querySelector(`[data-field="${f}"]`);
-        return {
-          reason: get('reason')?.value.trim() || '',
-          duration_min: Math.max(0, parseFloat(get('duration_min')?.value) || 0),
-          notes: get('notes')?.value.trim() || null
-        };
+        return { reason: get('reason')?.value.trim() || '', duration_min: Math.max(0, parseFloat(get('duration_min')?.value) || 0), notes: get('notes')?.value.trim() || null };
       }).filter(x => x.reason && x.duration_min >= 0);
     }
 
@@ -2434,26 +1734,8 @@
       const id = document.getElementById('shiftFormId').value;
       const profileRows = collectProfileCards();
       const downtimeRows = collectDowntimeCards();
-      if (!profileRows.length) {
-        showToast('Add at least one profile row.', true);
-        return;
-      }
-      const shiftPayload = {
-        shift_date: document.getElementById('logDate').value,
-        shift_type: document.getElementById('logShiftType').value,
-        team: document.getElementById('logTeam').value,
-        epf_no: document.getElementById('logEpf').value.trim() || null,
-        operator_name: document.getElementById('logOperator').value.trim() || null,
-        planned_break_min: Math.max(0, parseFloat(document.getElementById('logPlannedBreak').value) || 90),
-        was_planned: document.getElementById('logWasPlanned').value === 'yes',
-        other_dept_used: document.getElementById('logOtherDept').value === 'yes',
-        other_dept_period: document.getElementById('logOtherDeptPeriod').value.trim() || null,
-        other_notes: document.getElementById('logOtherNotes').value.trim() || null,
-        supervisor_sign: document.getElementById('logSupervisorSign').value.trim() || null,
-        quality_sign: document.getElementById('logQualitySign').value.trim() || null,
-        is_deleted: false
-      };
-
+      if (!profileRows.length) { showToast('Add at least one profile.', true); return; }
+      const shiftPayload = { shift_date: document.getElementById('logDate').value, shift_type: document.getElementById('logShiftType').value, team: document.getElementById('logTeam').value, epf_no: document.getElementById('logEpf').value.trim() || null, operator_name: document.getElementById('logOperator').value.trim() || null, planned_break_min: Math.max(0, parseFloat(document.getElementById('logPlannedBreak').value) || 90), was_planned: document.getElementById('logWasPlanned').value === 'yes', other_dept_used: document.getElementById('logOtherDept').value === 'yes', other_dept_period: document.getElementById('logOtherDeptPeriod').value.trim() || null, other_notes: document.getElementById('logOtherNotes').value.trim() || null, supervisor_sign: document.getElementById('logSupervisorSign').value.trim() || null, quality_sign: document.getElementById('logQualitySign').value.trim() || null, is_deleted: false };
       try {
         let shiftId = id ? Number(id) : null;
         if (shiftId) {
@@ -2466,37 +1748,14 @@
           if (error) throw error;
           shiftId = data.id;
         }
-
-        // FIXED: Use normalized profile code for matching
-        const profilePayload = profileRows.map((p, i) => {
-          const rec = records.find(r => normalizeProfileCode(r.profile) === p.profile_code);
-          return {
-            shift_id: shiftId,
-            profile_code: p.profile_code,
-            setup_min: p.setup_min,
-            target: p.target,
-            produced: p.produced,
-            rejected: Math.min(p.rejected, p.produced),
-            reject_reason: p.reject_reason,
-            ideal_cycle_seconds: rec ? (parseInt(rec.cycle_seconds, 10) || null) : null,
-            sort_order: i
-          };
-        });
-        if (profilePayload.length) {
-          const { error } = await supabaseClient.from('production_records').insert(profilePayload);
-          if (error) throw error;
-        }
-        if (downtimeRows.length) {
-          const { error } = await supabaseClient.from('downtime_events').insert(downtimeRows.map(d => ({ ...d, shift_id: shiftId })));
-          if (error) throw error;
-        }
-        showToast(id ? 'Shift record updated successfully!' : 'Shift record saved successfully!');
+        const profilePayload = profileRows.map((p, i) => { const rec = records.find(r => normalizeProfileCode(r.profile) === p.profile_code); return { shift_id: shiftId, profile_code: p.profile_code, setup_min: p.setup_min, target: p.target, produced: p.produced, rejected: Math.min(p.rejected, p.produced), reject_reason: p.reject_reason, ideal_cycle_seconds: rec ? (parseInt(rec.cycle_seconds, 10) || null) : null, sort_order: i }; });
+        if (profilePayload.length) { const { error } = await supabaseClient.from('production_records').insert(profilePayload); if (error) throw error; }
+        if (downtimeRows.length) { const { error } = await supabaseClient.from('downtime_events').insert(downtimeRows.map(d => ({ ...d, shift_id: shiftId }))); if (error) throw error; }
+        showToast(id ? 'Shift updated!' : 'Shift saved!');
         resetShiftLogForm();
         await fetchOeeData();
         switchOeeSubTab('latest');
-      } catch (error) {
-        showDbError('Database Error', error);
-      }
+      } catch (error) { showDbError('Error', error); }
     }
 
     function editShift(id) {
@@ -2515,15 +1774,14 @@
       document.getElementById('logOperator').value = s.operator_name || '';
       document.getElementById('logSupervisorSign').value = s.supervisor_sign || '';
       document.getElementById('logQualitySign').value = s.quality_sign || '';
-      document.getElementById('shiftLogFormTitle').innerText = `Edit Shift — ${s.shift_date} / ${s.shift_type}`;
+      document.getElementById('shiftLogFormTitle').innerText = `Edit: ${s.shift_date} / ${s.shift_type}`;
       document.getElementById('shiftLogEditingBadge').classList.remove('hidden');
-      const pc = document.getElementById('profileCardsContainer');
-      const dc = document.getElementById('downtimeCardsContainer');
-      pc.innerHTML = ''; dc.innerHTML = '';
-      cardCounter = 0; dtCounter = 0;
+      document.getElementById('profileCardsContainer').innerHTML = '';
+      document.getElementById('downtimeCardsContainer').innerHTML = '';
+      cardCounter = 0;
       productionRecords.filter(p => p.shift_id === id).sort((a,b) => (a.sort_order||0)-(b.sort_order||0)).forEach(p => addProfileCard(p));
       downtimeEvents.filter(d => d.shift_id === id).forEach(d => addDowntimeCard(d));
-      if (!pc.children.length) addProfileCard();
+      if (!document.getElementById('profileCardsContainer').children.length) addProfileCard();
       switchTab('oee');
       switchOeeSubTab('addlog');
     }
@@ -2534,32 +1792,22 @@
       const r = calculateShiftOee(s);
       const prods = productionRecords.filter(p => p.shift_id === id);
       const dts = downtimeEvents.filter(d => d.shift_id === id);
-      document.getElementById('viewShiftTitle').innerText = `${s.shift_date} — ${s.shift_type} Shift`;
-      document.getElementById('viewShiftBody').innerHTML = `
-        <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl">
-          <div><span class="text-slate-400 font-bold">Team:</span> <b>${escapeHtml(s.team)}</b></div>
-          <div><span class="text-slate-400 font-bold">EPF:</span> <b>${escapeHtml(s.epf_no || '-')}</b></div>
-          <div><span class="text-slate-400 font-bold">Operator:</span> <b>${escapeHtml(s.operator_name || '-')}</b></div>
-          <div><span class="text-slate-400 font-bold">OEE:</span> <b class="text-emerald-600">${fmtPct(r.oee)}</b></div>
-          <div><span class="text-slate-400 font-bold">Availability:</span> <b>${fmtPct(r.availability)}</b></div>
-          <div><span class="text-slate-400 font-bold">Performance:</span> <b>${fmtPct(r.performance)}</b></div>
-          <div><span class="text-slate-400 font-bold">Quality:</span> <b>${fmtPct(r.quality)}</b></div>
-          <div><span class="text-slate-400 font-bold">Downtime:</span> <b>${r.downtimeMin} min</b></div>
-        </div>
-        <div><h5 class="font-black uppercase text-[10px] text-slate-400 mb-2">Production</h5>${prods.length ? prods.map(p => `<div class="flex justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-700/40 mb-1"><span><b>${escapeHtml(p.profile_code || '')}</b></span><span>Prod ${p.produced} • Reject ${p.rejected}</span></div>`).join('') : '<p class="text-slate-400">No production rows.</p>'}</div>
-        <div><h5 class="font-black uppercase text-[10px] text-slate-400 mb-2">Downtime</h5>${dts.length ? dts.map(d => `<div class="flex justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-700/40 mb-1"><span>${escapeHtml(d.reason || '')}</span><span>${d.duration_min} min</span></div>`).join('') : '<p class="text-slate-400">No downtime events.</p>'}</div>`;
+      document.getElementById('viewShiftTitle').innerText = `${s.shift_date} — ${s.shift_type}`;
+      document.getElementById('viewShiftBody').innerHTML = `<div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl"><div><span class="text-slate-400 font-bold">Team:</span> <b>${escapeHtml(s.team)}</b></div><div><span class="text-slate-400 font-bold">OEE:</span> <b class="text-emerald-600">${fmtPct(r.oee)}</b></div><div><span class="text-slate-400 font-bold">A:</span> <b>${fmtPct(r.availability)}</b></div><div><span class="text-slate-400 font-bold">P:</span> <b>${fmtPct(r.performance)}</b></div><div><span class="text-slate-400 font-bold">Q:</span> <b>${fmtPct(r.quality)}</b></div><div><span class="text-slate-400 font-bold">Down:</span> <b>${r.downtimeMin}m</b></div></div><div><h5 class="font-black uppercase text-[10px] text-slate-400 mb-2">Production</h5>${prods.length ? prods.map(p => `<div class="flex justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-700/40 mb-1"><span><b>${escapeHtml(p.profile_code || '')}</b></span><span>Prod ${p.produced} • Rej ${p.rejected}</span></div>`).join('') : '<p class="text-slate-400">No data.</p>'}</div><div><h5 class="font-black uppercase text-[10px] text-slate-400 mb-2">Downtime</h5>${dts.length ? dts.map(d => `<div class="flex justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-700/40 mb-1"><span>${escapeHtml(d.reason || '')}</span><span>${d.duration_min}m</span></div>`).join('') : '<p class="text-slate-400">No events.</p>'}</div>`;
       document.getElementById('modalViewShift').classList.remove('hidden');
     }
 
     async function deleteShift(id) {
-      if (!confirm('Move this shift record to the Recovery Vault?')) return;
-      const { error } = await supabaseClient.from('shifts').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
-      if (error) { showDbError('Unable to delete shift', error); return; }
-      showToast('Shift moved to Recovery Vault.');
+      if (!confirm('Move to Recovery Vault?')) return;
+      await supabaseClient.from('shifts').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
+      showToast('Shift moved to vault.');
       await fetchOeeData();
       renderBinArchive();
     }
 
+    // ========================================================================
+    // PLANNING
+    // ========================================================================
     function populatePlanningDropdown() {
       const sel = document.getElementById('planProfileSelect');
       const list = document.getElementById('profileDataList');
@@ -2571,25 +1819,21 @@
       const profile = document.getElementById('planProfileSelect').value;
       const qty = Math.max(1, parseInt(document.getElementById('planBatchQty').value, 10) || 1);
       const handling = Math.max(0, parseInt(document.getElementById('planHandlingSec').value, 10) || 0);
-      if (!profile) { showToast('Choose a target profile first.', true); return; }
+      if (!profile) { showToast('Choose a profile.', true); return; }
       const rec = records.find(r => (r.profile || '') === profile);
-      if (!rec) { showToast('Selected profile was not found.', true); return; }
+      if (!rec) { showToast('Profile not found.', true); return; }
       planningCart.push({ id: `${Date.now()}-${Math.random()}`, profile: rec.profile, description: rec.description, qty, handling, cycle_seconds: parseInt(rec.cycle_seconds,10)||0 });
       renderPlanningCart();
     }
 
     function clearPlanningCart() { planningCart = []; renderPlanningCart(); }
-
     function removePlanningItem(index) { planningCart.splice(index, 1); renderPlanningCart(); }
 
     function renderPlanningCart() {
       const list = document.getElementById('planningCartList');
       if (!list) return;
-      if (!planningCart.length) {
-        list.innerHTML = '<p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p>';
-      } else {
-        list.innerHTML = planningCart.map((p,i) => `<div class="flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl"><div><b class="text-xs">${escapeHtml(p.profile || '')}</b><p class="text-[10px] text-slate-400">${escapeHtml(p.description || '')}</p></div><div class="flex items-center gap-3 text-xs"><span class="font-bold">${p.qty} pcs</span><span class="text-blue-600">${formatDuration((p.cycle_seconds+p.handling)*p.qty)}</span><button onclick="removePlanningItem(${i})" class="text-rose-500 font-black">×</button></div></div>`).join('');
-      }
+      if (!planningCart.length) { list.innerHTML = '<p class="text-xs text-slate-400 italic">No profiles in queue.</p>'; }
+      else { list.innerHTML = planningCart.map((p,i) => `<div class="flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl"><div><b class="text-xs">${escapeHtml(p.profile || '')}</b><p class="text-[10px] text-slate-400">${escapeHtml(p.description || '')}</p></div><div class="flex items-center gap-3 text-xs"><span class="font-bold">${p.qty} pcs</span><span class="text-blue-600">${formatDuration((p.cycle_seconds+p.handling)*p.qty)}</span><button onclick="removePlanningItem(${i})" class="text-rose-500 font-black">×</button></div></div>`).join(''); }
       const totalQty = planningCart.reduce((s,p)=>s+p.qty,0);
       const totalSec = planningCart.reduce((s,p)=>s+(p.cycle_seconds+p.handling)*p.qty,0);
       document.getElementById('calcTotalQty').innerText = `${totalQty} pcs`;
@@ -2598,96 +1842,88 @@
     }
 
     // ========================================================================
-    // EXPORT FUNCTIONS
+    // EXPORTS
     // ========================================================================
     function exportToExcel() {
-      if (!window.XLSX) { showToast('Excel library is unavailable.', true); return; }
-      const rows = records.map(r => ({ Profile: r.profile || '', Description: r.description||'', Length: r.length||'', Cycle_Seconds: r.cycle_seconds||0, Feed_Speeds: r.feed_speeds||'', Tooling: r.tooling||'' }));
+      if (!window.XLSX) { showToast('Excel library unavailable.', true); return; }
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'CNC Profiles');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(records.map(r => ({ Profile: r.profile||'', Description: r.description||'', Length: r.length||'', Cycle: r.cycle_seconds||0, Feed: r.feed_speeds||'', Tooling: r.tooling||'' }))), 'CNC Profiles');
       XLSX.writeFile(wb, `CNC_5000_Profiles_${localTodayISO()}.xlsx`);
     }
 
     function exportToolsToExcel() {
-      if (!window.XLSX) { showToast('Excel library is unavailable.', true); return; }
-      const rows = toolsList.map(t => ({ Category: normalizeToolCategory(t.category), Sub_Type: t.sub_type||'', Diameter: t.diameter||'', Description: t.description||'', Stock: parseInt(t.stock)||0, Location: t.location||'' }));
+      if (!window.XLSX) { showToast('Excel library unavailable.', true); return; }
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Tool Inventory');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(toolsList.map(t => ({ Category: normalizeToolCategory(t.category), Sub_Type: t.sub_type||'', Diameter: t.diameter||'', Description: t.description||'', Stock: t.stock||0, Location: t.location||'' }))), 'Tools');
       XLSX.writeFile(wb, `CNC_5000_Tools_${localTodayISO()}.xlsx`);
     }
 
     function generateEngineeringReportPDF() {
-      if (!window.jspdf?.jsPDF) { showToast('PDF library is unavailable.', true); return; }
+      if (!window.jspdf?.jsPDF) { showToast('PDF library unavailable.', true); return; }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       doc.setFontSize(16); doc.text('CNC 5000 - Engineering Profile Catalog', 14, 16);
       doc.setFontSize(9); doc.text(`Generated ${localTodayISO()}`, 14, 23);
       doc.autoTable({ startY: 30, head:[['Profile','Description','Length','Cycle (s)','Feed','Tooling']], body:records.map(r=>[r.profile||'',r.description||'',r.length||'',r.cycle_seconds||0,r.feed_speeds||'',r.tooling||'']) });
-      doc.save(`CNC_5000_Engineering_Catalog_${localTodayISO()}.pdf`);
+      doc.save(`CNC_5000_Catalog_${localTodayISO()}.pdf`);
     }
 
     function generateToolsInventoryPDF() {
-      if (!window.jspdf?.jsPDF) { showToast('PDF library is unavailable.', true); return; }
+      if (!window.jspdf?.jsPDF) { showToast('PDF library unavailable.', true); return; }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       doc.setFontSize(16); doc.text('CNC 5000 - Tool Inventory', 14, 16);
       doc.setFontSize(9); doc.text(`Generated ${localTodayISO()}`, 14, 23);
-      doc.autoTable({ startY:30, head:[['Category','Sub-Type','Diameter','Description','Stock','Location']], body:toolsList.map(t=>[normalizeToolCategory(t.category),t.sub_type||'',t.diameter||'',t.description||'',t.stock||0,t.location||'']) });
-      doc.save(`CNC_5000_Tool_Inventory_${localTodayISO()}.pdf`);
+      doc.autoTable({ startY:30, head:[['Category','Sub-Type','Diameter','Stock','Location']], body:toolsList.map(t=>[normalizeToolCategory(t.category),t.sub_type||'',t.diameter||'',t.stock||0,t.location||'']) });
+      doc.save(`CNC_5000_Tools_${localTodayISO()}.pdf`);
     }
 
     function generateJobSheetPDF() {
-      if (!window.jspdf?.jsPDF) { showToast('PDF library is unavailable.', true); return; }
+      if (!window.jspdf?.jsPDF) { showToast('PDF library unavailable.', true); return; }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       doc.setFontSize(16); doc.text('CNC 5000 - Production Traveler', 14, 16);
       doc.setFontSize(9); doc.text(`Generated ${localTodayISO()}`, 14, 23);
-      doc.autoTable({ startY:30, head:[['Profile','Description','Quantity','Cycle (s)','Handling (s)','Total Time']], body:planningCart.map(p=>[p.profile||'',p.description||'',p.qty,p.cycle_seconds,p.handling,formatDuration((p.cycle_seconds+p.handling)*p.qty)]) });
+      doc.autoTable({ startY:30, head:[['Profile','Qty','Cycle (s)','Handling (s)','Total Time']], body:planningCart.map(p=>[p.profile||'',p.qty,p.cycle_seconds,p.handling,formatDuration((p.cycle_seconds+p.handling)*p.qty)]) });
       doc.save(`CNC_5000_Traveler_${localTodayISO()}.pdf`);
     }
 
     function exportReportPDF() {
-      if (!window.jspdf?.jsPDF) { showToast('PDF library is unavailable.', true); return; }
+      if (!window.jspdf?.jsPDF) { showToast('PDF library unavailable.', true); return; }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       const results = shifts.map(s => ({s, r:calculateShiftOee(s)}));
-      doc.setFontSize(16); doc.text('CNC 5000 - Plant Intelligence Report', 14, 16);
+      doc.setFontSize(16); doc.text('CNC 5000 - Plant Report', 14, 16);
       doc.setFontSize(9); doc.text(`Generated ${localTodayISO()}`, 14, 23);
-      doc.autoTable({ startY:30, head:[['Date','Shift','Team','Produced','Good','Reject','Downtime','OEE']], body:results.map(x=>[x.s.shift_date,x.s.shift_type,x.s.team,x.r.produced,x.r.good,x.r.rejected,`${x.r.downtimeMin}m`,fmtPct(x.r.oee)]) });
-      doc.save(`CNC_5000_Plant_Report_${localTodayISO()}.pdf`);
+      doc.autoTable({ startY:30, head:[['Date','Shift','Team','Produced','Good','Reject','Down','OEE']], body:results.map(x=>[x.s.shift_date,x.s.shift_type,x.s.team,x.r.produced,x.r.good,x.r.rejected,`${x.r.downtimeMin}m`,fmtPct(x.r.oee)]) });
+      doc.save(`CNC_5000_Report_${localTodayISO()}.pdf`);
     }
 
     function exportReportExcel() {
-      if (!window.XLSX) { showToast('Excel library is unavailable.', true); return; }
+      if (!window.XLSX) { showToast('Excel library unavailable.', true); return; }
       const wb = XLSX.utils.book_new();
-      const oeeRows = shifts.map(s => { const r=calculateShiftOee(s); return {Date:s.shift_date,Shift:s.shift_type,Team:s.team,Produced:r.produced,Good:r.good,Rejected:r.rejected,Downtime_Min:r.downtimeMin,Availability:r.availability,Performance:r.performance,Quality:r.quality,OEE:r.oee}; });
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(oeeRows), 'OEE Summary');
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(productionRecords.map(p=>({...p}))), 'Production Records');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(shifts.map(s => { const r=calculateShiftOee(s); return {Date:s.shift_date,Shift:s.shift_type,Team:s.team,Produced:r.produced,Good:r.good,Rejected:r.rejected,Down:r.downtimeMin,OEE:fmtPct(r.oee)}; })), 'OEE Summary');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(productionRecords.map(p=>({...p}))), 'Production');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(downtimeEvents.map(d=>({...d}))), 'Downtime');
-      XLSX.writeFile(wb, `CNC_5000_MultiSheet_Report_${localTodayISO()}.xlsx`);
+      XLSX.writeFile(wb, `CNC_5000_MultiSheet_${localTodayISO()}.xlsx`);
     }
 
     function renderReportPreview() {
       const el = document.getElementById('reportPreviewCard');
       if (!el) return;
-      if (!shifts.length) {
-        el.innerHTML = '<div class="p-8 text-center text-slate-400">No shift data available for reporting.</div>';
-        return;
-      }
+      if (!shifts.length) { el.innerHTML = '<div class="p-8 text-center text-slate-400">No data for reporting.</div>'; return; }
       const rs = shifts.map(s=>calculateShiftOee(s));
       const avg = key => rs.reduce((a,r)=>a+r[key],0)/rs.length;
       const totalProd = rs.reduce((a,r)=>a+r.produced,0);
       const totalReject = rs.reduce((a,r)=>a+r.rejected,0);
-      el.innerHTML = `<div class="grid grid-cols-2 md:grid-cols-5 gap-3">${[
-        ['Shifts',shifts.length],['Produced',totalProd],['Rejects',totalReject],['Avg OEE',fmtPct(avg('oee'))],['Avg Availability',fmtPct(avg('availability'))]
-      ].map(x=>`<div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center"><span class="text-[9px] uppercase font-bold text-slate-400">${x[0]}</span><div class="text-xl font-black mt-1">${x[1]}</div></div>`).join('')}</div>`;
+      el.innerHTML = `<div class="grid grid-cols-2 md:grid-cols-5 gap-3">${[['Shifts',shifts.length],['Produced',totalProd],['Rejects',totalReject],['Avg OEE',fmtPct(avg('oee'))],['Avg A',fmtPct(avg('availability'))]].map(x=>`<div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center"><span class="text-[9px] uppercase font-bold text-slate-400">${x[0]}</span><div class="text-xl font-black mt-1">${x[1]}</div></div>`).join('')}</div>`;
     }
 
     function generateFormalSupervisorLetterPDF() {
-      if (!window.jspdf?.jsPDF) { showToast('PDF library is unavailable.', true); return; }
+      if (!window.jspdf?.jsPDF) { showToast('PDF library unavailable.', true); return; }
       const selected = memoRecipients.filter(r=>r.selected);
       if (!selected.length) { showToast('Select at least one recipient.', true); return; }
-      if (!toolsNoticeList.length) { showToast('Load at least one low-stock tool.', true); return; }
+      if (!toolsNoticeList.length) { showToast('Load at least one tool.', true); return; }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       const date = document.getElementById('memoDate').value || localTodayISO();
@@ -2698,11 +1934,11 @@
       const y=52+selected.length*6;
       doc.setFontSize(11); doc.text('Please arrange replenishment of the following low-stock CNC tools:',14,y+6);
       doc.autoTable({startY:y+12,head:[['Category','Diameter','Current Stock','Order Qty']],body:toolsNoticeList.map(t=>[normalizeToolCategory(t.category),t.diameter,t.stock,t.req_qty])});
-      doc.save(`CNC_5000_Restock_Notice_${date}.pdf`);
+      doc.save(`CNC_5000_Restock_${date}.pdf`);
     }
 
     // ========================================================================
-    // APPLICATION BOOTSTRAP
+    // BOOTSTRAP
     // ========================================================================
     function bootstrapCnc5000() {
       try {
@@ -2711,29 +1947,13 @@
         if (memoDate) memoDate.value = localTodayISO();
         resetShiftLogForm();
         populatePlanningDropdown();
-        
-        // Fetch data with proper error handling
-        fetchAllData().catch(e => {
-          console.error('Profile/OEE load failed:', e);
-          showToast('Failed to load profiles. Please refresh.', true);
-        });
-        
-        fetchToolsData().catch(e => {
-          console.error('Tool inventory load failed:', e);
-          showToast('Failed to load tools. Please refresh.', true);
-        });
-      } catch (e) {
-        console.error('Bootstrap error', e);
-        showToast('Application initialization failed. Check browser console.', true);
-      }
+        fetchAllData().catch(e => showToast('Profile load failed', true));
+        fetchToolsData().catch(e => showToast('Tool load failed', true));
+      } catch (e) { console.error('Bootstrap error', e); showToast('Init failed', true); }
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', bootstrapCnc5000);
-    } else {
-      bootstrapCnc5000();
-    }
-
+    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', bootstrapCnc5000); }
+    else { bootstrapCnc5000(); }
   </script>
 </body>
 </html>
