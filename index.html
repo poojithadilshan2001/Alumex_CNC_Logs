@@ -179,6 +179,8 @@
     <!-- SECTION 1: MASTER DASHBOARD                                    -->
     <!-- ============================================================== -->
     <section id="view-dashboard" class="space-y-6">
+      
+      <!-- Primary Metric Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div onclick="switchTab('logs')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-blue-500 transition group">
           <div class="flex justify-between items-start">
@@ -217,6 +219,7 @@
         </div>
       </div>
 
+      <!-- 30-DAY MULTI-ANGLE PROFILE PRODUCTION INTELLIGENCE MODULE -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
           <div>
@@ -256,6 +259,7 @@
         </div>
       </div>
 
+      <!-- Charts Telemetry Matrix -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <div class="flex justify-between items-center mb-3">
@@ -1282,6 +1286,539 @@
       renderBinArchive();
     }
 
+    // --- DASHBOARD TELEMETRY ---
+    function renderMasterDashboard() {
+      if (!profilesLoaded || !toolsLoaded) return;
+
+      document.getElementById('dashTotalProfiles').innerText = records.length;
+      if (records.length > 0) {
+        const max = Math.max(...records.map(r => r.cycle_seconds || 0));
+        document.getElementById('dashMaxCycleSummary').innerText = `Max: ${formatDuration(max)}`;
+      } else {
+        document.getElementById('dashMaxCycleSummary').innerText = 'Max: -';
+      }
+
+      const totalStockPcs = toolsList.reduce((acc, t) => acc + (parseInt(t.stock) || 0), 0);
+      const lowStockCount = toolsList.filter(t => (parseInt(t.stock) || 0) < 2).length;
+      document.getElementById('dashToolsStock').innerText = `${totalStockPcs} pcs`;
+      document.getElementById('dashLowStockSummary').innerText = `${lowStockCount} low-stock tool(s)`;
+
+      if (shifts.length > 0) {
+        const oeeResults = shifts.map(s => calculateShiftOee(s));
+        const avgA = oeeResults.reduce((s, r) => s + r.availability, 0) / oeeResults.length;
+        const avgP = oeeResults.reduce((s, r) => s + r.performance, 0) / oeeResults.length;
+        const avgQ = oeeResults.reduce((s, r) => s + r.quality, 0) / oeeResults.length;
+        const avgOee = oeeResults.reduce((s, r) => s + r.oee, 0) / oeeResults.length;
+        document.getElementById('dashOeeAvg').innerText = fmtPct(avgOee);
+        document.getElementById('dashApqSummary').innerText = `A: ${fmtPct(avgA)} | P: ${fmtPct(avgP)} | Q: ${fmtPct(avgQ)}`;
+
+        const latest = oeeResults[0];
+        document.getElementById('dashProducedToday').innerText = `${latest.produced} pcs`;
+        document.getElementById('dashScrapSummary').innerText = `Good: ${latest.good} | Rej: ${latest.rejected}`;
+      } else {
+        document.getElementById('dashOeeAvg').innerText = '0.0%';
+        document.getElementById('dashApqSummary').innerText = 'A: - | P: - | Q: -';
+        document.getElementById('dashProducedToday').innerText = '0 pcs';
+        document.getElementById('dashScrapSummary').innerText = 'Good: 0 | Rej: 0';
+      }
+
+      refreshToolsDashboard();
+      renderDashboardCharts();
+      render30DayProfileAnalytics();
+    }
+
+    function refreshToolsDashboard() {
+      const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 };
+      toolsList.forEach(t => {
+        const norm = normalizeToolCategory(t.category);
+        counts[norm] += (parseInt(t.stock) || 0);
+      });
+
+      const m = document.getElementById('catCount-Milling'); if (m) m.innerText = `${counts.Milling} pcs`;
+      const d = document.getElementById('catCount-Drilling'); if (d) d.innerText = `${counts.Drilling} pcs`;
+      const tp = document.getElementById('catCount-Tapping'); if (tp) tp.innerText = `${counts.Tapping} pcs`;
+      const ch = document.getElementById('catCount-Chamfer'); if (ch) ch.innerText = `${counts.Chamfer} pcs`;
+    }
+
+    function renderDashboardCharts() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#475569';
+      const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+      const recentShifts = [...shifts].reverse().slice(-8);
+      const shiftLabels = recentShifts.map(s => s.shift_date.slice(5));
+      const goodData = recentShifts.map(s => {
+        const prods = productionRecords.filter(p => p.shift_id === s.id);
+        const prod = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
+        const rej = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
+        return Math.max(0, prod - rej);
+      });
+      const rejData = recentShifts.map(s => {
+        const prods = productionRecords.filter(p => p.shift_id === s.id);
+        return prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
+      });
+
+      if (chartDashProductionInst) chartDashProductionInst.destroy();
+      const ctxProd = document.getElementById('chartDashProduction');
+      if (ctxProd) {
+        chartDashProductionInst = new Chart(ctxProd.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: shiftLabels.length ? shiftLabels : ['No Shifts'],
+            datasets: [
+              { label: 'Good', data: goodData.length ? goodData : [0], backgroundColor: '#10b981', borderRadius: 4, stack: 's' },
+              { label: 'Rejects', data: rejData.length ? rejData : [0], backgroundColor: '#f43f5e', borderRadius: 4, stack: 's' }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 9 } } } },
+            scales: {
+              x: { stacked: true, ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } },
+              y: { stacked: true, ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor }, beginAtZero: true }
+            }
+          }
+        });
+      }
+
+      const oeeSeries = recentShifts.map(s => (calculateShiftOee(s).oee * 100));
+      if (chartDashOeeInst) chartDashOeeInst.destroy();
+      const ctxOee = document.getElementById('chartDashOee');
+      if (ctxOee) {
+        chartDashOeeInst = new Chart(ctxOee.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: shiftLabels.length ? shiftLabels : ['No Shifts'],
+            datasets: [{
+              label: 'OEE %',
+              data: oeeSeries.length ? oeeSeries : [0],
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16,185,129,0.15)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } },
+              y: { ticks: { color: textColor, font: { size: 9 }, callback: v => v + '%' }, grid: { color: gridColor }, beginAtZero: true, max: 100 }
+            }
+          }
+        });
+      }
+
+      const topCycleProfiles = [...records].sort((a, b) => (b.cycle_seconds || 0) - (a.cycle_seconds || 0)).slice(0, 8);
+      if (chartDashCycleTimeInst) chartDashCycleTimeInst.destroy();
+      const ctxCycle = document.getElementById('chartDashCycleTime');
+      if (ctxCycle) {
+        chartDashCycleTimeInst = new Chart(ctxCycle.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: topCycleProfiles.length ? topCycleProfiles.map(r => r.profile) : ['No Profiles'],
+            datasets: [{
+              label: 'Cycle Time (s)',
+              data: topCycleProfiles.length ? topCycleProfiles.map(r => r.cycle_seconds) : [0],
+              backgroundColor: '#3b82f6',
+              borderRadius: 4
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor }, beginAtZero: true },
+              y: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } }
+            }
+          }
+        });
+      }
+
+      const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 };
+      toolsList.forEach(t => { counts[normalizeToolCategory(t.category)] += (parseInt(t.stock) || 0); });
+
+      if (chartDashToolsInst) chartDashToolsInst.destroy();
+      const ctxTools = document.getElementById('chartDashTools');
+      if (ctxTools) {
+        chartDashToolsInst = new Chart(ctxTools.getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Milling', 'Drilling', 'Tapping', 'Chamfer'],
+            datasets: [{ data: [counts.Milling, counts.Drilling, counts.Tapping, counts.Chamfer], backgroundColor: ['#0284c7', '#0ea5e9', '#10b981', '#8b5cf6'], borderWidth: 0 }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 9 } } } }
+          }
+        });
+      }
+    }
+
+    function renderOeeTelemetryChart() {
+      const canvas = document.getElementById('chartOeeTelemetryFull');
+      if (!canvas) return;
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#475569';
+      const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+      const chronological = [...shifts].sort((a, b) => a.shift_date.localeCompare(b.shift_date));
+      const labels = chronological.map(s => `${s.shift_date} ${s.shift_type === 'Night' ? '(N)' : '(D)'}`);
+      const results = chronological.map(s => calculateShiftOee(s));
+
+      if (chartOeeTelemetryInst) chartOeeTelemetryInst.destroy();
+      chartOeeTelemetryInst = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels.length ? labels : ['No shifts logged'],
+          datasets: [
+            { label: 'OEE', data: results.length ? results.map(r => r.oee * 100) : [0], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.3 },
+            { label: 'Availability', data: results.length ? results.map(r => r.availability * 100) : [0], borderColor: '#3b82f6', borderDash: [4, 4], fill: false, tension: 0.3 },
+            { label: 'Performance', data: results.length ? results.map(r => r.performance * 100) : [0], borderColor: '#f59e0b', borderDash: [4, 4], fill: false, tension: 0.3 },
+            { label: 'Quality', data: results.length ? results.map(r => r.quality * 100) : [0], borderColor: '#8b5cf6', borderDash: [4, 4], fill: false, tension: 0.3 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } } },
+          scales: {
+            x: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } },
+            y: { ticks: { color: textColor, font: { size: 9 }, callback: v => v + '%' }, grid: { color: gridColor }, min: 0, max: 120 }
+          }
+        }
+      });
+    }
+
+    function setProfile30Angle(angle) {
+      profile30CurrentAngle = angle;
+      ['quantity', 'shifts', 'rejects'].forEach(a => {
+        const btn = document.getElementById(`btnAngle-${a}`);
+        if (btn) {
+          btn.className = a === angle
+            ? "px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold"
+            : "px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold";
+        }
+      });
+      render30DayProfileAnalytics();
+    }
+
+    function render30DayProfileAnalytics() {
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const thresholdISO = fmtDateISO(thirtyDaysAgo);
+
+      const recentShifts = shifts.filter(s => s.shift_date >= thresholdISO);
+      const recentShiftIds = new Set(recentShifts.map(s => s.id));
+
+      const profileMap = {};
+      productionRecords.filter(p => recentShiftIds.has(p.shift_id)).forEach(p => {
+        const code = (p.profile_code || 'AL 684').trim().toUpperCase();
+        if (!profileMap[code]) {
+          profileMap[code] = { code, produced: 0, rejected: 0, good: 0, shiftIds: new Set() };
+        }
+        const prodQty = parseInt(p.produced) || 0;
+        const rejQty = parseInt(p.rejected) || 0;
+        profileMap[code].produced += prodQty;
+        profileMap[code].rejected += rejQty;
+        profileMap[code].good += Math.max(0, prodQty - rejQty);
+        profileMap[code].shiftIds.add(p.shift_id);
+      });
+
+      const profileList = Object.values(profileMap).map(item => ({
+        ...item,
+        shiftsCount: item.shiftIds.size,
+        avgPerShift: item.shiftIds.size > 0 ? (item.produced / item.shiftIds.size).toFixed(1) : '0',
+        scrapRatePct: item.produced > 0 ? ((item.rejected / item.produced) * 100).toFixed(1) : '0.0'
+      }));
+
+      if (profile30CurrentAngle === 'quantity') profileList.sort((a, b) => b.produced - a.produced);
+      else if (profile30CurrentAngle === 'shifts') profileList.sort((a, b) => b.shiftsCount - a.shiftsCount);
+      else if (profile30CurrentAngle === 'rejects') profileList.sort((a, b) => parseFloat(b.scrapRatePct) - parseFloat(a.scrapRatePct));
+
+      const tbody = document.getElementById('profile30TableBody');
+      if (tbody) {
+        if (profileList.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No profile production logs found in the last 30 days.</td></tr>`;
+        } else {
+          tbody.innerHTML = profileList.map((p, idx) => `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition">
+              <td class="p-3 font-semibold text-slate-400">${idx + 1}</td>
+              <td class="p-3 font-black text-slate-900 dark:text-white">${p.code}</td>
+              <td class="p-3 text-right font-mono font-bold text-blue-600 dark:text-blue-400">${p.produced}</td>
+              <td class="p-3 text-right font-mono text-emerald-600">${p.good}</td>
+              <td class="p-3 text-right font-mono text-rose-600">${p.rejected}</td>
+              <td class="p-3 text-right font-bold">${p.shiftsCount} shift(s)</td>
+              <td class="p-3 text-right font-mono">${p.avgPerShift}</td>
+              <td class="p-3 text-right font-mono font-bold ${parseFloat(p.scrapRatePct) > 5 ? 'text-rose-500' : 'text-slate-600 dark:text-slate-300'}">${p.scrapRatePct}%</td>
+            </tr>
+          `).join('');
+        }
+      }
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#475569';
+      const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+      const chartLabels = profileList.slice(0, 10).map(p => p.code);
+      let chartData = [], chartDatasetLabel = '', chartColor = '#3b82f6';
+
+      if (profile30CurrentAngle === 'quantity') {
+        chartData = profileList.slice(0, 10).map(p => p.produced);
+        chartDatasetLabel = 'Total Produced (Pcs)';
+        chartColor = '#3b82f6';
+      } else if (profile30CurrentAngle === 'shifts') {
+        chartData = profileList.slice(0, 10).map(p => p.shiftsCount);
+        chartDatasetLabel = 'Shift Count';
+        chartColor = '#10b981';
+      } else if (profile30CurrentAngle === 'rejects') {
+        chartData = profileList.slice(0, 10).map(p => parseFloat(p.scrapRatePct));
+        chartDatasetLabel = 'Scrap Rate (%)';
+        chartColor = '#f43f5e';
+      }
+
+      if (chartProfile30Inst) chartProfile30Inst.destroy();
+      const ctx30 = document.getElementById('chartProfile30Days');
+      if (ctx30) {
+        chartProfile30Inst = new Chart(ctx30.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: chartLabels.length ? chartLabels : ['No Data'],
+            datasets: [{
+              label: chartDatasetLabel,
+              data: chartData.length ? chartData : [0],
+              backgroundColor: chartColor,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: textColor, font: { size: 10, weight: 'bold' } }, grid: { display: false } },
+              y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, beginAtZero: true }
+            }
+          }
+        });
+      }
+    }
+
+    // --- NEW: PROFILE PERFORMANCE ANALYTICS ENGINE ---
+    function populateProfileAnalyticsDropdown() {
+       const sel = document.getElementById('analyticsProfileSelect');
+       if (!sel) return;
+       const uniqueProfiles = [...new Set(productionRecords.map(p => (p.profile_code||'').toUpperCase()))].sort();
+       
+       const currentVal = sel.value;
+       sel.innerHTML = '<option value="">-- Select Profile to Analyze --</option>' + 
+           uniqueProfiles.map(p => `<option value="${p}">${p}</option>`).join('');
+       
+       if (uniqueProfiles.includes(currentVal)) {
+           sel.value = currentVal;
+       } else if (uniqueProfiles.length > 0) {
+           sel.value = uniqueProfiles[0];
+       }
+       renderProfileAnalytics();
+    }
+
+    function renderProfileAnalytics() {
+       const code = document.getElementById('analyticsProfileSelect')?.value;
+       if (!code) return; 
+
+       const relevantProds = productionRecords.filter(p => (p.profile_code || '').toUpperCase() === code);
+       
+       const shiftsRun = relevantProds.length;
+       const totalProd = relevantProds.reduce((s, p) => s + (parseInt(p.produced)||0), 0);
+       const totalRej = relevantProds.reduce((s, p) => s + (parseInt(p.rejected)||0), 0);
+       const totalGood = Math.max(0, totalProd - totalRej);
+       const scrapRate = totalProd > 0 ? ((totalRej/totalProd)*100).toFixed(1) : 0.0;
+
+       document.getElementById('paTotalShifts').innerText = shiftsRun;
+       document.getElementById('paTotalProd').innerText = `${totalProd}`;
+       document.getElementById('paTotalGood').innerText = `${totalGood}`;
+       document.getElementById('paScrapRate').innerText = `${scrapRate}%`;
+
+       const chartData = relevantProds.map(p => {
+           const shift = shifts.find(s => s.id === p.shift_id);
+           const date = shift ? shift.shift_date : 'Unknown';
+           const prod = parseInt(p.produced)||0;
+           const rej = parseInt(p.rejected)||0;
+           return { date, good: prod - rej, rej };
+       }).sort((a,b) => a.date.localeCompare(b.date));
+
+       const labels = chartData.map(d => d.date);
+       const goodData = chartData.map(d => d.good);
+       const rejData = chartData.map(d => d.rej);
+
+       const ctx = document.getElementById('chartProfileSpecific');
+       if (!ctx) return;
+
+       if (chartProfileSpecificInst) chartProfileSpecificInst.destroy();
+       
+       const isDark = document.documentElement.classList.contains('dark');
+       const textColor = isDark ? '#cbd5e1' : '#475569';
+       const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+       chartProfileSpecificInst = new Chart(ctx.getContext('2d'), {
+           type: 'bar',
+           data: {
+               labels: labels,
+               datasets: [
+                   { label: 'Good Parts', data: goodData, backgroundColor: '#10b981', stack: 's' },
+                   { label: 'Scrap Parts', data: rejData, backgroundColor: '#f43f5e', stack: 's' }
+               ]
+           },
+           options: {
+               responsive: true, maintainAspectRatio: false,
+               plugins: { legend: { position: 'bottom', labels: { color: textColor } } },
+               scales: {
+                   x: { stacked: true, ticks: { color: textColor }, grid: { display: false } },
+                   y: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor }, beginAtZero: true }
+               }
+           }
+       });
+    }
+
+    // --- PROFILES TABLE (FULL CRUD: VIEW, EDIT, INSTANT DUPLICATE, DELETE) ---
+    function applyFiltersAndRender() {
+      const q = (document.getElementById('logSearchInput')?.value || '').toLowerCase();
+      displayedRecords = records.filter(r => (r.profile || '').toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q));
+
+      const tbody = document.getElementById('logsTableBody');
+      if (!tbody) return;
+
+      if (displayedRecords.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No profile logs found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = displayedRecords.map((r, i) => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+          <td class="p-3.5 font-semibold text-slate-400">${i + 1}</td>
+          <td class="p-3.5 font-bold">${r.profile}</td>
+          <td class="p-3.5">${r.description || '-'}</td>
+          <td class="p-3.5">${r.length || '-'}</td>
+          <td class="p-3.5 font-mono font-bold text-blue-600">${r.cycle_seconds}s</td>
+          <td class="p-3.5 font-mono">${r.feed_speeds || '-'}</td>
+          <td class="p-3.5">${r.tooling || 'Single tool'}</td>
+          <td class="p-3.5 text-center space-x-2">
+            <button onclick="viewProfileDetails(${r.id})" class="text-blue-600 hover:underline font-bold">View</button>
+            <button onclick="openFormModal(${r.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
+            <button onclick="duplicateProfileDirectly(${r.id})" class="text-emerald-600 hover:underline font-bold">Duplicate</button>
+            <button onclick="softDeleteRecord(${r.id})" class="text-rose-600 hover:underline font-bold">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function viewProfileDetails(id) {
+      const r = records.find(item => item.id === id);
+      if (!r) return;
+      document.getElementById('viewProfTitle').innerText = r.profile;
+      document.getElementById('viewProfBody').innerHTML = `
+        <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl">
+          <div><span class="text-slate-400 font-bold">Cycle Time:</span> <b class="text-blue-600 font-mono">${r.cycle_seconds}s</b> (${formatDuration(r.cycle_seconds)})</div>
+          <div><span class="text-slate-400 font-bold">Tooling:</span> <b>${r.tooling || 'Single tool'}</b></div>
+          <div><span class="text-slate-400 font-bold">Feed Speed:</span> <b>${r.feed_speeds || '-'}</b></div>
+          <div><span class="text-slate-400 font-bold">Length:</span> <b>${r.length || '-'}</b></div>
+        </div>
+        <div class="pt-2"><span class="text-slate-400 font-bold">Description:</span> <p class="text-slate-700 dark:text-slate-200">${r.description || 'No description recorded.'}</p></div>
+      `;
+      document.getElementById('modalViewProfile').classList.remove('hidden');
+    }
+
+    async function duplicateProfileDirectly(id) {
+      const item = records.find(r => r.id === id);
+      if (!item) return;
+      const clonePayload = {
+        profile: `${item.profile} (Copy)`,
+        description: item.description,
+        length: item.length,
+        cycle_seconds: item.cycle_seconds,
+        feed_speeds: item.feed_speeds,
+        tooling: item.tooling,
+        is_deleted: false,
+        record_date: todayISO()
+      };
+      
+      const { error } = await supabaseClient.from('cnc_cycle_times').insert([clonePayload]);
+      if (error) {
+        alert("Failed to duplicate profile: " + error.message);
+      } else {
+        showToast(`Duplicated ${item.profile} successfully!`);
+        fetchAllData();
+      }
+    }
+
+    function openFormModal(id = null) {
+      const modal = document.getElementById('modalForm');
+      const title = document.getElementById('formModalTitle');
+      const form = document.getElementById('recordForm');
+      form.reset();
+      document.getElementById('formRowId').value = '';
+
+      if (id) {
+        const item = records.find(r => r.id === id);
+        if (item) {
+          title.innerText = `Edit Profile Recipe: ${item.profile}`;
+          document.getElementById('formRowId').value = item.id;
+          document.getElementById('formProfile').value = item.profile || '';
+          document.getElementById('formDescription').value = item.description || '';
+          document.getElementById('formLength').value = item.length || '';
+          document.getElementById('formCycleSeconds').value = item.cycle_seconds || '';
+          document.getElementById('formFeedSpeeds').value = item.feed_speeds || '';
+          document.getElementById('formTooling').value = item.tooling || '';
+        }
+      } else {
+        title.innerText = 'Log New CNC Profile Recipe';
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function closeFormModal() {
+      document.getElementById('modalForm').classList.add('hidden');
+    }
+
+    async function submitForm(e) {
+      e.preventDefault();
+      const id = document.getElementById('formRowId').value;
+      const payload = {
+        profile: document.getElementById('formProfile').value.trim().toUpperCase(),
+        description: document.getElementById('formDescription').value.trim(),
+        length: document.getElementById('formLength').value.trim(),
+        cycle_seconds: parseInt(document.getElementById('formCycleSeconds').value, 10) || 0,
+        feed_speeds: document.getElementById('formFeedSpeeds').value.trim(),
+        tooling: document.getElementById('formTooling').value.trim() || 'Single tool',
+        is_deleted: false
+      };
+
+      try {
+        if (id) {
+          const { error } = await supabaseClient.from('cnc_cycle_times').update(payload).eq('id', id);
+          if (error) throw new Error(error.message);
+        } else {
+          payload.record_date = todayISO();
+          const { error } = await supabaseClient.from('cnc_cycle_times').insert([payload]);
+          if (error) throw new Error(error.message);
+        }
+        closeFormModal();
+        showToast("Profile saved successfully!");
+        fetchAllData();
+      } catch (error) {
+        alert("Database Error: " + error.message);
+      }
+    }
+
+    async function softDeleteRecord(id) {
+      if (!confirm('Move this CNC Profile to the Recovery Vault?')) return;
+      await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true }).eq('id', id);
+      fetchAllData();
+    }
+
     // --- TOOLS CRUD MODAL & OPERATIONS ---
     function toolsFilterByCategory(cat) {
       switchTab('tools');
@@ -1316,7 +1853,7 @@
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
             <td class="p-3.5 font-semibold text-slate-400">${i + 1}</td>
             <td class="p-3.5 font-bold text-cyan-600">${norm}</td>
-            <td class="p-3.5">${t.sub_type || 'Standard'}</td>
+            <td class="p-3.5 text-slate-400 italic">Included in Desc</td>
             <td class="p-3.5 font-bold">${t.diameter}</td>
             <td class="p-3.5 text-slate-600 dark:text-slate-300">${t.description || '-'}</td>
             <td class="p-3.5 text-center font-bold">${stock} pcs</td>
@@ -1338,10 +1875,10 @@
       document.getElementById('viewToolTitle').innerText = `${normalizeToolCategory(t.category)} (${t.diameter})`;
       document.getElementById('viewToolBody').innerHTML = `
         <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl">
-          <div><span class="text-slate-400 font-bold">Sub-Type:</span> <b>${t.sub_type || 'Standard'}</b></div>
+          <div><span class="text-slate-400 font-bold">Category:</span> <b>${normalizeToolCategory(t.category)}</b></div>
           <div><span class="text-slate-400 font-bold">Stock In Rack:</span> <b class="text-cyan-600">${t.stock} pcs</b></div>
           <div><span class="text-slate-400 font-bold">Location:</span> <b>${t.location || 'Main Storage Rack'}</b></div>
-          <div><span class="text-slate-400 font-bold">Category:</span> <b>${normalizeToolCategory(t.category)}</b></div>
+          <div><span class="text-slate-400 font-bold">Diameter:</span> <b>${t.diameter}</b></div>
         </div>
         <div class="pt-2"><span class="text-slate-400 font-bold">Machining Description:</span> <p class="text-slate-700 dark:text-slate-200">${t.description || 'No specific description noted.'}</p></div>
       `;
@@ -1353,7 +1890,6 @@
       if (!t) return;
       const clonePayload = {
         category: t.category,
-        sub_type: t.sub_type,
         diameter: `${t.diameter} (Copy)`,
         description: t.description,
         stock: t.stock,
@@ -1382,7 +1918,6 @@
           title.innerText = `Edit Tool: ${item.diameter}`;
           document.getElementById('toolsFormId').value = item.id;
           document.getElementById('toolsFormCategory').value = normalizeToolCategory(item.category);
-          document.getElementById('toolsFormSubType').value = item.sub_type || '';
           document.getElementById('toolsFormDiameter').value = item.diameter || '';
           document.getElementById('toolsFormDescription').value = item.description || '';
           document.getElementById('toolsFormStock').value = item.stock || 0;
@@ -1401,11 +1936,19 @@
     async function submitToolForm(e) {
       e.preventDefault();
       const id = document.getElementById('toolsFormId').value;
+      
+      const subType = document.getElementById('toolsFormSubType').value.trim();
+      let desc = document.getElementById('toolsFormDescription').value.trim();
+      
+      // Safely prepend sub-type into the description field to bypass missing schema columns
+      if (subType && !desc.includes(`[${subType}]`)) {
+          desc = `[${subType}] ${desc}`.trim();
+      }
+
       const payload = {
         category: document.getElementById('toolsFormCategory').value,
-        sub_type: document.getElementById('toolsFormSubType').value.trim(),
         diameter: document.getElementById('toolsFormDiameter').value.trim(),
-        description: document.getElementById('toolsFormDescription').value.trim(),
+        description: desc,
         stock: parseInt(document.getElementById('toolsFormStock').value, 10) || 0,
         location: document.getElementById('toolsFormLocation').value.trim(),
         is_deleted: false
@@ -1559,147 +2102,6 @@
       renderBinArchive();
     }
 
-    // --- PROFESSIONAL MEMO GENERATOR ---
-    function generateFormalSupervisorLetterPDF() {
-      if (toolsNoticeList.length === 0) {
-        alert("Please load or add low-stock tools first!");
-        return;
-      }
-
-      const activeRecipients = memoRecipients.filter(r => r.selected);
-      if (activeRecipients.length === 0) {
-        alert("Please select at least one recipient in the Document Details section to address the memo to.");
-        return;
-      }
-
-      const memoDate = document.getElementById('memoDate').value || todayISO();
-      const senderName = document.getElementById('memoSender').value.trim() || 'Poojitha Dilshan';
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('p', 'mm', 'a4');
-      
-      // Corporate Header Bar
-      doc.setFillColor(37, 99, 235);
-      doc.rect(0, 0, 210, 18, 'F');
-      
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
-      doc.setFont("helvetica", "bold");
-      doc.text("CNC 5000 MACHINE", 14, 12);
-      
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
-      doc.text("PRODUCTION FACILITY", 196, 11, { align: 'right' });
-      
-      // Memo Title
-      doc.setTextColor(30, 41, 59);
-      doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-      doc.text("INTERNAL MEMORANDUM", 105, 35, { align: 'center' });
-      
-      // Header Details Block
-      doc.setDrawColor(203, 213, 225);
-      doc.setLineWidth(0.5);
-      doc.line(14, 42, 196, 42); 
-      
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.text("TO:", 14, 52);
-      
-      let currentY = 52;
-      activeRecipients.forEach(r => {
-          doc.setFont("helvetica", "normal");
-          doc.text(`${r.name} (${r.role})`, 40, currentY);
-          currentY += 6; 
-      });
-
-      currentY += 2; 
-
-      doc.setFont("helvetica", "bold");
-      doc.text("FROM:", 14, currentY);
-      doc.setFont("helvetica", "normal");
-      doc.text(senderName, 40, currentY);
-      currentY += 7;
-      
-      doc.setFont("helvetica", "bold");
-      doc.text("DATE:", 14, currentY);
-      doc.setFont("helvetica", "normal");
-      doc.text(memoDate, 40, currentY);
-      currentY += 7;
-      
-      doc.setFont("helvetica", "bold");
-      doc.text("SUBJECT:", 14, currentY);
-      doc.setFont("helvetica", "normal");
-      doc.text("Urgent Requisition Notice for Critical Low-Stock CNC Tools", 40, currentY);
-      currentY += 5;
-      
-      doc.line(14, currentY, 196, currentY); 
-      currentY += 10;
-      
-      // Introductory Text
-      doc.setFontSize(10);
-      doc.text("Dear Sir/Madam,", 14, currentY);
-      currentY += 7;
-      doc.text("Please find below the requested list of CNC machine tools that have fallen below the safe", 14, currentY);
-      currentY += 6;
-      doc.text("operating inventory threshold (< 2 pieces). Expedited restocking approval is requested", 14, currentY);
-      currentY += 6;
-      doc.text("to prevent potential production downtime in the facility.", 14, currentY);
-      currentY += 8;
-      
-      // Table Styling
-      const rows = toolsNoticeList.map((t, idx) => [
-        idx + 1, 
-        t.category, 
-        t.diameter, 
-        `${t.stock} pcs`, 
-        `${t.req_qty} pcs`
-      ]);
-      
-      doc.autoTable({
-        head: [['#', 'Tool Category', 'Size / Diameter', 'Current Stock', 'Recommended Order']],
-        body: rows,
-        startY: currentY,
-        theme: 'grid',
-        headStyles: { 
-          fillColor: [37, 99, 235],
-          textColor: [255, 255, 255], 
-          fontStyle: 'bold',
-          halign: 'center'
-        },
-        columnStyles: {
-          0: { halign: 'center', cellWidth: 15 },
-          3: { halign: 'center', textColor: [225, 29, 72], fontStyle: 'bold' },
-          4: { halign: 'center', fontStyle: 'bold' }
-        },
-        styles: { fontSize: 10, cellPadding: 5 },
-        alternateRowStyles: { fillColor: [248, 250, 252] }
-      });
-      
-      // Signature Block
-      const finalY = doc.lastAutoTable.finalY || currentY;
-      
-      doc.setFont("helvetica", "normal");
-      doc.text("Prepared & Verified By:", 14, finalY + 25);
-      doc.line(14, finalY + 45, 70, finalY + 45); 
-      doc.setFont("helvetica", "bold");
-      doc.text(senderName, 14, finalY + 52);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.text("CNC Operations", 14, finalY + 57);
-
-      doc.save(`CNC5000_Restock_Memo_${memoDate}.pdf`);
-      showToast("Professional Memo exported to PDF.");
-    }
-
-    // --- INITIAL BOOTSTRAP ---
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('memoDate').value = todayISO();
-      loadRecipients();
-      resetShiftLogForm();
-      fetchAllData();
-      fetchToolsData();
-    });
   </script>
 </body>
 </html>
