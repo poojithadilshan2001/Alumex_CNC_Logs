@@ -296,7 +296,7 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- SECTION 2: CNC PROFILES DATABASE (FULL CRUD & COPY)            -->
+    <!-- SECTION 2: CNC PROFILES DATABASE                               -->
     <!-- ============================================================== -->
     <section id="view-logs" class="hidden space-y-6">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -723,29 +723,55 @@
     <!-- SECTION 6: RESTOCK NOTICE                                      -->
     <!-- ============================================================== -->
     <section id="view-toolsreq" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 text-white p-6 rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+      <div class="bg-slate-900 border border-slate-800 text-white p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl">
         <div>
           <span class="text-[10px] font-black uppercase text-cyan-400 tracking-widest">OFFICIAL MEMORANDUM</span>
           <h3 class="text-lg font-black mt-0.5">CNC Machine Tools Restocking Notice</h3>
-          <p class="text-xs text-slate-400 mt-1">Formal notice addressed to supervisor for tools below safe operating levels (&lt; 2 pcs)</p>
+          <p class="text-xs text-slate-400 mt-1">Formal notice addressed to supervisor(s) for tools below safe operating levels (&lt; 2 pcs)</p>
         </div>
-        <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs text-right">
-          <span class="text-slate-400 block text-[10px] uppercase font-bold">ADDRESSED TO:</span>
-          <span class="text-sm font-black text-cyan-400">Mr. U.N. Kavinda</span>
-          <span class="text-[10px] text-slate-400 block">Production & Operations Supervisor</span>
+      </div>
+
+      <!-- DYNAMIC CONFIGURATION BLOCK -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">Document Details & Routing</h4>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Date</label>
+              <input type="date" id="memoDate" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Prepared By (Sender)</label>
+              <input type="text" id="memoSender" value="Poojitha Dilshan" placeholder="Your Name" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none">
+            </div>
+          </div>
+
+          <!-- Dynamic Recipients Manager -->
+          <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col h-full">
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Address To (Select Recipients)</label>
+            <div id="recipientsList" class="flex-grow space-y-2 overflow-y-auto max-h-32 mb-3 pr-1">
+               <!-- Checkboxes inject here -->
+            </div>
+            <div class="flex gap-2 mt-auto pt-3 border-t border-slate-200 dark:border-slate-700">
+               <input type="text" id="newRecipName" placeholder="Name" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-1.5 text-xs outline-none">
+               <input type="text" id="newRecipRole" placeholder="Role/Title" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-1.5 text-xs outline-none">
+               <button type="button" onclick="addNewRecipient()" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">Add</button>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <div class="flex justify-between items-center">
-          <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Selected Tools for Notice to Mr. Kavinda</h4>
+          <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Selected Tools for Notice</h4>
           <button onclick="autoPopulateLowStock()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ Load Low Stock (&lt;2)</button>
         </div>
         <div id="requisitionItemsContainer" class="space-y-2 max-h-64 overflow-y-auto pr-1">
           <p class="text-xs text-slate-400 italic">No tools selected yet. Click "+ Load Low Stock".</p>
         </div>
         <div class="pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-end">
-          <button onclick="generateFormalSupervisorLetterPDF()" class="bg-rose-600 hover:bg-rose-700 text-white font-black px-6 py-2.5 rounded-xl text-xs transition shadow-lg shadow-rose-600/20">Export PDF Letter to Mr. Kavinda</button>
+          <button onclick="generateFormalSupervisorLetterPDF()" class="bg-rose-600 hover:bg-rose-700 text-white font-black px-6 py-2.5 rounded-xl text-xs transition shadow-lg shadow-rose-600/20">Export PDF Letter</button>
         </div>
       </div>
     </section>
@@ -961,6 +987,11 @@
     let downtimeEvents = [];
     let planningCart = [];
 
+    // --- RECIPIENTS LOGIC ---
+    let memoRecipients = [
+        { id: 1, name: 'Mr. U.N. Kavinda', role: 'Production & Operations Supervisor', selected: true }
+    ];
+
     let profilesLoaded = false;
     let toolsLoaded = false;
 
@@ -988,6 +1019,78 @@
       if (c.includes('tap')) return 'Tapping';
       if (c.includes('chamfer')) return 'Chamfer';
       return 'Milling';
+    }
+
+    // --- RECIPIENTS DATA MANAGEMENT ---
+    function loadRecipients() {
+        const saved = localStorage.getItem('alumex_memo_recipients');
+        if (saved) {
+            try {
+                memoRecipients = JSON.parse(saved);
+            } catch(e) {}
+        }
+        renderRecipients();
+    }
+
+    function saveRecipients() {
+        localStorage.setItem('alumex_memo_recipients', JSON.stringify(memoRecipients));
+    }
+
+    function renderRecipients() {
+        const container = document.getElementById('recipientsList');
+        if (!container) return;
+        
+        if (memoRecipients.length === 0) {
+            container.innerHTML = `<p class="text-xs text-slate-400 italic">No recipients added.</p>`;
+            return;
+        }
+
+        container.innerHTML = memoRecipients.map(r => `
+            <div class="flex items-center justify-between bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                <label class="flex items-center gap-2 cursor-pointer w-full">
+                    <input type="checkbox" onchange="toggleRecipient(${r.id})" ${r.selected ? 'checked' : ''} class="w-4 h-4 text-blue-600 rounded border-slate-300">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-slate-900 dark:text-white">${r.name}</span>
+                        <span class="text-[10px] text-slate-500">${r.role}</span>
+                    </div>
+                </label>
+                <button onclick="removeRecipient(${r.id})" class="text-rose-500 hover:text-rose-700 font-bold px-2 text-sm">&times;</button>
+            </div>
+        `).join('');
+    }
+
+    function toggleRecipient(id) {
+        const r = memoRecipients.find(x => x.id === id);
+        if (r) {
+            r.selected = !r.selected;
+            saveRecipients();
+        }
+    }
+
+    function removeRecipient(id) {
+        memoRecipients = memoRecipients.filter(x => x.id !== id);
+        saveRecipients();
+        renderRecipients();
+    }
+
+    function addNewRecipient() {
+        const nameInp = document.getElementById('newRecipName');
+        const roleInp = document.getElementById('newRecipRole');
+        const name = nameInp.value.trim();
+        const role = roleInp.value.trim();
+        
+        if (!name || !role) {
+            alert("Please enter both Name and Role/Title.");
+            return;
+        }
+
+        const newId = memoRecipients.length > 0 ? Math.max(...memoRecipients.map(r => r.id)) + 1 : 1;
+        memoRecipients.push({ id: newId, name, role, selected: true });
+        saveRecipients();
+        renderRecipients();
+        
+        nameInp.value = '';
+        roleInp.value = '';
     }
 
     function calculateShiftOee(shift) {
@@ -1721,7 +1824,6 @@
       div.innerHTML = `
         <div>
           <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Profile Code</label>
-          <!-- Using Datalist for autocomplete -->
           <input type="text" list="profileDataList" oninput="window.autoFillCycleTime(this)" placeholder="e.g. AL 684" class="profCodeInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold focus:ring-2 focus:ring-blue-500 outline-none transition" value="${prefill ? prefill.profile_code : ''}">
         </div>
         <div>
@@ -1754,14 +1856,12 @@
       `;
       container.appendChild(div);
 
-      // Auto trigger cycle fill if prefilled with a code but cycle wasn't set yet
       if (prefill && prefill.profile_code && !prefillCycle) {
           const inp = div.querySelector('.profCodeInput');
           if (inp) window.autoFillCycleTime(inp);
       }
     }
 
-    // Auto-populates cycle time from master database when user types the code
     window.autoFillCycleTime = function(input) {
         const code = input.value.trim().toUpperCase();
         const rec = records.find(r => (r.profile||'').toUpperCase() === code);
@@ -1867,11 +1967,9 @@
                 reject_reason 
             });
 
-            // --- SMART CONNECT LOGIC: Add / Update Master Profiles ---
             if (cycleSec > 0) {
                 const existingProfile = records.find(r => (r.profile||'').toUpperCase() === code);
                 if (!existingProfile) {
-                    // Profile code is entirely new, push it to our global creation queue
                     if (!cycleTimeSyncPayloads.some(p => p.profile === code)) {
                         cycleTimeSyncPayloads.push({
                             profile: code,
@@ -1882,8 +1980,6 @@
                         });
                     }
                 } else if (existingProfile.cycle_seconds !== cycleSec) {
-                    // Profile exists, but the user put a different cycle time in the shift log
-                    // Automatically update the main CNC Profile recipe library
                     cycleTimeUpdatePromises.push(
                         supabaseClient.from('cnc_cycle_times')
                         .update({ cycle_seconds: cycleSec })
@@ -1894,7 +1990,6 @@
           }
         });
 
-        // 1. Process smart-sync updates to CNC Profile database concurrently
         if (cycleTimeSyncPayloads.length > 0) {
             await supabaseClient.from('cnc_cycle_times').insert(cycleTimeSyncPayloads);
         }
@@ -1902,13 +1997,11 @@
             await Promise.all(cycleTimeUpdatePromises);
         }
 
-        // 2. Insert the actual production records for the shift
         if (prodPayloads.length > 0) {
           const { error: pErr } = await supabaseClient.from('production_records').insert(prodPayloads);
           if (pErr) throw new Error("Profiles Insert Error: " + pErr.message);
         }
 
-        // 3. Process Downtime events
         const dtElements = document.querySelectorAll('#downtimeCardsContainer > div');
         const dtPayloads = [];
         dtElements.forEach(el => {
@@ -1927,7 +2020,6 @@
         showToast(shiftId ? "Shift log & Profiles updated!" : "Shift log saved successfully!");
         resetShiftLogForm();
         
-        // Refresh Everything to reflect new cycle times and shift logs
         await fetchAllData(); 
         switchOeeSubTab('alllogs');
       } catch (err) {
@@ -1990,7 +2082,6 @@
 
       records.forEach(r => {
         selOptions += `<option value="${r.id}">${r.profile} (${r.cycle_seconds}s)</option>`;
-        // Datalist auto-complete options
         dlistOptions += `<option value="${r.profile}">Cycle: ${r.cycle_seconds}s</option>`;
       });
 
@@ -2070,7 +2161,7 @@
       const mins = Math.floor((totalSeconds % 3600) / 60);
       document.getElementById('calcTheorTime').innerText = `${hrs}h ${mins}m`;
 
-      const netShiftSec = 10.5 * 3600; // 12h - 1.5h break
+      const netShiftSec = 10.5 * 3600; 
       const estShifts = (totalSeconds / netShiftSec).toFixed(1);
       document.getElementById('calcShiftRequirement').innerText = estShifts;
     }
@@ -2193,9 +2284,144 @@
       });
       doc.save("Alumex_Tools_Inventory.pdf");
     }
+    
+    // --- PROFESSIONAL MEMO GENERATOR ---
+    function generateFormalSupervisorLetterPDF() {
+      if (toolsNoticeList.length === 0) {
+        alert("Please load or add low-stock tools first!");
+        return;
+      }
+
+      const activeRecipients = memoRecipients.filter(r => r.selected);
+      if (activeRecipients.length === 0) {
+        alert("Please select at least one recipient in the Document Details section to address the memo to.");
+        return;
+      }
+
+      const memoDate = document.getElementById('memoDate').value || todayISO();
+      const senderName = document.getElementById('memoSender').value.trim() || 'Poojitha Dilshan';
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      
+      // Corporate Header Bar
+      doc.setFillColor(37, 99, 235);
+      doc.rect(0, 0, 210, 18, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("ALUMEX PLC", 14, 12);
+      
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text("COMPONENT PLANT CNC OPERATIONS", 196, 11, { align: 'right' });
+      
+      // Memo Title
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text("INTERNAL MEMORANDUM", 105, 35, { align: 'center' });
+      
+      // Header Details Block
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.5);
+      doc.line(14, 42, 196, 42); 
+      
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("TO:", 14, 52);
+      
+      let currentY = 52;
+      activeRecipients.forEach(r => {
+          doc.setFont("helvetica", "normal");
+          doc.text(`${r.name} (${r.role})`, 40, currentY);
+          currentY += 6; 
+      });
+
+      currentY += 2; // Extra padding
+
+      doc.setFont("helvetica", "bold");
+      doc.text("FROM:", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      doc.text(senderName, 40, currentY);
+      currentY += 7;
+      
+      doc.setFont("helvetica", "bold");
+      doc.text("DATE:", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      doc.text(memoDate, 40, currentY);
+      currentY += 7;
+      
+      doc.setFont("helvetica", "bold");
+      doc.text("SUBJECT:", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      doc.text("Urgent Requisition Notice for Critical Low-Stock CNC Tools", 40, currentY);
+      currentY += 5;
+      
+      doc.line(14, currentY, 196, currentY); 
+      currentY += 10;
+      
+      // Introductory Text
+      doc.setFontSize(10);
+      doc.text("Dear Sir/Madam,", 14, currentY);
+      currentY += 7;
+      doc.text("Please find below the requested list of CNC machine tools that have fallen below the safe", 14, currentY);
+      currentY += 6;
+      doc.text("operating inventory threshold (< 2 pieces). Expedited restocking approval is requested", 14, currentY);
+      currentY += 6;
+      doc.text("to prevent potential production downtime in the Component Plant.", 14, currentY);
+      currentY += 8;
+      
+      // Table Styling
+      const rows = toolsNoticeList.map((t, idx) => [
+        idx + 1, 
+        t.category, 
+        t.diameter, 
+        `${t.stock} pcs`, 
+        `${t.req_qty} pcs`
+      ]);
+      
+      doc.autoTable({
+        head: [['#', 'Tool Category', 'Size / Diameter', 'Current Stock', 'Recommended Order']],
+        body: rows,
+        startY: currentY,
+        theme: 'grid',
+        headStyles: { 
+          fillColor: [37, 99, 235],
+          textColor: [255, 255, 255], 
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 15 },
+          3: { halign: 'center', textColor: [225, 29, 72], fontStyle: 'bold' },
+          4: { halign: 'center', fontStyle: 'bold' }
+        },
+        styles: { fontSize: 10, cellPadding: 5 },
+        alternateRowStyles: { fillColor: [248, 250, 252] }
+      });
+      
+      // Signature Block
+      const finalY = doc.lastAutoTable.finalY || currentY;
+      
+      doc.setFont("helvetica", "normal");
+      doc.text("Prepared & Verified By:", 14, finalY + 25);
+      doc.line(14, finalY + 45, 70, finalY + 45); 
+      doc.setFont("helvetica", "bold");
+      doc.text(senderName, 14, finalY + 52);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text("CNC Operations | Alumex PLC", 14, finalY + 57);
+
+      doc.save(`Alumex_Restock_Memo_${memoDate}.pdf`);
+      showToast("Professional Memo exported to PDF.");
+    }
 
     // --- INITIAL BOOTSTRAP ---
     document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('memoDate').value = todayISO();
+      loadRecipients();
       resetShiftLogForm();
       fetchAllData();
       fetchToolsData();
