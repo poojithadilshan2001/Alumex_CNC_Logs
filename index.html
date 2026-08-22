@@ -60,7 +60,7 @@
         <div class="bg-blue-600 text-white w-10 h-10 rounded-2xl font-black text-lg flex items-center justify-center shadow-md shadow-blue-500/20">5K</div>
         <div>
           <h1 class="text-base md:text-lg font-black text-slate-900 dark:text-white leading-tight tracking-tight">CNC 5000 MACHINE</h1>
-          <p class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">Advanced Production Intelligence &amp; OEE Operations</p>
+          <p class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">Component Plant CNC Intelligence &amp; OEE Operations</p>
         </div>
       </div>
 
@@ -296,9 +296,47 @@
     </section>
 
     <!-- ============================================================== -->
-    <!-- SECTION 2: CNC PROFILES DATABASE                               -->
+    <!-- SECTION 2: CNC PROFILES DATABASE & ANALYTICS                   -->
     <!-- ============================================================== -->
     <section id="view-logs" class="hidden space-y-6">
+      
+      <!-- NEW: Profile Performance Analytics Dashboard -->
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 border-b border-slate-200 dark:border-slate-700 pb-4">
+           <div>
+              <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">PROFILE PERFORMANCE ENGINE</span>
+              <h3 class="font-black text-lg text-slate-900 dark:text-white">Individual Yield Analytics</h3>
+              <p class="text-xs text-slate-500">Select a specific profile below to view its historical production yield and scrap data.</p>
+           </div>
+           <select id="analyticsProfileSelect" onchange="renderProfileAnalytics()" class="w-full sm:w-auto bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2 text-sm font-bold outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+              <option value="">-- Loading Profiles --</option>
+           </select>
+        </div>
+  
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+           <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center border border-slate-100 dark:border-slate-700">
+              <span class="text-[10px] font-bold text-slate-400 uppercase">Shifts Run</span>
+              <p id="paTotalShifts" class="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">0</p>
+           </div>
+           <div class="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-2xl text-center border border-blue-100 dark:border-blue-900/50">
+              <span class="text-[10px] font-bold text-blue-500 uppercase">Total Produced</span>
+              <p id="paTotalProd" class="text-2xl font-black text-blue-600 mt-1">0</p>
+           </div>
+           <div class="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-2xl text-center border border-emerald-100 dark:border-emerald-900/50">
+              <span class="text-[10px] font-bold text-emerald-500 uppercase">Good Parts</span>
+              <p id="paTotalGood" class="text-2xl font-black text-emerald-600 mt-1">0</p>
+           </div>
+           <div class="bg-rose-50 dark:bg-rose-950/40 p-4 rounded-2xl text-center border border-rose-100 dark:border-rose-900/50">
+              <span class="text-[10px] font-bold text-rose-500 uppercase">Scrap Rate</span>
+              <p id="paScrapRate" class="text-2xl font-black text-rose-600 mt-1">0.0%</p>
+           </div>
+        </div>
+  
+        <div class="h-64 w-full">
+           <canvas id="chartProfileSpecific"></canvas>
+        </div>
+      </div>
+
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
@@ -354,8 +392,8 @@
     <section id="view-production" class="hidden space-y-6">
       <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 rounded-3xl shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
         <div>
-          <h3 class="font-black text-lg">CNC 5000 Shift Schedule</h3>
-          <p class="text-xs text-blue-200 mt-1">Component Plant Milling Operations</p>
+          <h3 class="font-black text-lg">Facility Shift Schedule</h3>
+          <p class="text-xs text-blue-200 mt-1">CNC 5000 Milling Operations Hub</p>
         </div>
         <div class="grid grid-cols-2 gap-3 text-xs bg-black/20 p-3 rounded-xl border border-white/10 backdrop-blur-sm">
           <div>
@@ -582,7 +620,7 @@
             </div>
             <div>
               <label class="block font-bold mb-1">Supervisor Sign</label>
-              <input type="text" id="logSupervisorSign" placeholder="e.g., Jane Doe" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+              <input type="text" id="logSupervisorSign" placeholder="e.g., U.N. Kavinda" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
             </div>
             <div>
               <label class="block font-bold mb-1">Quality Sign</label>
@@ -841,7 +879,7 @@
         <input type="hidden" id="formRowId">
         <div>
           <label class="block font-bold mb-1">Profile Code *</label>
-          <input type="text" id="formProfile" required placeholder="e.g., PRO-684" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
+          <input type="text" id="formProfile" required placeholder="e.g., AL 684" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
         </div>
         <div>
           <label class="block font-bold mb-1">Description / Feature</label>
@@ -993,7 +1031,7 @@
 
     // --- RECIPIENTS LOGIC (Updated LocalStorage Key to prevent cached names) ---
     let memoRecipients = [
-        { id: 1, name: 'John Doe', role: 'Plant Supervisor', selected: true }
+        { id: 1, name: 'Mr. U.N. Kavinda', role: 'Production & Operations Supervisor', selected: true }
     ];
 
     let profilesLoaded = false;
@@ -1002,6 +1040,8 @@
     let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null;
     let chartProfile30Inst = null;
     let chartOeeTelemetryInst = null;
+    let chartProfileSpecificInst = null; // New Profile Analytics Chart
+    
     let profile30CurrentAngle = 'quantity';
     let cardCounter = 0, dtCounter = 0;
 
@@ -1165,7 +1205,7 @@
       }
 
       if (tabId === 'dashboard') renderMasterDashboard();
-      if (tabId === 'logs') applyFiltersAndRender();
+      if (tabId === 'logs') { applyFiltersAndRender(); populateProfileAnalyticsDropdown(); }
       if (tabId === 'oee') { renderShiftsTable(); renderLatestShiftCard(); renderOeeTelemetryChart(); }
       if (tabId === 'production') renderPlanningCart();
       if (tabId === 'tools') applyToolsFiltersAndRender();
@@ -1179,6 +1219,7 @@
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
       document.querySelectorAll('.themeIcon').forEach(el => el.innerText = isDark ? '☀' : '🌙');
       renderMasterDashboard();
+      renderProfileAnalytics(); // refresh new chart color
     }
 
     (function initTheme() {
@@ -1228,6 +1269,7 @@
       renderReportPreview();
       render30DayProfileAnalytics();
       renderOeeTelemetryChart();
+      populateProfileAnalyticsDropdown(); // Init the new feature
     }
 
     async function fetchToolsData() {
@@ -1474,7 +1516,7 @@
 
       const profileMap = {};
       productionRecords.filter(p => recentShiftIds.has(p.shift_id)).forEach(p => {
-        const code = (p.profile_code || 'PRO-684').trim().toUpperCase();
+        const code = (p.profile_code || 'AL 684').trim().toUpperCase();
         if (!profileMap[code]) {
           profileMap[code] = { code, produced: 0, rejected: 0, good: 0, shiftIds: new Set() };
         }
@@ -1563,6 +1605,82 @@
           }
         });
       }
+    }
+
+    // --- NEW: PROFILE PERFORMANCE ANALYTICS ENGINE ---
+    function populateProfileAnalyticsDropdown() {
+       const sel = document.getElementById('analyticsProfileSelect');
+       if (!sel) return;
+       const uniqueProfiles = [...new Set(productionRecords.map(p => (p.profile_code||'').toUpperCase()))].sort();
+       
+       const currentVal = sel.value;
+       sel.innerHTML = '<option value="">-- Select Profile to Analyze --</option>' + 
+           uniqueProfiles.map(p => `<option value="${p}">${p}</option>`).join('');
+       
+       if (uniqueProfiles.includes(currentVal)) {
+           sel.value = currentVal;
+       } else if (uniqueProfiles.length > 0) {
+           sel.value = uniqueProfiles[0];
+       }
+       renderProfileAnalytics();
+    }
+
+    function renderProfileAnalytics() {
+       const code = document.getElementById('analyticsProfileSelect')?.value;
+       if (!code) return; 
+
+       const relevantProds = productionRecords.filter(p => (p.profile_code || '').toUpperCase() === code);
+       
+       const shiftsRun = relevantProds.length;
+       const totalProd = relevantProds.reduce((s, p) => s + (parseInt(p.produced)||0), 0);
+       const totalRej = relevantProds.reduce((s, p) => s + (parseInt(p.rejected)||0), 0);
+       const totalGood = Math.max(0, totalProd - totalRej);
+       const scrapRate = totalProd > 0 ? ((totalRej/totalProd)*100).toFixed(1) : 0.0;
+
+       document.getElementById('paTotalShifts').innerText = shiftsRun;
+       document.getElementById('paTotalProd').innerText = `${totalProd}`;
+       document.getElementById('paTotalGood').innerText = `${totalGood}`;
+       document.getElementById('paScrapRate').innerText = `${scrapRate}%`;
+
+       const chartData = relevantProds.map(p => {
+           const shift = shifts.find(s => s.id === p.shift_id);
+           const date = shift ? shift.shift_date : 'Unknown';
+           const prod = parseInt(p.produced)||0;
+           const rej = parseInt(p.rejected)||0;
+           return { date, good: prod - rej, rej };
+       }).sort((a,b) => a.date.localeCompare(b.date));
+
+       const labels = chartData.map(d => d.date);
+       const goodData = chartData.map(d => d.good);
+       const rejData = chartData.map(d => d.rej);
+
+       const ctx = document.getElementById('chartProfileSpecific');
+       if (!ctx) return;
+
+       if (chartProfileSpecificInst) chartProfileSpecificInst.destroy();
+       
+       const isDark = document.documentElement.classList.contains('dark');
+       const textColor = isDark ? '#cbd5e1' : '#475569';
+       const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+       chartProfileSpecificInst = new Chart(ctx.getContext('2d'), {
+           type: 'bar',
+           data: {
+               labels: labels,
+               datasets: [
+                   { label: 'Good Parts', data: goodData, backgroundColor: '#10b981', stack: 's' },
+                   { label: 'Scrap Parts', data: rejData, backgroundColor: '#f43f5e', stack: 's' }
+               ]
+           },
+           options: {
+               responsive: true, maintainAspectRatio: false,
+               plugins: { legend: { position: 'bottom', labels: { color: textColor } } },
+               scales: {
+                   x: { stacked: true, ticks: { color: textColor }, grid: { display: false } },
+                   y: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor }, beginAtZero: true }
+               }
+           }
+       });
     }
 
     // --- PROFILES TABLE (FULL CRUD: VIEW, EDIT, INSTANT DUPLICATE, DELETE) ---
@@ -1824,7 +1942,7 @@
       div.innerHTML = `
         <div>
           <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Profile Code</label>
-          <input type="text" list="profileDataList" oninput="window.autoFillCycleTime(this)" placeholder="e.g. PRO-684" class="profCodeInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold focus:ring-2 focus:ring-blue-500 outline-none transition" value="${prefill ? prefill.profile_code : ''}">
+          <input type="text" list="profileDataList" oninput="window.autoFillCycleTime(this)" placeholder="e.g. AL 684" class="profCodeInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold focus:ring-2 focus:ring-blue-500 outline-none transition" value="${prefill ? prefill.profile_code : ''}">
         </div>
         <div>
           <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Cycle (s)</label>
@@ -1899,7 +2017,7 @@
       document.getElementById('downtimeCardsContainer').innerHTML = '';
       document.getElementById('logDate').value = todayISO();
       
-      addProfileCard({ profile_code: 'PRO-684', target: 50, produced: 50, rejected: 0, reject_reason: '' });
+      addProfileCard({ profile_code: 'AL 684', target: 50, produced: 50, rejected: 0, reject_reason: '' });
       addProfileCard();
       addProfileCard();
     }
