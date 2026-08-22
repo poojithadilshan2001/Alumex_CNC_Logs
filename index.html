@@ -28,9 +28,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0"></script>
-  <!-- SheetJS -->
+  <!-- SheetJS (Excel/CSV parsing and exporting) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <!-- jsPDF & AutoTable -->
+  <!-- PDF.js (For extracting text from uploaded PDFs) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <!-- jsPDF & AutoTable (For generating PDFs) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <style>
@@ -339,6 +341,10 @@
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
             <span>+</span> Log New Profile
+          </button>
+          <input type="file" id="importProfileFile" accept=".xlsx, .xls, .csv, .pdf" class="hidden" onchange="handleProfileImport(event)">
+          <button onclick="document.getElementById('importProfileFile').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1">
+            <span>📥</span> Import
           </button>
         </div>
         <div class="flex items-center gap-2">
@@ -1029,6 +1035,13 @@ const SUPABASE_ANON_KEY = "your-anon-key-here";</pre>
     }
 
     // ========================================================================
+    // PDF.JS WORKER CONFIGURATION
+    // ========================================================================
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    }
+
+    // ========================================================================
     // LOCAL STORAGE DATABASE (Demo Mode Fallback)
     // ========================================================================
     const LocalDB = {
@@ -1173,7 +1186,7 @@ const SUPABASE_ANON_KEY = "your-anon-key-here";</pre>
     let cardCounter = 0, dtCounter = 0;
 
     // ========================================================================
-    // SETUP SQL (Updated with Provided Report Data)
+    // SETUP SQL
     // ========================================================================
     const SETUP_SQL = `-- CNC 5000 Database Schema
 -- Run this in Supabase SQL Editor
@@ -1359,6 +1372,149 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
         grid: isDark ? '#334155' : '#e2e8f0',
         isDark
       };
+    }
+
+    // ========================================================================
+    // IMPORT PROFILES (EXCEL / PDF)
+    // ========================================================================
+    async function handleProfileImport(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const fileName = file.name.toLowerCase();
+      const isPDF = fileName.endsWith('.pdf');
+      
+      showToast('Parsing file... Please wait.', false);
+      
+      try {
+        let newProfiles = [];
+        if (isPDF) {
+          if (typeof pdfjsLib === 'undefined') {
+            showToast('PDF library not loaded.', true);
+            e.target.value = '';
+            return;
+          }
+          newProfiles = await parsePdfForProfiles(file);
+        } else {
+          newProfiles = await parseExcelForProfiles(file);
+        }
+        
+        if (newProfiles.length > 0) {
+          if (IS_DEMO_MODE) {
+            await LocalDB.insert('cnc_cycle_times', newProfiles);
+          } else {
+            const { error } = await supabaseClient.from('cnc_cycle_times').insert(newProfiles);
+            if (error) throw error;
+          }
+          showToast(`Successfully imported ${newProfiles.length} profiles!`);
+          fetchAllData();
+        } else {
+          showToast('No recognizable profile data found in file.', true);
+        }
+      } catch (err) {
+        showToast('Import failed: ' + (err.message || err), true);
+      }
+      
+      e.target.value = ''; // Reset input
+    }
+
+    async function parseExcelForProfiles(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const json = XLSX.utils.sheet_to_json(worksheet);
+            
+            const profiles = json.map(row => {
+              const getVal = (...keys) => {
+                for (let k of Object.keys(row)) {
+                  if (keys.some(key => k.toLowerCase().includes(key))) return row[k];
+                }
+                return '';
+              };
+              
+              const profile = getVal('profile', 'code') || 'UNKNOWN';
+              const desc = getVal('desc') || '';
+              const length = getVal('length', 'dim') || '';
+              const cycleRaw = getVal('sec', 'cycle', 'duration');
+              const cycle = parseInt(cycleRaw, 10) || 0;
+              const feed = getVal('feed', 'speed') || '';
+              const tooling = getVal('tooling', 'tool') || 'Single tool';
+              
+              if (profile === 'UNKNOWN' && !desc) return null;
+              
+              return {
+                profile: String(profile).trim().toUpperCase(),
+                description: String(desc).trim(),
+                length: String(length).trim(),
+                cycle_seconds: cycle,
+                feed_speeds: String(feed).trim(),
+                tooling: String(tooling).trim(),
+                is_deleted: false,
+                record_date: todayISO()
+              };
+            }).filter(Boolean);
+            
+            resolve(profiles);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    async function parsePdfForProfiles(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let fullText = "";
+      
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        fullText += pageText + " \n";
+      }
+
+      // Best-effort PDF extraction looking for AL/VB codes and subsequent seconds (e.g. 82s)
+      const profiles = [];
+      const words = fullText.split(/\s+/);
+      
+      for (let i = 0; i < words.length; i++) {
+        if ((words[i] === 'AL' || words[i] === 'VB') && /^\d+/.test(words[i+1])) {
+          const profileCode = `${words[i]} ${words[i+1]}`;
+          let cycleSec = 0;
+          
+          // Scan ahead up to 20 tokens to find something ending in 's' like '82s'
+          for (let j = i + 1; j < Math.min(i + 20, words.length); j++) {
+             if (/^\d+s$/.test(words[j])) {
+                cycleSec = parseInt(words[j].replace('s', ''), 10);
+                break;
+             }
+          }
+          
+          // Prevent exact duplication from the same parse loop
+          if (!profiles.find(p => p.profile === profileCode && p.cycle_seconds === cycleSec)) {
+              profiles.push({
+                profile: profileCode,
+                description: 'Imported from PDF',
+                length: '-',
+                cycle_seconds: cycleSec || 60, // fallback
+                feed_speeds: '600',
+                tooling: 'Single tool',
+                is_deleted: false,
+                record_date: todayISO()
+              });
+          }
+          i++; // skip next word as it's part of the profile code
+        }
+      }
+      return profiles;
     }
 
     // ========================================================================
