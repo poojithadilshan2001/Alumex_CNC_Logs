@@ -44,6 +44,12 @@
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen font-sans antialiased transition-colors duration-200">
 
+  <!-- NOTIFICATION TOAST -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-slate-700">
+    <span id="toastIcon">✓</span>
+    <span id="toastMessage">Action successful</span>
+  </div>
+
   <!-- ============================================================== -->
   <!-- HEADER & BRAND BAR                                             -->
   <!-- ============================================================== -->
@@ -455,7 +461,7 @@
           <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm space-y-1">
             <span class="text-amber-300 font-black uppercase text-[10px]">Performance (P)</span>
             <p class="font-mono font-bold text-white text-sm">Ideal Time / Operating Min</p>
-            <p class="text-[11px] text-slate-300">Ideal time = Σ (Parts Produced × Profile Standard Cycle Time in seconds) / 60.</p>
+            <p class="text-[11px] text-slate-300">Ideal time = Σ (Parts Produced × Profile Cycle Time) / 60.</p>
           </div>
 
           <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm space-y-1">
@@ -522,6 +528,9 @@
           </div>
 
           <!-- Dynamic Profile Rows -->
+          <!-- DATALIST FOR PROFILE AUTOCOMPLETE -->
+          <datalist id="profileDataList"></datalist>
+          
           <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
             <div class="flex justify-between items-center">
               <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Profiles Produced in Shift</span>
@@ -997,8 +1006,15 @@
       let idealMin = 0;
       prods.forEach(p => {
         const code = (p.profile_code || '').trim().toUpperCase();
-        const profileRec = records.find(r => (r.profile || '').trim().toUpperCase() === code);
-        const cycleSec = profileRec ? (parseFloat(profileRec.cycle_seconds) || 0) : 0;
+        
+        // Smart Sync: Use historical cycle seconds saved in log. 
+        // Fallback to current database value if not available.
+        let cycleSec = p.ideal_cycle_seconds;
+        if (cycleSec == null || cycleSec <= 0) {
+            const profileRec = records.find(r => (r.profile || '').trim().toUpperCase() === code);
+            cycleSec = profileRec ? (parseFloat(profileRec.cycle_seconds) || 0) : 0;
+        }
+
         idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
       });
 
@@ -1582,7 +1598,7 @@
       fetchAllData();
     }
 
-    // --- PRODUCTION & OEE (FULL CRUD: VIEW, EDIT, ACTIONS) ---
+    // --- PRODUCTION & OEE (SMART PROFILE SYNC INTEGRATED) ---
     function switchOeeSubTab(sub) {
       ['latest', 'addlog', 'alllogs', 'oeeanalysis'].forEach(s => {
         document.getElementById(`oeeSub-${s}`)?.classList.add('hidden');
@@ -1674,10 +1690,10 @@
         </div>
         <table class="w-full text-left text-xs border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden block">
           <thead class="bg-slate-100 dark:bg-slate-700/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-200">
-            <tr><th class="p-2">Profile</th><th class="p-2 text-right">Target</th><th class="p-2 text-right">Produced</th><th class="p-2 text-right">Reject</th></tr>
+            <tr><th class="p-2">Profile</th><th class="p-2">Cycle Time</th><th class="p-2 text-right">Target</th><th class="p-2 text-right">Produced</th><th class="p-2 text-right">Reject</th></tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-700 w-full table">
-            ${prods.map(p => `<tr><td class="p-2 font-bold">${p.profile_code}</td><td class="p-2 text-right font-mono">${p.target}</td><td class="p-2 text-right font-mono text-blue-600 font-bold">${p.produced}</td><td class="p-2 text-right font-mono text-rose-600">${p.rejected}</td></tr>`).join('')}
+            ${prods.map(p => `<tr><td class="p-2 font-bold">${p.profile_code}</td><td class="p-2 font-mono text-slate-500">${p.ideal_cycle_seconds || '- '}s</td><td class="p-2 text-right font-mono">${p.target}</td><td class="p-2 text-right font-mono text-blue-600 font-bold">${p.produced}</td><td class="p-2 text-right font-mono text-rose-600">${p.rejected}</td></tr>`).join('')}
           </tbody>
         </table>
       `;
@@ -1689,39 +1705,72 @@
       const cid = cardCounter;
       const container = document.getElementById('profileCardsContainer');
       const div = document.createElement('div');
-      div.className = "p-3 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-700/30 grid grid-cols-2 sm:grid-cols-6 gap-2 items-center text-xs";
+      div.className = "p-3 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-700/30 grid grid-cols-2 lg:grid-cols-7 gap-2 items-center text-xs";
       div.id = `profCard-${cid}`;
+
+      let prefillCycle = '';
+      if (prefill) {
+         if (prefill.ideal_cycle_seconds) {
+             prefillCycle = prefill.ideal_cycle_seconds;
+         } else if (prefill.profile_code) {
+             const r = records.find(x => x.profile.toUpperCase() === prefill.profile_code.toUpperCase());
+             if (r) prefillCycle = r.cycle_seconds;
+         }
+      }
+
       div.innerHTML = `
         <div>
           <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Profile Code</label>
-          <input type="text" placeholder="e.g. AL 684" class="profCodeInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2 font-bold" value="${prefill ? prefill.profile_code : 'AL 684'}">
+          <!-- Using Datalist for autocomplete -->
+          <input type="text" list="profileDataList" oninput="window.autoFillCycleTime(this)" placeholder="e.g. AL 684" class="profCodeInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold focus:ring-2 focus:ring-blue-500 outline-none transition" value="${prefill ? prefill.profile_code : ''}">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Cycle (s)</label>
+          <input type="number" placeholder="90" class="profCycleInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-mono text-blue-600 font-bold outline-none" value="${prefillCycle}">
         </div>
         <div>
           <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Setup (min)</label>
-          <input type="number" placeholder="0" class="profSetupInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2" value="${prefill && prefill.setup_min !== undefined ? prefill.setup_min : '0'}">
+          <input type="number" placeholder="0" class="profSetupInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 outline-none" value="${prefill && prefill.setup_min !== undefined ? prefill.setup_min : '0'}">
         </div>
         <div>
           <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Target (Pcs)</label>
-          <input type="number" placeholder="50" class="profTargetInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2" value="${prefill ? prefill.target : '50'}">
+          <input type="number" placeholder="50" class="profTargetInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 outline-none" value="${prefill ? prefill.target : '0'}">
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Produced (Pcs)</label>
-          <input type="number" placeholder="50" class="profProducedInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2 font-bold text-blue-600 dark:text-blue-400" value="${prefill ? prefill.produced : '50'}">
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Produced</label>
+          <input type="number" placeholder="50" class="profProducedInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-blue-600 dark:text-blue-400 outline-none" value="${prefill ? prefill.produced : '0'}">
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Rejected (Pcs)</label>
-          <input type="number" placeholder="0" class="profRejectedInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2 text-rose-600 font-bold" value="${prefill ? prefill.rejected : '0'}">
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Rejected</label>
+          <input type="number" placeholder="0" class="profRejectedInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-rose-600 font-bold outline-none" value="${prefill ? prefill.rejected : '0'}">
         </div>
-        <div class="col-span-2 sm:col-span-1">
+        <div class="col-span-2 lg:col-span-1">
           <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Reject Reason</label>
           <div class="flex items-center gap-1">
-            <input type="text" placeholder="Reason..." class="profRejectReasonInput w-full bg-white dark:bg-slate-700 border rounded-xl p-2" value="${prefill && prefill.reject_reason ? prefill.reject_reason : ''}">
+            <input type="text" placeholder="Reason..." class="profRejectReasonInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 outline-none" value="${prefill && prefill.reject_reason ? prefill.reject_reason : ''}">
             <button type="button" onclick="document.getElementById('profCard-${cid}').remove()" class="text-rose-500 font-bold px-1.5 text-base hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg">×</button>
           </div>
         </div>
       `;
       container.appendChild(div);
+
+      // Auto trigger cycle fill if prefilled with a code but cycle wasn't set yet
+      if (prefill && prefill.profile_code && !prefillCycle) {
+          const inp = div.querySelector('.profCodeInput');
+          if (inp) window.autoFillCycleTime(inp);
+      }
     }
+
+    // Auto-populates cycle time from master database when user types the code
+    window.autoFillCycleTime = function(input) {
+        const code = input.value.trim().toUpperCase();
+        const rec = records.find(r => (r.profile||'').toUpperCase() === code);
+        const container = input.closest('div').parentElement;
+        const cycleInput = container.querySelector('.profCycleInput');
+        if (rec && cycleInput) {
+            cycleInput.value = rec.cycle_seconds;
+        }
+    };
 
     function addDowntimeCard(prefill = null) {
       dtCounter++;
@@ -1732,10 +1781,10 @@
       div.id = `dtCard-${cid}`;
       const reasons = ['Breakdown', 'Setup', 'Tool Change', 'Material Waiting', 'Power Outage', 'Other'];
       div.innerHTML = `
-        <select class="dtReasonSelect bg-white dark:bg-slate-700 border rounded-xl p-2 font-semibold">
+        <select class="dtReasonSelect bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-semibold outline-none">
           ${reasons.map(r => `<option value="${r}" ${prefill && prefill.reason === r ? 'selected' : ''}>${r === 'Setup' ? 'Setup / Changeover' : r}</option>`).join('')}
         </select>
-        <input type="number" placeholder="Duration (min)" class="dtDurationInput bg-white dark:bg-slate-700 border rounded-xl p-2 w-28 font-bold" value="${prefill ? prefill.duration_min : '15'}">
+        <input type="number" placeholder="Duration (min)" class="dtDurationInput bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 w-28 font-bold outline-none" value="${prefill ? prefill.duration_min : '15'}">
         <button type="button" onclick="document.getElementById('dtCard-${cid}').remove()" class="text-rose-500 font-bold px-2 text-base">×</button>
       `;
       container.appendChild(div);
@@ -1750,9 +1799,9 @@
       document.getElementById('downtimeCardsContainer').innerHTML = '';
       document.getElementById('logDate').value = todayISO();
       
-      addProfileCard({ profile_code: 'AL 684', setup_min: 0, target: 50, produced: 50, rejected: 0, reject_reason: '' });
-      addProfileCard({ profile_code: '', setup_min: 0, target: 0, produced: 0, rejected: 0, reject_reason: '' });
-      addProfileCard({ profile_code: '', setup_min: 0, target: 0, produced: 0, rejected: 0, reject_reason: '' });
+      addProfileCard({ profile_code: 'AL 684', target: 50, produced: 50, rejected: 0, reject_reason: '' });
+      addProfileCard();
+      addProfileCard();
     }
 
     async function submitShiftLog(e) {
@@ -1786,31 +1835,80 @@
         } else {
           const { data, error: insErr } = await supabaseClient.from('shifts').insert([shiftPayload]).select();
           if (insErr) throw new Error("Insert Shift Error: " + insErr.message);
-          if (!data || data.length === 0) throw new Error("Shift saved, but Supabase returned no data. Check RLS policies.");
+          if (!data || data.length === 0) throw new Error("Shift saved, but Supabase returned no data.");
           activeShiftId = data[0].id;
         }
 
         const profElements = document.querySelectorAll('#profileCardsContainer > div');
         const prodPayloads = [];
+        const cycleTimeSyncPayloads = [];
+        const cycleTimeUpdatePromises = [];
+
         profElements.forEach(el => {
           const codeInput = el.querySelector('.profCodeInput');
           if (!codeInput) return;
           const code = codeInput.value.trim().toUpperCase();
+          const cycleSec = parseInt(el.querySelector('.profCycleInput').value, 10) || 0;
           const setup_min = parseInt(el.querySelector('.profSetupInput').value, 10) || 0;
           const target = parseInt(el.querySelector('.profTargetInput').value, 10) || 0;
           const produced = parseInt(el.querySelector('.profProducedInput').value, 10) || 0;
           const rejected = parseInt(el.querySelector('.profRejectedInput').value, 10) || 0;
           const reject_reason = el.querySelector('.profRejectReasonInput').value.trim();
+
           if (code) {
-            prodPayloads.push({ shift_id: activeShiftId, profile_code: code, setup_min, target, produced, rejected, reject_reason });
+            prodPayloads.push({ 
+                shift_id: activeShiftId, 
+                profile_code: code, 
+                ideal_cycle_seconds: cycleSec, 
+                setup_min, 
+                target, 
+                produced, 
+                rejected, 
+                reject_reason 
+            });
+
+            // --- SMART CONNECT LOGIC: Add / Update Master Profiles ---
+            if (cycleSec > 0) {
+                const existingProfile = records.find(r => (r.profile||'').toUpperCase() === code);
+                if (!existingProfile) {
+                    // Profile code is entirely new, push it to our global creation queue
+                    if (!cycleTimeSyncPayloads.some(p => p.profile === code)) {
+                        cycleTimeSyncPayloads.push({
+                            profile: code,
+                            cycle_seconds: cycleSec,
+                            description: 'Auto-added from Daily Shift Log',
+                            record_date: todayISO(),
+                            is_deleted: false
+                        });
+                    }
+                } else if (existingProfile.cycle_seconds !== cycleSec) {
+                    // Profile exists, but the user put a different cycle time in the shift log
+                    // Automatically update the main CNC Profile recipe library
+                    cycleTimeUpdatePromises.push(
+                        supabaseClient.from('cnc_cycle_times')
+                        .update({ cycle_seconds: cycleSec })
+                        .eq('id', existingProfile.id)
+                    );
+                }
+            }
           }
         });
 
+        // 1. Process smart-sync updates to CNC Profile database concurrently
+        if (cycleTimeSyncPayloads.length > 0) {
+            await supabaseClient.from('cnc_cycle_times').insert(cycleTimeSyncPayloads);
+        }
+        if (cycleTimeUpdatePromises.length > 0) {
+            await Promise.all(cycleTimeUpdatePromises);
+        }
+
+        // 2. Insert the actual production records for the shift
         if (prodPayloads.length > 0) {
           const { error: pErr } = await supabaseClient.from('production_records').insert(prodPayloads);
           if (pErr) throw new Error("Profiles Insert Error: " + pErr.message);
         }
 
+        // 3. Process Downtime events
         const dtElements = document.querySelectorAll('#downtimeCardsContainer > div');
         const dtPayloads = [];
         dtElements.forEach(el => {
@@ -1826,9 +1924,11 @@
           if (dErr) throw new Error("Downtime Insert Error: " + dErr.message);
         }
 
-        showToast(shiftId ? "Shift log updated!" : "Shift log saved successfully!");
+        showToast(shiftId ? "Shift log & Profiles updated!" : "Shift log saved successfully!");
         resetShiftLogForm();
-        await fetchOeeData();
+        
+        // Refresh Everything to reflect new cycle times and shift logs
+        await fetchAllData(); 
         switchOeeSubTab('alllogs');
       } catch (err) {
         alert("Backend Sync Failed: \n" + err.message);
@@ -1876,318 +1976,26 @@
 
     async function deleteShiftRecord(id) {
       if (!confirm('Move this Shift Record to the Recovery Vault?')) return;
-      await supabaseClient.from('shifts').update({ is_deleted: true }).eq('id', id);
+      await supabaseClient.from('shifts').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
       fetchOeeData();
     }
 
-    // --- TOOLS INVENTORY (FULL CRUD: VIEW, EDIT, INSTANT DUPLICATE, DISPOSE) ---
-    function toolsFilterByCategory(cat) {
-      switchTab('tools');
-      const select = document.getElementById('filterCategorySelect');
-      if (select) select.value = cat;
-      applyToolsFiltersAndRender();
-    }
-
-    function applyToolsFiltersAndRender() {
-      const q = (document.getElementById('toolSearchInput')?.value || '').toLowerCase();
-      const cat = document.getElementById('filterCategorySelect')?.value || 'ALL';
-
-      toolsDisplayed = toolsList.filter(t => {
-        const norm = normalizeToolCategory(t.category);
-        const matchQ = (t.diameter || '').toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q);
-        const matchCat = (cat === 'ALL') || (norm === cat);
-        return matchQ && matchCat;
-      });
-
-      const tbody = document.getElementById('inventoryTableBody');
-      if (!tbody) return;
-
-      if (toolsDisplayed.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No tools found matching criteria.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = toolsDisplayed.map((t, i) => {
-        const stock = parseInt(t.stock) || 0;
-        const norm = normalizeToolCategory(t.category);
-        return `
-          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-            <td class="p-3.5 font-semibold text-slate-400">${i + 1}</td>
-            <td class="p-3.5 font-bold text-cyan-600">${norm}</td>
-            <td class="p-3.5">${t.sub_type || 'Standard'}</td>
-            <td class="p-3.5 font-bold">${t.diameter}</td>
-            <td class="p-3.5 text-slate-600 dark:text-slate-300">${t.description || '-'}</td>
-            <td class="p-3.5 text-center font-bold">${stock} pcs</td>
-            <td class="p-3.5 font-mono text-slate-500">${t.location || '-'}</td>
-            <td class="p-3.5 text-center space-x-2">
-              <button onclick="viewToolDetails(${t.id})" class="text-blue-600 hover:underline font-bold">View</button>
-              <button onclick="editTool(${t.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
-              <button onclick="duplicateToolDirectly(${t.id})" class="text-emerald-600 hover:underline font-bold">Duplicate</button>
-              <button onclick="deleteTool(${t.id})" class="text-rose-500 hover:underline font-bold">Dispose</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function viewToolDetails(id) {
-      const t = toolsList.find(item => item.id === id);
-      if (!t) return;
-      document.getElementById('viewToolTitle').innerText = `${normalizeToolCategory(t.category)} (${t.diameter})`;
-      document.getElementById('viewToolBody').innerHTML = `
-        <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl">
-          <div><span class="text-slate-400 font-bold">Sub-Type:</span> <b>${t.sub_type || 'Standard'}</b></div>
-          <div><span class="text-slate-400 font-bold">Stock In Rack:</span> <b class="text-cyan-600">${t.stock} pcs</b></div>
-          <div><span class="text-slate-400 font-bold">Location:</span> <b>${t.location || 'Main Storage Rack'}</b></div>
-          <div><span class="text-slate-400 font-bold">Category:</span> <b>${normalizeToolCategory(t.category)}</b></div>
-        </div>
-        <div class="pt-2"><span class="text-slate-400 font-bold">Machining Description:</span> <p class="text-slate-700 dark:text-slate-200">${t.description || 'No specific description noted.'}</p></div>
-      `;
-      document.getElementById('modalViewTool').classList.remove('hidden');
-    }
-
-    async function duplicateToolDirectly(id) {
-      const t = toolsList.find(item => item.id === id);
-      if (!t) return;
-      const clonePayload = {
-        category: t.category,
-        sub_type: t.sub_type,
-        diameter: `${t.diameter} (Copy)`,
-        description: t.description,
-        stock: t.stock,
-        location: t.location,
-        is_deleted: false
-      };
-      const { error } = await toolsClient.from('cnc_tool_bits').insert([clonePayload]);
-      if (error) {
-        alert("Failed to duplicate tool: " + error.message);
-      } else {
-        showToast("Tool duplicated successfully!");
-        fetchToolsData();
-      }
-    }
-
-    function openToolsFormModal(id = null) {
-      const modal = document.getElementById('toolsModalForm');
-      const title = document.getElementById('toolsFormModalTitle');
-      const form = document.getElementById('toolsToolForm');
-      form.reset();
-      document.getElementById('toolsFormId').value = '';
-
-      if (id) {
-        const item = toolsList.find(t => t.id === id);
-        if (item) {
-          title.innerText = `Edit Tool: ${item.diameter}`;
-          document.getElementById('toolsFormId').value = item.id;
-          document.getElementById('toolsFormCategory').value = normalizeToolCategory(item.category);
-          document.getElementById('toolsFormSubType').value = item.sub_type || '';
-          document.getElementById('toolsFormDiameter').value = item.diameter || '';
-          document.getElementById('toolsFormDescription').value = item.description || '';
-          document.getElementById('toolsFormStock').value = item.stock || 0;
-          document.getElementById('toolsFormLocation').value = item.location || '';
-        }
-      } else {
-        title.innerText = 'Log Tool to Inventory';
-      }
-      modal.classList.remove('hidden');
-    }
-
-    function closeToolsFormModal() {
-      document.getElementById('toolsModalForm').classList.add('hidden');
-    }
-
-    async function submitToolForm(e) {
-      e.preventDefault();
-      const id = document.getElementById('toolsFormId').value;
-      const payload = {
-        category: document.getElementById('toolsFormCategory').value,
-        sub_type: document.getElementById('toolsFormSubType').value.trim(),
-        diameter: document.getElementById('toolsFormDiameter').value.trim(),
-        description: document.getElementById('toolsFormDescription').value.trim(),
-        stock: parseInt(document.getElementById('toolsFormStock').value, 10) || 0,
-        location: document.getElementById('toolsFormLocation').value.trim(),
-        is_deleted: false
-      };
-
-      try {
-        if (id) {
-          const { error } = await toolsClient.from('cnc_tool_bits').update(payload).eq('id', id);
-          if (error) throw new Error(error.message);
-        } else {
-          const { error } = await toolsClient.from('cnc_tool_bits').insert([payload]);
-          if (error) throw new Error(error.message);
-        }
-        closeToolsFormModal();
-        showToast("Tool saved successfully!");
-        fetchToolsData();
-      } catch (error) {
-        alert("Database Error: " + error.message);
-      }
-    }
-
-    async function deleteTool(id) {
-      if (!confirm('Move this CNC Tool to the Recovery Vault?')) return;
-      await toolsClient.from('cnc_tool_bits').update({ is_deleted: true }).eq('id', id);
-      fetchToolsData();
-    }
-
-    // --- RESTOCK NOTICES ---
-    function autoPopulateLowStock() {
-      const low = toolsList.filter(t => (parseInt(t.stock) || 0) < 2);
-      if (low.length === 0) {
-        alert("No tools currently have stock lower than 2 units.");
-        return;
-      }
-      toolsNoticeList = low.map(t => ({
-        id: t.id,
-        category: t.category,
-        diameter: t.diameter,
-        stock: t.stock,
-        req_qty: Math.max(2, 5 - (parseInt(t.stock) || 0))
-      }));
-      renderToolsNoticeList();
-    }
-
-    function renderToolsNoticeList() {
-      const container = document.getElementById('requisitionItemsContainer');
-      if (!container) return;
-
-      if (toolsNoticeList.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 italic">No tools loaded in notice. Click "+ Load Low Stock".</p>`;
-        return;
-      }
-
-      container.innerHTML = toolsNoticeList.map((t, idx) => `
-        <div class="flex flex-wrap justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl text-xs">
-          <div>
-            <b class="text-cyan-600 dark:text-cyan-400">${t.category} (${t.diameter})</b>
-            <span class="text-slate-400 ml-2">Stock: <b class="text-rose-500">${t.stock}</b></span>
-          </div>
-          <div class="flex items-center gap-2 mt-2 sm:mt-0">
-            <span class="text-slate-500">Order Qty:</span>
-            <input type="number" class="w-16 bg-white dark:bg-slate-700 border rounded-lg p-1 font-bold text-center" value="${t.req_qty}" onchange="toolsNoticeList[${idx}].req_qty = parseInt(this.value,10) || 1">
-            <button onclick="toolsNoticeList.splice(${idx},1); renderToolsNoticeList();" class="text-rose-500 font-bold px-1.5">×</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function generateFormalSupervisorLetterPDF() {
-      if (toolsNoticeList.length === 0) {
-        alert("Please load or add low-stock tools first!");
-        return;
-      }
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('p', 'mm', 'a4');
-      doc.setFontSize(14);
-      doc.text("ALUMEX PLC - COMPONENT PLANT OPERATIONS", 14, 15);
-      doc.setFontSize(10);
-      doc.text(`DATE: ${todayISO()}`, 14, 22);
-      doc.text("TO: Mr. U.N. Kavinda (Production & Operations Supervisor)", 14, 28);
-      doc.text("SUBJECT: Urgent Requisition Notice for Critical Low-Stock CNC Tool Bits", 14, 34);
-
-      const rows = toolsNoticeList.map((t, idx) => [idx + 1, t.category, t.diameter, `${t.stock} pcs`, `${t.req_qty} pcs`]);
-      doc.autoTable({
-        head: [['#', 'Tool Category', 'Size / Diameter', 'Current Stock', 'Recommended Order Qty']],
-        body: rows,
-        startY: 40
-      });
-      doc.save("Alumex_Restock_Memo_Kavinda.pdf");
-      showToast("Memo exported to PDF.");
-    }
-
-    // --- RECOVERY BIN VAULT ---
-    function renderBinArchive() {
-      const pBody = document.getElementById('trashProfilesTableBody');
-      const tBody = document.getElementById('trashToolsTableBody');
-      const sBody = document.getElementById('trashShiftsTableBody');
-
-      const totalDeleted = trashRecords.length + toolsTrash.length + trashShifts.length;
-      const badge = document.getElementById('trashCountBadge');
-      if (badge) {
-        badge.innerText = totalDeleted;
-        badge.classList.toggle('hidden', totalDeleted === 0);
-      }
-
-      if (pBody) {
-        pBody.innerHTML = trashRecords.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted CNC profiles.</p>' :
-          trashRecords.map(r => `
-            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs">
-              <span><b>${r.profile}</b> (${r.cycle_seconds}s)</span>
-              <div class="space-x-2">
-                <button onclick="restoreRecord(${r.id})" class="text-emerald-600 hover:underline font-bold">Restore</button>
-                <button onclick="hardDeleteRecord(${r.id})" class="text-rose-600 hover:underline font-bold">Purge</button>
-              </div>
-            </div>
-          `).join('');
-      }
-
-      if (tBody) {
-        tBody.innerHTML = toolsTrash.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted tools.</p>' :
-          toolsTrash.map(t => `
-            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs">
-              <span><b>${t.category}</b> — ${t.diameter}</span>
-              <div class="space-x-2">
-                <button onclick="restoreTool(${t.id})" class="text-emerald-600 hover:underline font-bold">Restore</button>
-                <button onclick="hardDeleteTool(${t.id})" class="text-rose-600 hover:underline font-bold">Purge</button>
-              </div>
-            </div>
-          `).join('');
-      }
-
-      if (sBody) {
-        sBody.innerHTML = trashShifts.length === 0 ? '<p class="text-xs text-slate-400 italic">No deleted shifts.</p>' :
-          trashShifts.map(s => `
-            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/40 p-2 rounded-xl text-xs">
-              <span><b>${s.shift_date}</b> (${s.shift_type} - Team ${s.team})</span>
-              <div class="space-x-2">
-                <button onclick="restoreShift(${s.id})" class="text-emerald-600 hover:underline font-bold">Restore</button>
-                <button onclick="hardDeleteShift(${s.id})" class="text-rose-600 hover:underline font-bold">Purge</button>
-              </div>
-            </div>
-          `).join('');
-      }
-    }
-
-    async function restoreRecord(id) {
-      await supabaseClient.from('cnc_cycle_times').update({ is_deleted: false }).eq('id', id);
-      fetchAllData();
-    }
-    async function hardDeleteRecord(id) {
-      if (!confirm('Permanently purge this profile?')) return;
-      await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
-      fetchAllData();
-    }
-    async function restoreTool(id) {
-      await toolsClient.from('cnc_tool_bits').update({ is_deleted: false }).eq('id', id);
-      fetchToolsData();
-    }
-    async function hardDeleteTool(id) {
-      if (!confirm('Permanently purge this tool?')) return;
-      await toolsClient.from('cnc_tool_bits').delete().eq('id', id);
-      fetchToolsData();
-    }
-    async function restoreShift(id) {
-      await supabaseClient.from('shifts').update({ is_deleted: false }).eq('id', id);
-      await fetchOeeData();
-      renderBinArchive();
-    }
-    async function hardDeleteShift(id) {
-      if (!confirm('Permanently purge this shift and its operational logs?')) return;
-      await supabaseClient.from('production_records').delete().eq('shift_id', id);
-      await supabaseClient.from('downtime_events').delete().eq('shift_id', id);
-      await supabaseClient.from('shifts').delete().eq('id', id);
-      await fetchOeeData();
-      renderBinArchive();
-    }
-
-    // --- PRODUCTION PLANNER ---
+    // --- PRODUCTION PLANNER & DATALIST SYNC ---
     function populatePlanningDropdown() {
       const sel = document.getElementById('planProfileSelect');
-      if (!sel) return;
-      sel.innerHTML = '<option value="">-- Choose Profile --</option>' + records.map(r => `
-        <option value="${r.id}">${r.profile} (${r.cycle_seconds}s)</option>
-      `).join('');
+      const dlist = document.getElementById('profileDataList'); 
+      
+      let selOptions = '<option value="">-- Choose Profile --</option>';
+      let dlistOptions = '';
+
+      records.forEach(r => {
+        selOptions += `<option value="${r.id}">${r.profile} (${r.cycle_seconds}s)</option>`;
+        // Datalist auto-complete options
+        dlistOptions += `<option value="${r.profile}">Cycle: ${r.cycle_seconds}s</option>`;
+      });
+
+      if (sel) sel.innerHTML = selOptions;
+      if (dlist) dlist.innerHTML = dlistOptions;
     }
 
     function addProfileToPlanningCart() {
