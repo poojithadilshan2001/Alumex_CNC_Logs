@@ -30,7 +30,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- SheetJS & PDF Utilities -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   
@@ -212,7 +211,7 @@
             <span class="text-cyan-600 text-xs font-black group-hover:translate-x-1 transition-transform">→</span>
           </div>
           <p id="dashToolsStock" class="text-3xl font-black text-cyan-600 dark:text-cyan-400 mt-1">0 pcs</p>
-          <p id="dashLowStockSummary" class="text-[11px] text-rose-500 font-bold mt-1">0 low stock</p>
+          <p id="dashLowStockSummary" class="text-[11px] text-rose-500 font-bold mt-1">0 low stock alert</p>
         </div>
       </div>
 
@@ -847,21 +846,19 @@
 
   <script>
     // ========================================================================
-    // SUPABASE CONFIGURATION (Pre-configured with your project credentials)
+    // SUPABASE CONFIGURATION
     // ========================================================================
     const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ocmFvYWRmZGVnamZ3Y2tycWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNDAwNzUsImV4cCI6MjEwMjYxNjA3NX0.X3LBq4lh7OarSjmw0kGukG0xw0k_P-qQlE3owXEfhOc";
     
-    let supabase = null;
+    // CRITICAL FIX: Renamed 'supabase' to 'supabaseClient' to prevent shadowing collisions.
+    let supabaseClient = null;
     try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch(e) {
         console.error("Supabase init failed", e);
     }
 
-    // ========================================================================
-    // DATABASE TABLE & COLUMN MAPPING (Matching your Supabase Tables)
-    // ========================================================================
     const DB_MAP = {
         profiles: {
             table: 'cnc_cycle_times', 
@@ -888,9 +885,6 @@
         }
     };
 
-    // ========================================================================
-    // NOTIFICATION SYSTEM
-    // ========================================================================
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toastNotification');
       document.getElementById('toastMessage').textContent = message;
@@ -901,9 +895,6 @@
       window.toastTimer = setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 5000);
     }
 
-    // ========================================================================
-    // APPLICATION STATE
-    // ========================================================================
     let records = [];
     let toolsList = [];
     let shifts = [];
@@ -918,18 +909,20 @@
     let chartProfile30Inst = null;
     let chartProfileSpecificInst = null;
 
-    // ========================================================================
-    // UTILITIES
-    // ========================================================================
     const escapeHtml = v => (v == null ? '' : String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
     const fmtPct = v => (v == null || isNaN(v) || !isFinite(v)) ? '-' : (v * 100).toFixed(1) + '%';
     const localTodayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
     
     function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
 
-    // ========================================================================
-    // UI NAVIGATION
-    // ========================================================================
+    // CRITICAL FIX: Safe JSON parsing
+    function safeParseJSON(val) {
+        if (typeof val === 'string') {
+            try { return JSON.parse(val); } catch(e) { return null; }
+        }
+        return val;
+    }
+
     function switchTab(tabId) {
       document.querySelectorAll('main > section').forEach(el => {
         el.classList.add('hidden');
@@ -975,9 +968,6 @@
       document.getElementById(`oeeSubBtn-${subId}`).className = "px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold";
     }
 
-    // ========================================================================
-    // SUPABASE DATA FETCHING
-    // ========================================================================
     async function loadDataFromSupabase() {
         const badge = document.getElementById('syncBadge');
         const status = document.getElementById('syncStatus');
@@ -986,7 +976,8 @@
         try {
             status.textContent = 'Fetching Data...';
 
-            const { data: profData, error: profErr } = await supabase.from(DB_MAP.profiles.table).select('*');
+            // CRITICAL FIX: Changed supabase.from to supabaseClient.from
+            const { data: profData, error: profErr } = await supabaseClient.from(DB_MAP.profiles.table).select('*');
             if (profErr) throw new Error(`Profiles Error: ${profErr.message}`);
             
             records = (profData || []).map(row => ({
@@ -999,7 +990,7 @@
                 tooling: row[DB_MAP.profiles.cols.tooling]
             }));
 
-            const { data: toolData, error: toolErr } = await supabase.from(DB_MAP.tools.table).select('*');
+            const { data: toolData, error: toolErr } = await supabaseClient.from(DB_MAP.tools.table).select('*');
             if (toolErr) throw new Error(`Tools Error: ${toolErr.message}`);
             
             toolsList = (toolData || []).map(row => ({
@@ -1012,7 +1003,7 @@
                 loc: row[DB_MAP.tools.cols.loc]
             }));
 
-            const { data: shiftData, error: shiftErr } = await supabase.from(DB_MAP.shifts.table).select('*');
+            const { data: shiftData, error: shiftErr } = await supabaseClient.from(DB_MAP.shifts.table).select('*');
             if (shiftErr) throw new Error(`Shifts Error: ${shiftErr.message}`);
             
             shifts = (shiftData || []).map(row => ({
@@ -1021,9 +1012,9 @@
                 shiftType: row[DB_MAP.shifts.cols.shiftType],
                 team: row[DB_MAP.shifts.cols.team],
                 epf: row[DB_MAP.shifts.cols.epf],
-                profiles: typeof row[DB_MAP.shifts.cols.profilesData] === 'string' ? JSON.parse(row[DB_MAP.shifts.cols.profilesData]) : row[DB_MAP.shifts.cols.profilesData],
-                downtime: typeof row[DB_MAP.shifts.cols.downtimeData] === 'string' ? JSON.parse(row[DB_MAP.shifts.cols.downtimeData]) : row[DB_MAP.shifts.cols.downtimeData],
-                oeeSummary: typeof row[DB_MAP.shifts.cols.oeeSummary] === 'string' ? JSON.parse(row[DB_MAP.shifts.cols.oeeSummary]) : row[DB_MAP.shifts.cols.oeeSummary]
+                profiles: safeParseJSON(row[DB_MAP.shifts.cols.profilesData]),
+                downtime: safeParseJSON(row[DB_MAP.shifts.cols.downtimeData]),
+                oeeSummary: safeParseJSON(row[DB_MAP.shifts.cols.oeeSummary])
             }));
 
             badge.className = "flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 rounded-full text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 transition-colors";
@@ -1056,11 +1047,11 @@
 
         try {
             if (id) {
-                const { error } = await supabase.from(DB_MAP.profiles.table).update(payload).eq(DB_MAP.profiles.cols.id, id);
+                const { error } = await supabaseClient.from(DB_MAP.profiles.table).update(payload).eq(DB_MAP.profiles.cols.id, id);
                 if(error) throw error;
                 showToast('Profile Updated in Supabase.');
             } else {
-                const { error } = await supabase.from(DB_MAP.profiles.table).insert([payload]);
+                const { error } = await supabaseClient.from(DB_MAP.profiles.table).insert([payload]);
                 if(error) throw error;
                 showToast('New Profile Saved to Supabase.');
             }
@@ -1074,7 +1065,7 @@
     async function deleteProfile(id) {
         if(!confirm('Delete this profile from database?')) return;
         try {
-            const { error } = await supabase.from(DB_MAP.profiles.table).delete().eq(DB_MAP.profiles.cols.id, id);
+            const { error } = await supabaseClient.from(DB_MAP.profiles.table).delete().eq(DB_MAP.profiles.cols.id, id);
             if(error) throw error;
             showToast('Profile Deleted from Supabase.', 'error');
             loadDataFromSupabase();
@@ -1097,11 +1088,11 @@
 
         try {
             if (id) {
-                const { error } = await supabase.from(DB_MAP.tools.table).update(payload).eq(DB_MAP.tools.cols.id, id);
+                const { error } = await supabaseClient.from(DB_MAP.tools.table).update(payload).eq(DB_MAP.tools.cols.id, id);
                 if(error) throw error;
                 showToast('Tool Updated in Supabase.');
             } else {
-                const { error } = await supabase.from(DB_MAP.tools.table).insert([payload]);
+                const { error } = await supabaseClient.from(DB_MAP.tools.table).insert([payload]);
                 if(error) throw error;
                 showToast('New Tool Saved to Supabase.');
             }
@@ -1115,7 +1106,7 @@
     async function deleteTool(id) {
         if(!confirm('Delete this tool from database?')) return;
         try {
-            const { error } = await supabase.from(DB_MAP.tools.table).delete().eq(DB_MAP.tools.cols.id, id);
+            const { error } = await supabaseClient.from(DB_MAP.tools.table).delete().eq(DB_MAP.tools.cols.id, id);
             if(error) throw error;
             showToast('Tool Deleted from Supabase.', 'error');
             loadDataFromSupabase();
@@ -1182,7 +1173,7 @@
         };
 
         try {
-            const { error } = await supabase.from(DB_MAP.shifts.table).insert([payload]);
+            const { error } = await supabaseClient.from(DB_MAP.shifts.table).insert([payload]);
             if (error) throw error;
             showToast('Shift Log Saved directly to Supabase.');
             resetShiftLogForm();
@@ -1196,7 +1187,7 @@
     async function deleteShift(id) {
         if(!confirm('Delete this shift log?')) return;
         try {
-            const { error } = await supabase.from(DB_MAP.shifts.table).delete().eq(DB_MAP.shifts.cols.id, id);
+            const { error } = await supabaseClient.from(DB_MAP.shifts.table).delete().eq(DB_MAP.shifts.cols.id, id);
             if(error) throw error;
             showToast('Shift Deleted.', 'error');
             loadDataFromSupabase();
@@ -1221,11 +1212,12 @@
       const sortEl = document.getElementById('filterSort');
       const sort = sortEl ? sortEl.value : 'profile_asc';
 
-      let filtered = records.filter(r => (r.profile||'').toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q));
+      // CRITICAL FIX: Wrapped properties in String() to prevent TypeError crashes
+      let filtered = records.filter(r => String(r.profile||'').toLowerCase().includes(q) || String(r.description||'').toLowerCase().includes(q));
       
       filtered.sort((a, b) => {
-        if(sort === 'profile_asc') return (a.profile||'').localeCompare(b.profile||'');
-        if(sort === 'profile_desc') return (b.profile||'').localeCompare(a.profile||'');
+        if(sort === 'profile_asc') return String(a.profile||'').localeCompare(String(b.profile||''));
+        if(sort === 'profile_desc') return String(b.profile||'').localeCompare(String(a.profile||''));
         if(sort === 'cycle_asc') return (a.cycle_sec||0) - (b.cycle_sec||0);
         if(sort === 'cycle_desc') return (b.cycle_sec||0) - (a.cycle_sec||0);
         return 0;
@@ -1263,7 +1255,8 @@
       const catEl = document.getElementById('filterCategorySelect');
       const cat = catEl ? catEl.value : 'ALL';
 
-      let filtered = toolsList.filter(t => ((t.subType||'').toLowerCase().includes(q)) || ((t.diameter||'').toLowerCase().includes(q)));
+      // CRITICAL FIX: Wrapped properties in String() to prevent TypeError crashes
+      let filtered = toolsList.filter(t => (String(t.subType||'').toLowerCase().includes(q)) || (String(t.diameter||'').toLowerCase().includes(q)));
       if(cat !== 'ALL') { filtered = filtered.filter(t => t.category === cat); }
 
       ['Milling', 'Drilling', 'Tapping', 'Chamfer'].forEach(c => {
@@ -1408,7 +1401,7 @@
             const topSpeeds = [...records].sort((a,b) => (a.cycle_sec||0) - (b.cycle_sec||0)).slice(0,5);
             chartDashCycleTimeInst = new Chart(cycCtx, {
                 type: 'bar',
-                data: { labels: topSpeeds.map(r => r.profile), datasets: [{ label: 'Seconds', data: topSpeeds.map(r => r.cycle_sec), backgroundColor: '#f59e0b', borderRadius: 4 }] },
+                data: { labels: topSpeeds.map(r => String(r.profile)), datasets: [{ label: 'Seconds', data: topSpeeds.map(r => r.cycle_sec), backgroundColor: '#f59e0b', borderRadius: 4 }] },
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
@@ -1454,7 +1447,7 @@
                     const pct = d.prod > 0 ? ((d.rej / d.prod)*100).toFixed(1) + '%' : '0%';
                     const avg = d.shifts > 0 ? Math.round(d.prod / d.shifts) : 0;
                     
-                    labels30.push(name);
+                    labels30.push(String(name));
                     data30.push(d.prod);
 
                     table30.innerHTML += `
@@ -1719,10 +1712,6 @@
         });
     }
 
-    // ========================================================================
-    // --- ADDED: MISSING PDF, EXCEL, IMPORT & ANALYTICS FUNCTIONS ---
-    // ========================================================================
-
     function renderProfileAnalytics() {
         const pid = document.getElementById('analyticsProfileSelect').value;
         if(!pid) return;
@@ -1783,14 +1772,14 @@
                 for (const row of jsonData) {
                     if (row['Profile Code'] || row['profile']) {
                         const payload = {
-                            [DB_MAP.profiles.cols.profile]: row['Profile Code'] || row['profile'] || 'Unknown',
-                            [DB_MAP.profiles.cols.description]: row['Description'] || row['description'] || '',
-                            [DB_MAP.profiles.cols.length]: row['Length'] || row['length'] || '',
+                            [DB_MAP.profiles.cols.profile]: String(row['Profile Code'] || row['profile'] || 'Unknown'),
+                            [DB_MAP.profiles.cols.description]: String(row['Description'] || row['description'] || ''),
+                            [DB_MAP.profiles.cols.length]: String(row['Length'] || row['length'] || ''),
                             [DB_MAP.profiles.cols.cycle_sec]: parseInt(row['Cycle Sec'] || row['cycle_sec']) || 0,
-                            [DB_MAP.profiles.cols.feed]: row['Feed'] || row['feed'] || '',
-                            [DB_MAP.profiles.cols.tooling]: row['Tooling'] || row['tooling'] || ''
+                            [DB_MAP.profiles.cols.feed]: String(row['Feed'] || row['feed'] || ''),
+                            [DB_MAP.profiles.cols.tooling]: String(row['Tooling'] || row['tooling'] || '')
                         };
-                        await supabase.from(DB_MAP.profiles.table).insert([payload]);
+                        await supabaseClient.from(DB_MAP.profiles.table).insert([payload]);
                         successCount++;
                     }
                 }
@@ -1974,11 +1963,16 @@
         doc.save("Executive_OEE_Audit.pdf");
     }
 
-    window.onload = () => {
+    // CRITICAL FIX: Safe execution using DOMContentLoaded instead of window.onload
+    document.addEventListener('DOMContentLoaded', () => {
         switchTab('dashboard'); 
         resetShiftLogForm();
-        loadDataFromSupabase();
-    };
+        // Slight delay guarantees UI paint before API request blocks thread
+        setTimeout(() => {
+            loadDataFromSupabase();
+        }, 100);
+    });
+
   </script>
 </body>
 </html>
