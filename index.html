@@ -71,7 +71,7 @@
       <div class="flex items-center gap-3">
         <div id="syncBadge" class="flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 rounded-full text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
           <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span id="syncStatus">Connecting...</span>
+          <span id="syncStatus">System Online</span>
         </div>
         <button onclick="toggleDarkMode()" class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition shadow-sm">
           <span class="themeIcon text-sm">🌙</span>
@@ -965,22 +965,22 @@
 
   <script>
     // ========================================================================
-    // ⚠️⚠️⚠️  IMPORTANT: UPDATE THESE CREDENTIALS  ⚠️⚠️⚠️
+    // NOTIFICATION & CORE SETUP
     // ========================================================================
-    // Replace with YOUR actual Supabase project credentials
-    // Find these in: Supabase Dashboard → Settings → API
-    // ========================================================================
-    
-    const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
-    
-    let supabaseClient = null;
-    if (typeof supabase !== 'undefined') {
-      try {
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      } catch (e) {
-        console.error('Supabase init failed. Please check your URL and KEY.', e);
-      }
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toastNotification');
+      const msg = document.getElementById('toastMessage');
+      const icon = document.getElementById('toastIcon');
+      
+      msg.textContent = message;
+      icon.textContent = type === 'error' ? '✖' : '✓';
+      toast.className = `fixed bottom-5 right-5 z-50 transform transition-all duration-300 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-slate-700 ${type === 'error' ? 'border-red-500' : ''}`;
+      
+      if(window.toastTimer) clearTimeout(window.toastTimer);
+      
+      window.toastTimer = setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 5000); // Ensures toast disappears exactly after 5 seconds
     }
 
     // ========================================================================
@@ -995,23 +995,15 @@
     // ========================================================================
     let records = [];
     let trashRecords = [];
-    let displayedRecords = [];
     let toolsList = [];
     let toolsTrash = [];
-    let toolsDisplayed = [];
-    let toolsNoticeList = [];
     let shifts = [];
     let trashShifts = [];
-    let productionRecords = [];
-    let downtimeEvents = [];
     let planningCart = [];
 
     let memoRecipients = [
-      { id: 1, name: 'Mr. U.N. Kavinda', role: 'Production & Operations Supervisor', selected: true }
+      { id: Date.now(), name: 'Mr. U.N. Kavinda', role: 'Production & Operations Supervisor', selected: true }
     ];
-
-    let profilesLoaded = false;
-    let toolsLoaded = false;
 
     let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null;
     let chartProfile30Inst = null;
@@ -1036,16 +1028,17 @@
       return m > 0 ? `${m}m ${r}s` : `${r}s`;
     }
 
+    function localTodayISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
     function normalizeToolCategory(cat) {
       const c = (cat || '').toLowerCase();
       if (c.includes('drill')) return 'Drilling';
       if (c.includes('tap')) return 'Tapping';
       if (c.includes('chamfer')) return 'Chamfer';
       return 'Milling';
-    }
-
-    function normalizeProfileCode(code) {
-      return (code || '').trim().toUpperCase();
     }
 
     function escapeHtml(value) {
@@ -1058,6 +1051,784 @@
         .replace(/'/g, '&#039;');
     }
 
-    function localTodayISO() {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    // ========================================================================
+    // DATA LAYER (LOCAL STORAGE ENVELOPE FOR PRESENTATION)
+    // ========================================================================
+    function loadData() {
+        const storedProfiles = localStorage.getItem('cnc5000_profiles');
+        if (storedProfiles) records = JSON.parse(storedProfiles);
+        
+        const storedTools = localStorage.getItem('cnc5000_tools');
+        if (storedTools) toolsList = JSON.parse(storedTools);
+        
+        const storedShifts = localStorage.getItem('cnc5000_shifts');
+        if (storedShifts) shifts = JSON.parse(storedShifts);
+        
+        // Populate if completely empty to ensure the presentation looks good
+        if(records.length === 0 && toolsList.length === 0 && shifts.length === 0) {
+            seedInitialData();
+        }
+
+        renderAll();
+    }
+
+    function saveData() {
+        localStorage.setItem('cnc5000_profiles', JSON.stringify(records));
+        localStorage.setItem('cnc5000_tools', JSON.stringify(toolsList));
+        localStorage.setItem('cnc5000_shifts', JSON.stringify(shifts));
+        renderAll();
+    }
+
+    function seedInitialData() {
+        records = [
+            { id: generateId(), profile: 'AL 105', description: 'Window Frame Edge', length: '1500mm', cycle_sec: 120, feed: '500', tooling: '10mm End Mill' },
+            { id: generateId(), profile: 'AL 204', description: 'Door Track Base', length: '2100mm', cycle_sec: 185, feed: '450', tooling: '8mm Flat' },
+            { id: generateId(), profile: 'AL 808', description: 'Curtain Wall Mullion', length: '3000mm', cycle_sec: 340, feed: '600', tooling: '12mm Ball Nose' }
+        ];
+
+        toolsList = [
+            { id: generateId(), category: 'Milling', subType: 'Flat End Mill', diameter: '10.0mm', desc: 'Aluminum roughing', stock: 12, loc: 'Rack A1' },
+            { id: generateId(), category: 'Milling', subType: 'Ball Nose', diameter: '6.0mm', desc: 'Finishing', stock: 1, loc: 'Rack A2' },
+            { id: generateId(), category: 'Drilling', subType: 'Through Drill', diameter: '4.5mm', desc: 'Rivet holes', stock: 0, loc: 'Rack B1' },
+            { id: generateId(), category: 'Chamfer', subType: 'Deburring Tool', diameter: 'N/A', desc: 'Edge cleaning', stock: 5, loc: 'Rack C3' }
+        ];
+
+        shifts = [
+            { 
+                id: generateId(), date: localTodayISO(), shiftType: 'Day', team: 'A', epf: '4021',
+                profiles: [{ profileId: records[0].id, prod: 150, good: 148, reject: 2 }],
+                downtime: [{ reason: 'Tool Change', mins: 15 }],
+                oeeSummary: { availability: 0.95, performance: 0.98, quality: 0.986, oee: 0.918 }
+            }
+        ];
+        saveData();
+    }
+
+    // ========================================================================
+    // UI BEHAVIOR
+    // ========================================================================
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('main > section').forEach(el => {
+        el.classList.add('hidden');
+        el.classList.remove('fade-in');
+      });
+      const target = document.getElementById(`view-${tabId}`);
+      if(target) {
+        target.classList.remove('hidden');
+        target.classList.add('fade-in');
+      }
+
+      document.querySelectorAll('[id^="navTile-"]').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md');
+        btn.classList.add('bg-white', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300', 'border-slate-200', 'dark:border-slate-700');
+        const iconContainer = btn.querySelector('div > span:nth-child(2)');
+        if(iconContainer && !iconContainer.id) {
+           iconContainer.classList.remove('bg-white/20');
+           iconContainer.classList.add('bg-slate-100', 'dark:bg-slate-700');
+        }
+      });
+
+      const activeBtn = document.getElementById(`navTile-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-white', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300', 'border-slate-200', 'dark:border-slate-700');
+        activeBtn.classList.add('bg-blue-600', 'border-blue-600', 'text-white', 'shadow-md');
+        const iconContainer = activeBtn.querySelector('div > span:nth-child(2)');
+        if(iconContainer && !iconContainer.id) {
+            iconContainer.classList.remove('bg-slate-100', 'dark:bg-slate-700');
+            iconContainer.classList.add('bg-white/20');
+        }
+      }
+
+      if(tabId === 'dashboard') updateDashboardMetrics();
+      if(tabId === 'reports') renderReportPreview();
+    }
+
+    function switchOeeSubTab(subId) {
+      document.querySelectorAll('[id^="oeeSub-"]').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`oeeSub-${subId}`).classList.remove('hidden');
+      
+      document.querySelectorAll('[id^="oeeSubBtn-"]').forEach(btn => {
+        btn.className = "px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold";
+      });
+      document.getElementById(`oeeSubBtn-${subId}`).className = "px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold";
+    }
+
+    // ========================================================================
+    // RENDERING LOGIC
+    // ========================================================================
+    function renderAll() {
+        applyFiltersAndRender();
+        applyToolsFiltersAndRender();
+        renderShifts();
+        renderPlanningOptions();
+        updateDashboardMetrics();
+        populateAnalyticsDropdown();
+        populateMemoRecipients();
+    }
+
+    function applyFiltersAndRender() {
+      const q = document.getElementById('logSearchInput').value.toLowerCase();
+      const sort = document.getElementById('filterSort').value;
+      
+      let filtered = records.filter(r => 
+        r.profile.toLowerCase().includes(q) || 
+        r.description.toLowerCase().includes(q)
+      );
+
+      filtered.sort((a, b) => {
+        if(sort === 'profile_asc') return a.profile.localeCompare(b.profile);
+        if(sort === 'profile_desc') return b.profile.localeCompare(a.profile);
+        if(sort === 'cycle_asc') return a.cycle_sec - b.cycle_sec;
+        if(sort === 'cycle_desc') return b.cycle_sec - a.cycle_sec;
+        return 0;
+      });
+
+      const tbody = document.getElementById('logsTableBody');
+      tbody.innerHTML = '';
+      if(filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No profiles found.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach((r, i) => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+            <td class="p-3.5">${i + 1}</td>
+            <td class="p-3.5 font-bold">${escapeHtml(r.profile)}</td>
+            <td class="p-3.5">${escapeHtml(r.description)}</td>
+            <td class="p-3.5">${escapeHtml(r.length)}</td>
+            <td class="p-3.5 font-mono text-blue-600 dark:text-blue-400 font-bold">${r.cycle_sec}s</td>
+            <td class="p-3.5">${escapeHtml(r.feed)}</td>
+            <td class="p-3.5 truncate max-w-[120px]" title="${escapeHtml(r.tooling)}">${escapeHtml(r.tooling)}</td>
+            <td class="p-3.5 text-center space-x-2">
+              <button onclick="editProfile('${r.id}')" class="text-blue-500 hover:text-blue-700 font-bold">Edit</button>
+              <button onclick="deleteProfile('${r.id}')" class="text-rose-500 hover:text-rose-700 font-bold">Trash</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function applyToolsFiltersAndRender() {
+      const q = document.getElementById('toolSearchInput').value.toLowerCase();
+      const cat = document.getElementById('filterCategorySelect').value;
+
+      let filtered = toolsList.filter(t => 
+        (t.subType && t.subType.toLowerCase().includes(q)) || 
+        (t.diameter && t.diameter.toLowerCase().includes(q))
+      );
+      if(cat !== 'ALL') {
+          filtered = filtered.filter(t => t.category === cat);
+      }
+
+      const tbody = document.getElementById('inventoryTableBody');
+      tbody.innerHTML = '';
+      
+      // Update counts
+      ['Milling', 'Drilling', 'Tapping', 'Chamfer'].forEach(c => {
+          document.getElementById(`catCount-${c}`).textContent = toolsList.filter(t => t.category === c).reduce((a, b) => a + parseInt(b.stock||0), 0) + ' pcs';
+      });
+
+      if(filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No tools found.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach((t, i) => {
+        let stockClass = "text-slate-800 dark:text-slate-200";
+        if(t.stock < 2) stockClass = "text-rose-600 font-black animate-pulse";
+        else if (t.stock < 5) stockClass = "text-amber-500 font-bold";
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+            <td class="p-3.5">${i + 1}</td>
+            <td class="p-3.5 font-bold">${escapeHtml(t.category)}</td>
+            <td class="p-3.5">${escapeHtml(t.subType)}</td>
+            <td class="p-3.5 font-mono">${escapeHtml(t.diameter)}</td>
+            <td class="p-3.5 truncate max-w-[150px]">${escapeHtml(t.desc)}</td>
+            <td class="p-3.5 text-center font-mono text-base ${stockClass}">${t.stock}</td>
+            <td class="p-3.5">${escapeHtml(t.loc)}</td>
+            <td class="p-3.5 text-center space-x-2">
+              <button onclick="editTool('${t.id}')" class="text-cyan-600 hover:text-cyan-800 font-bold">Edit</button>
+              <button onclick="deleteTool('${t.id}')" class="text-rose-500 hover:text-rose-700 font-bold">Del</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderShifts() {
+        const tbody = document.getElementById('shiftsTableBody');
+        tbody.innerHTML = '';
+
+        if(shifts.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No shifts recorded.</td></tr>`;
+            return;
+        }
+
+        const sorted = [...shifts].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+        sorted.forEach(s => {
+            let totalProd = 0, totalGood = 0, totalRej = 0;
+            if(s.profiles) {
+                s.profiles.forEach(p => {
+                    totalProd += (parseInt(p.prod) || 0);
+                    totalGood += (parseInt(p.good) || 0);
+                    totalRej += (parseInt(p.reject) || 0);
+                });
+            }
+            
+            let dt = 0;
+            if(s.downtime) {
+                s.downtime.forEach(d => dt += (parseInt(d.mins)||0));
+            }
+
+            const oee = s.oeeSummary ? fmtPct(s.oeeSummary.oee) : '-';
+
+            tbody.innerHTML += `
+              <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                <td class="p-3.5 font-bold">${escapeHtml(s.date)}</td>
+                <td class="p-3.5">${escapeHtml(s.shiftType)}</td>
+                <td class="p-3.5 font-bold text-blue-600">Team ${escapeHtml(s.team)}</td>
+                <td class="p-3.5 text-right font-mono">${totalProd}</td>
+                <td class="p-3.5 text-right font-mono text-emerald-600">${totalGood}</td>
+                <td class="p-3.5 text-right font-mono text-rose-600">${totalRej}</td>
+                <td class="p-3.5 text-right font-mono text-amber-600">${dt}m</td>
+                <td class="p-3.5 text-right font-bold text-indigo-600">${oee}</td>
+                <td class="p-3.5 text-center">
+                  <button onclick="viewShift('${s.id}')" class="text-blue-500 font-bold">View</button>
+                </td>
+              </tr>
+            `;
+        });
+    }
+
+    // ========================================================================
+    // DASHBOARD & METRICS
+    // ========================================================================
+    function updateDashboardMetrics() {
+        document.getElementById('dashTotalProfiles').textContent = records.length;
+        
+        let toolsTotal = 0; let lowStock = 0;
+        toolsList.forEach(t => { 
+            toolsTotal += parseInt(t.stock||0);
+            if(parseInt(t.stock||0) < 2) lowStock++;
+        });
+        document.getElementById('dashToolsStock').textContent = `${toolsTotal} pcs`;
+        document.getElementById('dashLowStockSummary').textContent = `${lowStock} low stock alert`;
+
+        // Process Shift Data for Dashboard
+        let oeeSum = 0; let oeeCount = 0;
+        let todayProd = 0; let todayGood = 0; let todayRej = 0;
+        
+        shifts.forEach(s => {
+            if(s.oeeSummary && s.oeeSummary.oee) {
+                oeeSum += s.oeeSummary.oee;
+                oeeCount++;
+            }
+            if(s.date === localTodayISO() && s.profiles) {
+                s.profiles.forEach(p => {
+                    todayProd += parseInt(p.prod||0);
+                    todayGood += parseInt(p.good||0);
+                    todayRej += parseInt(p.reject||0);
+                });
+            }
+        });
+
+        if(oeeCount > 0) {
+            document.getElementById('dashOeeAvg').textContent = fmtPct(oeeSum / oeeCount);
+        }
+
+        document.getElementById('dashProducedToday').textContent = `${todayProd} pcs`;
+        document.getElementById('dashScrapSummary').textContent = `Good: ${todayGood} | Rej: ${todayRej}`;
+
+        renderDashboardCharts();
+    }
+
+    function renderDashboardCharts() {
+        // Safe destroy previous instances
+        if(chartDashOeeInst) chartDashOeeInst.destroy();
+        if(chartDashProductionInst) chartDashProductionInst.destroy();
+
+        const oeeCtx = document.getElementById('chartDashOee');
+        if(oeeCtx && shifts.length > 0) {
+            const sorted = [...shifts].sort((a,b) => new Date(a.date) - new Date(b.date)).slice(-7);
+            const labels = sorted.map(s => s.date.slice(5));
+            const data = sorted.map(s => s.oeeSummary ? (s.oeeSummary.oee * 100).toFixed(1) : 0);
+
+            chartDashOeeInst = new Chart(oeeCtx, {
+                type: 'line',
+                data: { labels, datasets: [{ label: 'OEE %', data, borderColor: '#10b981', tension: 0.3, fill: true, backgroundColor: 'rgba(16,185,129,0.1)' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+    }
+
+    // ========================================================================
+    // MODALS & FORMS
+    // ========================================================================
+    function openFormModal() {
+        document.getElementById('recordForm').reset();
+        document.getElementById('formRowId').value = '';
+        document.getElementById('formModalTitle').textContent = 'Log New CNC Profile';
+        document.getElementById('modalForm').classList.remove('hidden');
+    }
+    
+    function closeFormModal() { document.getElementById('modalForm').classList.add('hidden'); }
+    
+    function submitForm(e) {
+        e.preventDefault();
+        const id = document.getElementById('formRowId').value;
+        const payload = {
+            profile: document.getElementById('formProfile').value,
+            description: document.getElementById('formDescription').value,
+            length: document.getElementById('formLength').value,
+            cycle_sec: parseInt(document.getElementById('formCycleSeconds').value),
+            feed: document.getElementById('formFeedSpeeds').value,
+            tooling: document.getElementById('formTooling').value,
+        };
+
+        if(id) {
+            const idx = records.findIndex(r => r.id === id);
+            if(idx > -1) records[idx] = { ...records[idx], ...payload };
+        } else {
+            payload.id = generateId();
+            records.push(payload);
+        }
+
+        saveData();
+        closeFormModal();
+        showToast('Profile saved successfully.');
+    }
+
+    function editProfile(id) {
+        const r = records.find(x => x.id === id);
+        if(!r) return;
+        document.getElementById('formRowId').value = r.id;
+        document.getElementById('formProfile').value = r.profile || '';
+        document.getElementById('formDescription').value = r.description || '';
+        document.getElementById('formLength').value = r.length || '';
+        document.getElementById('formCycleSeconds').value = r.cycle_sec || '';
+        document.getElementById('formFeedSpeeds').value = r.feed || '';
+        document.getElementById('formTooling').value = r.tooling || '';
+        document.getElementById('formModalTitle').textContent = 'Edit CNC Profile';
+        document.getElementById('modalForm').classList.remove('hidden');
+    }
+
+    function deleteProfile(id) {
+        if(!confirm('Delete this profile?')) return;
+        records = records.filter(r => r.id !== id);
+        saveData();
+        showToast('Profile deleted.', 'error');
+    }
+
+    // Tools
+    function openToolsFormModal() {
+        document.getElementById('toolsToolForm').reset();
+        document.getElementById('toolsFormId').value = '';
+        document.getElementById('toolsModalForm').classList.remove('hidden');
+    }
+    
+    function closeToolsFormModal() { document.getElementById('toolsModalForm').classList.add('hidden'); }
+    
+    function submitToolForm(e) {
+        e.preventDefault();
+        const id = document.getElementById('toolsFormId').value;
+        const payload = {
+            category: document.getElementById('toolsFormCategory').value,
+            subType: document.getElementById('toolsFormSubType').value,
+            diameter: document.getElementById('toolsFormDiameter').value,
+            desc: document.getElementById('toolsFormDescription').value,
+            stock: parseInt(document.getElementById('toolsFormStock').value),
+            loc: document.getElementById('toolsFormLocation').value
+        };
+
+        if(id) {
+            const idx = toolsList.findIndex(x => x.id === id);
+            if(idx > -1) toolsList[idx] = { ...toolsList[idx], ...payload };
+        } else {
+            payload.id = generateId();
+            toolsList.push(payload);
+        }
+
+        saveData();
+        closeToolsFormModal();
+        showToast('Tool updated successfully.');
+    }
+    
+    function editTool(id) {
+        const t = toolsList.find(x => x.id === id);
+        if(!t) return;
+        document.getElementById('toolsFormId').value = t.id;
+        document.getElementById('toolsFormCategory').value = t.category || '';
+        document.getElementById('toolsFormSubType').value = t.subType || '';
+        document.getElementById('toolsFormDiameter').value = t.diameter || '';
+        document.getElementById('toolsFormDescription').value = t.desc || '';
+        document.getElementById('toolsFormStock').value = t.stock || 0;
+        document.getElementById('toolsFormLocation').value = t.loc || '';
+        document.getElementById('toolsModalForm').classList.remove('hidden');
+    }
+
+    function deleteTool(id) {
+        if(!confirm('Delete this tool?')) return;
+        toolsList = toolsList.filter(t => t.id !== id);
+        saveData();
+        showToast('Tool deleted.', 'error');
+    }
+
+    function toolsFilterByCategory(cat) {
+        document.getElementById('filterCategorySelect').value = cat;
+        applyToolsFiltersAndRender();
+    }
+
+    // ========================================================================
+    // SHIFT & OEE FORMS
+    // ========================================================================
+    function resetShiftLogForm() {
+        document.getElementById('shiftLogForm').reset();
+        document.getElementById('shiftFormId').value = '';
+        document.getElementById('logDate').value = localTodayISO();
+        document.getElementById('profileCardsContainer').innerHTML = '';
+        document.getElementById('downtimeCardsContainer').innerHTML = '';
+        cardCounter = 0; dtCounter = 0;
+    }
+
+    function addProfileCard() {
+        const html = `
+            <div id="profCard-${cardCounter}" class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-5 gap-2 relative mt-2">
+                <button type="button" onclick="document.getElementById('profCard-${cardCounter}').remove()" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">×</button>
+                <div class="col-span-2">
+                    <label class="text-[10px] font-bold text-slate-400">Profile</label>
+                    <select class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none log-profile-sel">
+                        ${records.map(r => `<option value="${r.id}">${r.profile}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400">Prod</label>
+                    <input type="number" value="0" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none log-profile-prod" onchange="calcScrap(${cardCounter})">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400">Good</label>
+                    <input type="number" value="0" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none text-emerald-600 log-profile-good" onchange="calcScrap(${cardCounter})">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400">Reject</label>
+                    <input type="number" value="0" readonly class="w-full bg-slate-100 dark:bg-slate-700 border rounded-lg p-1.5 outline-none text-rose-500 font-bold log-profile-rej">
+                </div>
+            </div>`;
+        document.getElementById('profileCardsContainer').insertAdjacentHTML('beforeend', html);
+        cardCounter++;
+    }
+
+    function calcScrap(idx) {
+        const card = document.getElementById(`profCard-${idx}`);
+        if(!card) return;
+        const prod = parseInt(card.querySelector('.log-profile-prod').value) || 0;
+        const good = parseInt(card.querySelector('.log-profile-good').value) || 0;
+        card.querySelector('.log-profile-rej').value = Math.max(0, prod - good);
+    }
+
+    function addDowntimeCard() {
+        const html = `
+            <div id="dtCard-${dtCounter}" class="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-2xl border border-amber-200 dark:border-amber-900/50 grid grid-cols-4 gap-2 relative mt-2">
+                <button type="button" onclick="document.getElementById('dtCard-${dtCounter}').remove()" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">×</button>
+                <div class="col-span-3">
+                    <label class="text-[10px] font-bold text-amber-600">Reason</label>
+                    <input type="text" placeholder="e.g. Machine Breakdown" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none log-dt-reason">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-amber-600">Mins</label>
+                    <input type="number" value="0" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none font-bold text-amber-600 log-dt-mins">
+                </div>
+            </div>`;
+        document.getElementById('downtimeCardsContainer').insertAdjacentHTML('beforeend', html);
+        dtCounter++;
+    }
+
+    function submitShiftLog(e) {
+        e.preventDefault();
+        const payload = {
+            id: generateId(),
+            date: document.getElementById('logDate').value,
+            shiftType: document.getElementById('logShiftType').value,
+            team: document.getElementById('logTeam').value,
+            epf: document.getElementById('logEpf').value,
+            plannedBreak: parseInt(document.getElementById('logPlannedBreak').value) || 0,
+            wasPlanned: document.getElementById('logWasPlanned').value,
+            otherDept: document.getElementById('logOtherDept').value,
+            notes: document.getElementById('logOtherNotes').value,
+            operator: document.getElementById('logOperator').value,
+            profiles: [],
+            downtime: []
+        };
+
+        document.querySelectorAll('#profileCardsContainer > div').forEach(c => {
+            payload.profiles.push({
+                profileId: c.querySelector('.log-profile-sel').value,
+                prod: parseInt(c.querySelector('.log-profile-prod').value) || 0,
+                good: parseInt(c.querySelector('.log-profile-good').value) || 0,
+                reject: parseInt(c.querySelector('.log-profile-rej').value) || 0
+            });
+        });
+
+        document.querySelectorAll('#downtimeCardsContainer > div').forEach(c => {
+            payload.downtime.push({
+                reason: c.querySelector('.log-dt-reason').value,
+                mins: parseInt(c.querySelector('.log-dt-mins').value) || 0
+            });
+        });
+
+        // Basic OEE Calculation for 12hr shift (720 min)
+        const totalPlannedMin = 720;
+        const breakMin = payload.plannedBreak;
+        const idealOperatingMin = totalPlannedMin - breakMin;
+        
+        let downtimeMin = payload.downtime.reduce((acc, dt) => acc + dt.mins, 0);
+        let actualOperatingMin = idealOperatingMin - downtimeMin;
+        if(actualOperatingMin < 0) actualOperatingMin = 0;
+
+        let totalGood = 0; let totalProd = 0; let idealCycleTimeSecSum = 0;
+        
+        payload.profiles.forEach(p => {
+            totalProd += p.prod;
+            totalGood += p.good;
+            const ref = records.find(x => x.id === p.profileId);
+            if(ref) idealCycleTimeSecSum += (ref.cycle_sec * p.prod);
+        });
+
+        const availability = idealOperatingMin > 0 ? (actualOperatingMin / idealOperatingMin) : 0;
+        const performance = actualOperatingMin > 0 ? ((idealCycleTimeSecSum / 60) / actualOperatingMin) : 0;
+        const quality = totalProd > 0 ? (totalGood / totalProd) : 0;
+        const oee = availability * performance * quality;
+
+        payload.oeeSummary = {
+            availability: Math.min(1, availability),
+            performance: Math.min(1, performance),
+            quality: Math.min(1, quality),
+            oee: Math.min(1, oee)
+        };
+
+        shifts.push(payload);
+        saveData();
+        resetShiftLogForm();
+        switchOeeSubTab('alllogs');
+        showToast('Shift log saved.');
+    }
+
+    // ========================================================================
+    // PRODUCTION PLANNING
+    // ========================================================================
+    function renderPlanningOptions() {
+        const sel = document.getElementById('planProfileSelect');
+        if(!sel) return;
+        sel.innerHTML = '<option value="">-- Choose Profile --</option>';
+        records.forEach(r => sel.innerHTML += `<option value="${r.id}">${r.profile} - ${r.description}</option>`);
+    }
+
+    function addProfileToPlanningCart() {
+        const pid = document.getElementById('planProfileSelect').value;
+        if(!pid) { showToast('Select a profile', 'error'); return; }
+        const r = records.find(x => x.id === pid);
+        if(!r) return;
+        
+        planningCart.push({
+            id: generateId(),
+            profileId: r.id,
+            profileName: r.profile,
+            handling: parseInt(document.getElementById('planHandlingSec').value) || 0,
+            qty: parseInt(document.getElementById('planBatchQty').value) || 0,
+            cycle: r.cycle_sec
+        });
+        
+        renderPlanningCart();
+    }
+
+    function renderPlanningCart() {
+        const list = document.getElementById('planningCartList');
+        list.innerHTML = '';
+        
+        if(planningCart.length === 0) {
+            list.innerHTML = '<p class="text-xs text-slate-400 italic">No profiles in queue.</p>';
+            document.getElementById('calcTotalQty').textContent = '0 pcs';
+            document.getElementById('calcTheorTime').textContent = '0h 0m';
+            document.getElementById('calcShiftRequirement').textContent = '0.0';
+            return;
+        }
+
+        let totalQty = 0; let totalSecs = 0;
+
+        planningCart.forEach(item => {
+            totalQty += item.qty;
+            const totalSec = (item.cycle + item.handling) * item.qty;
+            totalSecs += totalSec;
+
+            list.innerHTML += `
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-600">
+                    <div>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white">${item.profileName} <span class="text-slate-400 font-normal">x ${item.qty}</span></p>
+                        <p class="text-[10px] text-slate-500">Cyc: ${item.cycle}s | Hnd: ${item.handling}s</p>
+                    </div>
+                    <button onclick="planningCart = planningCart.filter(x => x.id !== '${item.id}'); renderPlanningCart();" class="text-rose-500 font-black px-2">×</button>
+                </div>
+            `;
+        });
+
+        document.getElementById('calcTotalQty').textContent = `${totalQty} pcs`;
+        
+        const hrs = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        document.getElementById('calcTheorTime').textContent = `${hrs}h ${mins}m`;
+        
+        // Assume 10.5 hrs productive time per 12 hr shift
+        const productiveHoursPerShift = 10.5;
+        const totalHrs = totalSecs / 3600;
+        document.getElementById('calcShiftRequirement').textContent = (totalHrs / productiveHoursPerShift).toFixed(1);
+    }
+    
+    function clearPlanningCart() { planningCart = []; renderPlanningCart(); }
+
+    // ========================================================================
+    // MEMO NOTICES
+    // ========================================================================
+    function populateMemoRecipients() {
+        const list = document.getElementById('recipientsList');
+        if(!list) return;
+        list.innerHTML = '';
+        memoRecipients.forEach(r => {
+            list.innerHTML += `
+                <label class="flex items-center gap-2 text-xs cursor-pointer">
+                    <input type="checkbox" ${r.selected ? 'checked' : ''} onchange="toggleRecipient(${r.id})" class="rounded text-blue-600 focus:ring-blue-500">
+                    <span class="font-bold">${escapeHtml(r.name)}</span> - <span class="text-slate-500">${escapeHtml(r.role)}</span>
+                </label>
+            `;
+        });
+        document.getElementById('memoDate').value = localTodayISO();
+    }
+
+    function toggleRecipient(id) {
+        const r = memoRecipients.find(x => x.id === id);
+        if(r) r.selected = !r.selected;
+    }
+
+    function addNewRecipient() {
+        const n = document.getElementById('newRecipName').value;
+        const r = document.getElementById('newRecipRole').value;
+        if(n && r) {
+            memoRecipients.push({ id: Date.now(), name: n, role: r, selected: true });
+            document.getElementById('newRecipName').value = '';
+            document.getElementById('newRecipRole').value = '';
+            populateMemoRecipients();
+        }
+    }
+
+    function autoPopulateLowStock() {
+        const cont = document.getElementById('requisitionItemsContainer');
+        cont.innerHTML = '';
+        const low = toolsList.filter(t => parseInt(t.stock||0) < 2);
+        
+        if(low.length === 0) {
+            cont.innerHTML = '<p class="text-xs text-slate-400 italic">Inventory levels normal. No tools below safe threshold.</p>';
+            return;
+        }
+
+        low.forEach(t => {
+            cont.innerHTML += `
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white">${escapeHtml(t.subType)} (${escapeHtml(t.diameter)})</p>
+                        <p class="text-[10px] text-slate-500">${escapeHtml(t.category)} | Current Stock: <span class="text-rose-500 font-bold">${t.stock}</span></p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-[10px] font-bold text-slate-500">Req Qty:</label>
+                        <input type="number" value="5" class="w-16 bg-white dark:bg-slate-800 border rounded-lg p-1.5 text-xs outline-none">
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // ========================================================================
+    // ANALYTICS & EXPORTS
+    // ========================================================================
+    function populateAnalyticsDropdown() {
+        const sel = document.getElementById('analyticsProfileSelect');
+        if(!sel) return;
+        sel.innerHTML = '<option value="">-- Choose Profile --</option>';
+        records.forEach(r => sel.innerHTML += `<option value="${r.id}">${r.profile}</option>`);
+    }
+
+    function generateFormalSupervisorLetterPDF() {
+        if (typeof jspdf === 'undefined') { showToast('PDF library not loaded.', 'error'); return; }
+        const doc = new jspdf.jsPDF();
+        
+        const date = document.getElementById('memoDate').value || localTodayISO();
+        const sender = document.getElementById('memoSender').value || 'Poojitha Dilshan';
+        const recips = memoRecipients.filter(x => x.selected);
+        
+        doc.setFontSize(22);
+        doc.text('MEMORANDUM', 105, 20, { align: 'center' });
+        doc.setFontSize(10);
+        doc.text('CNC 5000 OPERATIONS', 105, 26, { align: 'center' });
+        
+        doc.line(20, 32, 190, 32);
+        
+        doc.setFontSize(11);
+        doc.text(`Date: ${date}`, 20, 42);
+        doc.text(`From: ${sender}`, 20, 48);
+        doc.text(`To:`, 20, 54);
+        
+        let y = 54;
+        recips.forEach(r => {
+            doc.text(`- ${r.name} (${r.role})`, 25, y += 6);
+        });
+
+        y += 10;
+        doc.text('Subject: CNC Tooling Inventory Restock Requisition', 20, y);
+        
+        y += 10;
+        doc.setFontSize(10);
+        doc.text('Please find below the list of CNC tools that have fallen below the critical operating threshold', 20, y);
+        doc.text('of 2 units. Immediate restocking is requested to prevent production downtime.', 20, y+6);
+
+        // Assuming jsPDF-AutoTable is loaded
+        const tableData = [];
+        document.querySelectorAll('#requisitionItemsContainer > div').forEach(row => {
+            const name = row.querySelector('p.font-bold').textContent;
+            const stockTxt = row.querySelector('span.text-rose-500').textContent;
+            const reqQty = row.querySelector('input[type="number"]').value;
+            tableData.push([name, stockTxt, reqQty]);
+        });
+
+        if(tableData.length > 0) {
+            doc.autoTable({
+                startY: y + 15,
+                head: [['Tool Description', 'Current Stock', 'Requested Qty']],
+                body: tableData,
+                theme: 'grid',
+                styles: { fontSize: 9 }
+            });
+        }
+
+        doc.save(`Tool_Requisition_${date}.pdf`);
+        showToast('PDF Exported Successfully.');
+    }
+
+    // ========================================================================
+    // INIT
+    // ========================================================================
+    window.onload = () => {
+        loadData();
+        resetShiftLogForm();
+        switchTab('dashboard'); // Start on dashboard
+    };
+  </script>
+</body>
+</html>
