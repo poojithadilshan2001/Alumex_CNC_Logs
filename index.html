@@ -331,7 +331,7 @@
           <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
             <span>+</span> Log New Profile
           </button>
-          <input type="file" id="importProfileFile" accept=".xlsx, .xls, .csv, .pdf" class="hidden" onchange="handleProfileImport(event)">
+          <input type="file" id="importProfileFile" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleProfileImport(event)">
           <button onclick="document.getElementById('importProfileFile').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1">
             <span>📥</span> Import
           </button>
@@ -851,10 +851,15 @@
     const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ocmFvYWRmZGVnamZ3Y2tycWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNDAwNzUsImV4cCI6MjEwMjYxNjA3NX0.X3LBq4lh7OarSjmw0kGukG0xw0k_P-qQlE3owXEfhOc";
     
-    // Initialize Supabase client correctly
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Initialize Supabase client
+    let supabase;
+    try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch(e) {
+        console.error("Failed to initialize Supabase:", e);
+    }
 
-    const DB_MAP = {
+    // Table column mappings    const DB_MAP = {
         profiles: {
             table: 'cnc_cycle_times', 
             cols: {
@@ -880,6 +885,7 @@
         }
     };
 
+    // Toast notification
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toastNotification');
       document.getElementById('toastMessage').textContent = message;
@@ -890,6 +896,7 @@
       window.toastTimer = setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 5000);
     }
 
+    // Global state
     let records = [];
     let toolsList = [];
     let shifts = [];
@@ -904,6 +911,7 @@
     let chartProfile30Inst = null;
     let chartProfileSpecificInst = null;
 
+    // Utility functions
     const escapeHtml = v => (v == null ? '' : String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
     const fmtPct = v => (v == null || isNaN(v) || !isFinite(v)) ? '-' : (v * 100).toFixed(1) + '%';
     const localTodayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
@@ -917,6 +925,7 @@
         return val;
     }
 
+    // Navigation
     function switchTab(tabId) {
       document.querySelectorAll('main > section').forEach(el => {
         el.classList.add('hidden');
@@ -962,91 +971,104 @@
       document.getElementById(`oeeSubBtn-${subId}`).className = "px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold";
     }
 
+    // ========================================================================
+    // DATABASE OPERATIONS
+    // ========================================================================
     async function loadDataFromSupabase() {
         const badge = document.getElementById('syncBadge');
         const status = document.getElementById('syncStatus');
         const dot = document.getElementById('syncDot');
 
+        if (!supabase) {
+            status.textContent = 'Supabase not initialized';
+            return;
+        }
+
         try {
             status.textContent = 'Fetching Data...';
 
+            // Load profiles
             const { data: profData, error: profErr } = await supabase.from(DB_MAP.profiles.table).select('*');
             if (profErr) throw new Error(`Profiles Error: ${profErr.message}`);
             
             records = (profData || []).map(row => ({
-                id: row[DB_MAP.profiles.cols.id],
-                profile: row[DB_MAP.profiles.cols.profile],
-                description: row[DB_MAP.profiles.cols.description],
-                length: row[DB_MAP.profiles.cols.length],
-                cycle_sec: row[DB_MAP.profiles.cols.cycle_sec],
-                feed: row[DB_MAP.profiles.cols.feed],
-                tooling: row[DB_MAP.profiles.cols.tooling]
+                id: row.id,
+                profile: row.profile,
+                description: row.description,
+                length: row.length,
+                cycle_sec: row.cycle_sec,
+                feed: row.feed,
+                tooling: row.tooling
             }));
 
+            // Load tools
             const { data: toolData, error: toolErr } = await supabase.from(DB_MAP.tools.table).select('*');
             if (toolErr) throw new Error(`Tools Error: ${toolErr.message}`);
             
             toolsList = (toolData || []).map(row => ({
-                id: row[DB_MAP.tools.cols.id],
-                category: row[DB_MAP.tools.cols.category],
-                subType: row[DB_MAP.tools.cols.subType],
-                diameter: row[DB_MAP.tools.cols.diameter],
-                desc: row[DB_MAP.tools.cols.desc],
-                stock: row[DB_MAP.tools.cols.stock],
-                loc: row[DB_MAP.tools.cols.loc]
+                id: row.id,
+                category: row.category,
+                subType: row.sub_type,
+                diameter: row.diameter,
+                desc: row.desc_text,
+                stock: row.stock,
+                loc: row.loc
             }));
 
+            // Load shifts
             const { data: shiftData, error: shiftErr } = await supabase.from(DB_MAP.shifts.table).select('*');
             if (shiftErr) throw new Error(`Shifts Error: ${shiftErr.message}`);
             
             shifts = (shiftData || []).map(row => ({
-                id: row[DB_MAP.shifts.cols.id],
-                date: row[DB_MAP.shifts.cols.date],
-                shiftType: row[DB_MAP.shifts.cols.shiftType],
-                team: row[DB_MAP.shifts.cols.team],
-                epf: row[DB_MAP.shifts.cols.epf],
-                profiles: safeParseJSON(row[DB_MAP.shifts.cols.profilesData]),
-                downtime: safeParseJSON(row[DB_MAP.shifts.cols.downtimeData]),
-                oeeSummary: safeParseJSON(row[DB_MAP.shifts.cols.oeeSummary])
+                id: row.id,
+                date: row.date,
+                shiftType: row.shift_type,
+                team: row.team,
+                epf: row.epf,
+                profiles: safeParseJSON(row.profiles_data),
+                downtime: safeParseJSON(row.downtime_data),
+                oeeSummary: safeParseJSON(row.oee_summary)
             }));
 
+            // Update status
             badge.className = "flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 rounded-full text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 transition-colors";
             dot.className = "w-2 h-2 rounded-full bg-emerald-500";
-            status.textContent = 'DB Connected';
+            status.textContent = `DB Connected (${records.length} profiles, ${toolsList.length} tools, ${shifts.length} shifts)`;
             
             renderAll();
         } catch (error) {
             console.error("Supabase Connection Failed:", error);
             badge.className = "flex items-center space-x-1.5 px-3 py-1 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/80 rounded-full text-[11px] font-semibold text-rose-700 dark:text-rose-400 transition-colors";
             dot.className = "w-2 h-2 rounded-full bg-rose-500";
-            status.textContent = 'DB Error (Check RLS)';
+            status.textContent = `DB Error: ${error.message}`;
             showToast(`Database connection failed: ${error.message}.`, 'error');
             
             renderAll();
         }
     }
 
+    // Profile CRUD
     async function submitForm(e) {
         e.preventDefault();
         const id = document.getElementById('formRowId').value;
         const payload = {
-            [DB_MAP.profiles.cols.profile]: document.getElementById('formProfile').value,
-            [DB_MAP.profiles.cols.description]: document.getElementById('formDescription').value,
-            [DB_MAP.profiles.cols.length]: document.getElementById('formLength').value,
-            [DB_MAP.profiles.cols.cycle_sec]: parseInt(document.getElementById('formCycleSeconds').value),
-            [DB_MAP.profiles.cols.feed]: document.getElementById('formFeedSpeeds').value,
-            [DB_MAP.profiles.cols.tooling]: document.getElementById('formTooling').value,
+            profile: document.getElementById('formProfile').value,
+            description: document.getElementById('formDescription').value,
+            length: document.getElementById('formLength').value,
+            cycle_sec: parseInt(document.getElementById('formCycleSeconds').value),
+            feed: document.getElementById('formFeedSpeeds').value,
+            tooling: document.getElementById('formTooling').value,
         };
 
         try {
             if (id) {
-                const { error } = await supabase.from(DB_MAP.profiles.table).update(payload).eq(DB_MAP.profiles.cols.id, id);
+                const { error } = await supabase.from(DB_MAP.profiles.table).update(payload).eq('id', id);
                 if(error) throw error;
-                showToast('Profile Updated in Supabase.');
+                showToast('Profile Updated.');
             } else {
                 const { error } = await supabase.from(DB_MAP.profiles.table).insert([payload]);
                 if(error) throw error;
-                showToast('New Profile Saved to Supabase.');
+                showToast('New Profile Saved.');
             }
             closeFormModal();
             loadDataFromSupabase();
@@ -1058,36 +1080,37 @@
     async function deleteProfile(id) {
         if(!confirm('Delete this profile from database?')) return;
         try {
-            const { error } = await supabase.from(DB_MAP.profiles.table).delete().eq(DB_MAP.profiles.cols.id, id);
+            const { error } = await supabase.from(DB_MAP.profiles.table).delete().eq('id', id);
             if(error) throw error;
-            showToast('Profile Deleted from Supabase.', 'error');
+            showToast('Profile Deleted.', 'error');
             loadDataFromSupabase();
         } catch(err) {
             showToast(`Error deleting profile: ${err.message}`, 'error');
         }
     }
 
+    // Tool CRUD
     async function submitToolForm(e) {
         e.preventDefault();
         const id = document.getElementById('toolsFormId').value;
         const payload = {
-            [DB_MAP.tools.cols.category]: document.getElementById('toolsFormCategory').value,
-            [DB_MAP.tools.cols.subType]: document.getElementById('toolsFormSubType').value,
-            [DB_MAP.tools.cols.diameter]: document.getElementById('toolsFormDiameter').value,
-            [DB_MAP.tools.cols.desc]: document.getElementById('toolsFormDescription').value,
-            [DB_MAP.tools.cols.stock]: parseInt(document.getElementById('toolsFormStock').value),
-            [DB_MAP.tools.cols.loc]: document.getElementById('toolsFormLocation').value
+            category: document.getElementById('toolsFormCategory').value,
+            sub_type: document.getElementById('toolsFormSubType').value,
+            diameter: document.getElementById('toolsFormDiameter').value,
+            desc_text: document.getElementById('toolsFormDescription').value,
+            stock: parseInt(document.getElementById('toolsFormStock').value),
+            loc: document.getElementById('toolsFormLocation').value
         };
 
         try {
             if (id) {
-                const { error } = await supabase.from(DB_MAP.tools.table).update(payload).eq(DB_MAP.tools.cols.id, id);
+                const { error } = await supabase.from(DB_MAP.tools.table).update(payload).eq('id', id);
                 if(error) throw error;
-                showToast('Tool Updated in Supabase.');
+                showToast('Tool Updated.');
             } else {
                 const { error } = await supabase.from(DB_MAP.tools.table).insert([payload]);
                 if(error) throw error;
-                showToast('New Tool Saved to Supabase.');
+                showToast('New Tool Saved.');
             }
             closeToolsFormModal();
             loadDataFromSupabase(); 
@@ -1099,15 +1122,16 @@
     async function deleteTool(id) {
         if(!confirm('Delete this tool from database?')) return;
         try {
-            const { error } = await supabase.from(DB_MAP.tools.table).delete().eq(DB_MAP.tools.cols.id, id);
+            const { error } = await supabase.from(DB_MAP.tools.table).delete().eq('id', id);
             if(error) throw error;
-            showToast('Tool Deleted from Supabase.', 'error');
+            showToast('Tool Deleted.', 'error');
             loadDataFromSupabase();
         } catch(err) {
             showToast(`Error deleting tool: ${err.message}`, 'error');
         }
     }
 
+    // Shift CRUD
     async function submitShiftLog(e) {
         e.preventDefault();
         let profDataArray = [];
@@ -1156,19 +1180,19 @@
         };
 
         const payload = {
-            [DB_MAP.shifts.cols.date]: document.getElementById('logDate').value,
-            [DB_MAP.shifts.cols.shiftType]: document.getElementById('logShiftType').value,
-            [DB_MAP.shifts.cols.team]: document.getElementById('logTeam').value,
-            [DB_MAP.shifts.cols.epf]: document.getElementById('logEpf').value,
-            [DB_MAP.shifts.cols.profilesData]: profDataArray, 
-            [DB_MAP.shifts.cols.downtimeData]: dtDataArray,
-            [DB_MAP.shifts.cols.oeeSummary]: oeeSumObj
+            date: document.getElementById('logDate').value,
+            shift_type: document.getElementById('logShiftType').value,
+            team: document.getElementById('logTeam').value,
+            epf: document.getElementById('logEpf').value,
+            profiles_data: profDataArray, 
+            downtime_data: dtDataArray,
+            oee_summary: oeeSumObj
         };
 
         try {
             const { error } = await supabase.from(DB_MAP.shifts.table).insert([payload]);
             if (error) throw error;
-            showToast('Shift Log Saved directly to Supabase.');
+            showToast('Shift Log Saved.');
             resetShiftLogForm();
             switchOeeSubTab('alllogs');
             loadDataFromSupabase();
@@ -1180,7 +1204,7 @@
     async function deleteShift(id) {
         if(!confirm('Delete this shift log?')) return;
         try {
-            const { error } = await supabase.from(DB_MAP.shifts.table).delete().eq(DB_MAP.shifts.cols.id, id);
+            const { error } = await supabase.from(DB_MAP.shifts.table).delete().eq('id', id);
             if(error) throw error;
             showToast('Shift Deleted.', 'error');
             loadDataFromSupabase();
@@ -1189,6 +1213,9 @@
         }
     }
 
+    // ========================================================================
+    // RENDER FUNCTIONS
+    // ========================================================================
     function renderAll() {
         applyFiltersAndRender();
         applyToolsFiltersAndRender();
@@ -1464,6 +1491,9 @@
         }
     }
 
+    // ========================================================================
+    // UI HELPERS
+    // ========================================================================
     function openFormModal() {
         document.getElementById('recordForm').reset();
         document.getElementById('formRowId').value = '';
@@ -1522,6 +1552,10 @@
     }
 
     function addProfileCard() {
+        if(records.length === 0) {
+            showToast('No profiles available. Add a profile first.', 'error');
+            return;
+        }
         const html = `
             <div id="profCard-${cardCounter}" class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-5 gap-2 relative mt-2">
                 <button type="button" onclick="document.getElementById('profCard-${cardCounter}').remove()" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">×</button>
@@ -1748,6 +1782,17 @@
         }
     }
 
+    function toolsFilterByCategory(category) {
+        const select = document.getElementById('filterCategorySelect');
+        if(select) {
+            select.value = category;
+            applyToolsFiltersAndRender();
+        }
+    }
+
+    // ========================================================================
+    // EXPORT FUNCTIONS
+    // ========================================================================
     function handleProfileImport(event) {
         const file = event.target.files[0];
         if(!file) return;
@@ -1763,12 +1808,12 @@
                 for (const row of jsonData) {
                     if (row['Profile Code'] || row['profile']) {
                         const payload = {
-                            [DB_MAP.profiles.cols.profile]: String(row['Profile Code'] || row['profile'] || 'Unknown'),
-                            [DB_MAP.profiles.cols.description]: String(row['Description'] || row['description'] || ''),
-                            [DB_MAP.profiles.cols.length]: String(row['Length'] || row['length'] || ''),
-                            [DB_MAP.profiles.cols.cycle_sec]: parseInt(row['Cycle Sec'] || row['cycle_sec']) || 0,
-                            [DB_MAP.profiles.cols.feed]: String(row['Feed'] || row['feed'] || ''),
-                            [DB_MAP.profiles.cols.tooling]: String(row['Tooling'] || row['tooling'] || '')
+                            profile: String(row['Profile Code'] || row['profile'] || 'Unknown'),
+                            description: String(row['Description'] || row['description'] || ''),
+                            length: String(row['Length'] || row['length'] || ''),
+                            cycle_sec: parseInt(row['Cycle Sec'] || row['cycle_sec']) || 0,
+                            feed: String(row['Feed'] || row['feed'] || ''),
+                            tooling: String(row['Tooling'] || row['tooling'] || '')
                         };
                         await supabase.from(DB_MAP.profiles.table).insert([payload]);
                         successCount++;
@@ -1954,22 +1999,15 @@
         doc.save("Executive_OEE_Audit.pdf");
     }
 
-    // Add missing function toolsFilterByCategory
-    function toolsFilterByCategory(category) {
-        const select = document.getElementById('filterCategorySelect');
-        if(select) {
-            select.value = category;
-            applyToolsFiltersAndRender();
-        }
-    }
-
-    // Initialize the app
+    // ========================================================================
+    // INITIALIZATION
+    // ========================================================================
     document.addEventListener('DOMContentLoaded', () => {
         switchTab('dashboard'); 
         resetShiftLogForm();
         setTimeout(() => {
             loadDataFromSupabase();
-        }, 100);
+        }, 500);
     });
 
   </script>
