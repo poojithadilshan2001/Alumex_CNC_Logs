@@ -1,650 +1,2600 @@
 <!DOCTYPE html>
 <html lang="en" class="light">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CNC 5000 - Complete Production System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PDF, EXCEL, and CSV Parsing Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { colors: { brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' } } } }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CNC 5000 - Operations & OEE Intelligence</title>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1e40af">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
+            toolsteel: { 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+          }
         }
-    </script>
-    <style>
-        .fade-in { animation: fadeIn 0.3s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+      }
+    }
+  </script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- SheetJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- jsPDF & AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen font-sans antialiased transition-colors duration-200">
 
-<!-- TOAST -->
-<div id="toast" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-slate-700">
-    <span id="toastIcon">✓</span><span id="toastMsg">Success</span>
-</div>
+  <!-- NOTIFICATION TOAST -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-slate-700">
+    <span id="toastIcon">✓</span>
+    <span id="toastMessage">Action successful</span>
+  </div>
 
-<!-- HEADER -->
-<header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-800/95 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 md:px-8 py-3 shadow-sm">
+  <!-- ============================================================== -->
+  <!-- HEADER & BRAND BAR                                             -->
+  <!-- ============================================================== -->
+  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-800/95 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 md:px-8 py-3 shadow-sm">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
-            <div class="bg-blue-600 text-white w-10 h-10 rounded-2xl font-black text-lg flex items-center justify-center shadow-md shadow-blue-500/20">5K</div>
-            <div>
-                <h1 class="text-base md:text-lg font-black text-slate-900 dark:text-white leading-tight">CNC 5000 MACHINE</h1>
-                <p class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">Complete Operations &amp; OEE Intelligence</p>
-            </div>
+      
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+        <div class="bg-blue-600 text-white w-10 h-10 rounded-2xl font-black text-lg flex items-center justify-center shadow-md shadow-blue-500/20">5K</div>
+        <div>
+          <h1 class="text-base md:text-lg font-black text-slate-900 dark:text-white leading-tight tracking-tight">CNC 5000 MACHINE</h1>
+          <p class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">Advanced Production Intelligence &amp; OEE Operations</p>
         </div>
-        <div class="flex items-center gap-3">
-            <div id="syncBadge" class="flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 rounded-full text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-                <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500"></span><span id="syncStatus">Connected</span>
-            </div>
-            <button onclick="toggleDarkMode()" class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition shadow-sm">🌙</button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 rounded-full text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="syncStatus">Online</span>
         </div>
+        <button onclick="toggleDarkMode()" class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition shadow-sm">
+          <span class="themeIcon text-sm">🌙</span>
+        </button>
+      </div>
     </div>
-</header>
+  </header>
 
-<!-- NAVIGATION (Horizontal Scroll on Mobile) -->
-<div class="max-w-7xl mx-auto px-4 md:px-8 pt-5">
-    <div class="flex sm:grid sm:grid-cols-4 lg:grid-cols-8 gap-2.5 overflow-x-auto no-scrollbar pb-2">
-        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="min-w-[120px] p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-blue-600 border-blue-600 text-white shadow-md">
-            <div class="flex justify-between items-center w-full"><span class="text-base">📊</span><span class="text-[9px] font-mono uppercase bg-white/20 px-1.5 py-0.5 rounded">Hub</span></div>
-            <div class="mt-2"><p class="text-xs font-black leading-tight">Dashboard</p></div>
-        </button>
-        <button onclick="switchTab('profiles')" id="nav-profiles" class="min-w-[120px] p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-            <div class="flex justify-between items-center w-full"><span class="text-base">⚙️</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Setup</span></div>
-            <div class="mt-2"><p class="text-xs font-black leading-tight">Profiles</p></div>
-        </button>
-        <button onclick="switchTab('tools')" id="nav-tools" class="min-w-[120px] p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-            <div class="flex justify-between items-center w-full"><span class="text-base">🛠️</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Stock</span></div>
-            <div class="mt-2"><p class="text-xs font-black leading-tight">Tools</p></div>
-        </button>
-        <button onclick="switchTab('shifts')" id="nav-shifts" class="min-w-[120px] p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-            <div class="flex justify-between items-center w-full"><span class="text-base">📅</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Logs</span></div>
-            <div class="mt-2"><p class="text-xs font-black leading-tight">Shifts &amp; Prod</p></div>
-        </button>
-        <button onclick="switchTab('oee')" id="nav-oee" class="min-w-[120px] p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-            <div class="flex justify-between items-center w-full"><span class="text-base">⚡</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Core</span></div>
-            <div class="mt-2"><p class="text-xs font-black leading-tight">OEE Metrics</p></div>
-        </button>
-        <button onclick="switchTab('planning')" id="nav-planning" class="min-w-[120px] p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-            <div class="flex justify-between items-center w-full"><span class="text-base">📋</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Plan</span></div>
-            <div class="mt-2"><p class="text-xs font-black leading-tight">Queue</p></div>
-        </button>
-        <button onclick="switchTab('reports')" id="nav-reports" class="min-w-[120px] p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-            <div class="flex justify-between items-center w-full"><span class="text-base">📑</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Files</span></div>
-            <div class="mt-2"><p class="text-xs font-black leading-tight">Reports &amp; CSV</p></div>
-        </button>
-        <button onclick="switchTab('trash')" id="nav-trash" class="min-w-[120px] p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400">
-            <div class="flex justify-between items-center w-full"><span class="text-base">🗑️</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Bin</span></div>
-            <div class="mt-2"><p class="text-xs font-black leading-tight">Trash</p></div>
-        </button>
+  <!-- ============================================================== -->
+  <!-- MAIN VISIBLE NAVIGATION GRID HUB                               -->
+  <!-- ============================================================== -->
+  <div class="max-w-7xl mx-auto px-4 md:px-8 pt-5">
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+      
+      <button onclick="switchTab('dashboard')" id="navTile-dashboard" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-blue-600 border-blue-600 text-white shadow-md">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">📊</span>
+          <span class="text-[9px] font-mono uppercase bg-white/20 px-1.5 py-0.5 rounded">Hub</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Dashboard</p>
+          <p class="text-[10px] opacity-80 truncate">Telemetry</p>
+        </div>
+      </button>
+
+      <button onclick="switchTab('logs')" id="navTile-logs" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">⚙</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Profiles</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">CNC Cycles</p>
+          <p class="text-[10px] text-slate-400 truncate">Recipes &amp; Speeds</p>
+        </div>
+      </button>
+
+      <button onclick="switchTab('production')" id="navTile-production" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">📋</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Planner</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Job Orders</p>
+          <p class="text-[10px] text-slate-400 truncate">Shift Estimator</p>
+        </div>
+      </button>
+
+      <button onclick="switchTab('oee')" id="navTile-oee" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">⚡</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">OEE</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Production</p>
+          <p class="text-[10px] text-slate-400 truncate">Shift Logs &amp; APQ</p>
+        </div>
+      </button>
+
+      <button onclick="switchTab('tools')" id="navTile-tools" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">🛠</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Stock</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Tools</p>
+          <p class="text-[10px] text-slate-400 truncate">4 Core Types</p>
+        </div>
+      </button>
+
+      <button onclick="switchTab('toolsreq')" id="navTile-toolsreq" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">✉</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Notice</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Restock</p>
+          <p class="text-[10px] text-slate-400 truncate">Supervisor Memo</p>
+        </div>
+      </button>
+
+      <button onclick="switchTab('reports')" id="navTile-reports" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">📑</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Audit</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Reports</p>
+          <p class="text-[10px] text-slate-400 truncate">Detailed Analysis</p>
+        </div>
+      </button>
+
+      <button onclick="switchTab('trash')" id="navTile-trash" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">🗑</span>
+          <span id="trashCountBadge" class="hidden bg-rose-500 text-white px-1.5 py-0.2 rounded-full text-[9px] font-bold font-mono">0</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Bin Vault</p>
+          <p class="text-[10px] text-slate-400 truncate">Recovery</p>
+        </div>
+      </button>
+
     </div>
-</div>
+  </div>
 
-<main class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+  <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
-    <!-- DASHBOARD -->
-    <section id="view-dashboard" class="space-y-6 fade-in">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Profiles</span>
-                <p id="dashProfiles" class="text-2xl md:text-3xl font-black text-blue-600 mt-1">0</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Stock</span>
-                <p id="dashTools" class="text-2xl md:text-3xl font-black text-emerald-600 mt-1">0</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Shifts</span>
-                <p id="dashShifts" class="text-2xl md:text-3xl font-black text-indigo-600 mt-1">0</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg OEE</span>
-                <p id="dashOEE" class="text-2xl md:text-3xl font-black text-purple-600 mt-1">0.0%</p>
-            </div>
+    <!-- ============================================================== -->
+    <!-- SECTION 1: MASTER DASHBOARD                                    -->
+    <!-- ============================================================== -->
+    <section id="view-dashboard" class="space-y-6">
+      
+      <!-- Primary Metric Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div onclick="switchTab('logs')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-blue-500 transition group">
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active CNC Profiles</span>
+            <span class="text-blue-600 text-xs font-black group-hover:translate-x-1 transition-transform">→</span>
+          </div>
+          <p id="dashTotalProfiles" class="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1">0</p>
+          <p id="dashMaxCycleSummary" class="text-[11px] text-slate-500 mt-1 truncate">Max: -</p>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-                <h3 class="font-bold text-xs uppercase mb-3">📈 OEE Trend (Last 7 Shifts)</h3>
-                <div class="h-52 w-full"><canvas id="chartOEE"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-                <h3 class="font-bold text-xs uppercase mb-3">🛠️ Tool Stock Matrix</h3>
-                <div class="h-52 w-full"><canvas id="chartTools"></canvas></div>
-            </div>
+
+        <div onclick="switchTab('oee')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-emerald-500 transition group">
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Plant Composite OEE</span>
+            <span class="text-emerald-600 text-xs font-black group-hover:translate-x-1 transition-transform">→</span>
+          </div>
+          <p id="dashOeeAvg" class="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0.0%</p>
+          <p id="dashApqSummary" class="text-[11px] text-slate-500 mt-1">A: - | P: - | Q: -</p>
         </div>
+
+        <div onclick="switchTab('oee')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-indigo-500 transition group">
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Latest Output</span>
+            <span class="text-indigo-600 text-xs font-black group-hover:translate-x-1 transition-transform">→</span>
+          </div>
+          <p id="dashProducedToday" class="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-1">0 pcs</p>
+          <p id="dashScrapSummary" class="text-[11px] text-slate-500 mt-1">Good: 0 | Rej: 0</p>
+        </div>
+
+        <div onclick="switchTab('tools')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-cyan-500 transition group">
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Tools Units</span>
+            <span class="text-cyan-600 text-xs font-black group-hover:translate-x-1 transition-transform">→</span>
+          </div>
+          <p id="dashToolsStock" class="text-3xl font-black text-cyan-600 dark:text-cyan-400 mt-1">0 pcs</p>
+          <p id="dashLowStockSummary" class="text-[11px] text-rose-500 font-bold mt-1">0 low stock</p>
+        </div>
+      </div>
+
+      <!-- 30-DAY MULTI-ANGLE PROFILE PRODUCTION INTELLIGENCE MODULE -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+          <div>
+            <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">30-DAY FACTORY RUNS INSIGHT</span>
+            <h3 class="text-base font-black text-slate-900 dark:text-white mt-0.5">Profiles Produced in Last 30 Days</h3>
+            <p class="text-xs text-slate-400">Analyze production volume, shift occurrences, and reject ratios for all profiles.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded-2xl text-xs font-bold">
+            <button onclick="setProfile30Angle('quantity')" id="btnAngle-quantity" class="px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold">By Quantity (Pcs)</button>
+            <button onclick="setProfile30Angle('shifts')" id="btnAngle-shifts" class="px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold">By Shift Count</button>
+            <button onclick="setProfile30Angle('rejects')" id="btnAngle-rejects" class="px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold">By Scrap Rate (%)</button>
+          </div>
+        </div>
+
+        <div class="h-64 w-full">
+          <canvas id="chartProfile30Days"></canvas>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-2xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="p-3">#</th>
+                <th class="p-3">Profile Code</th>
+                <th class="p-3 text-right">Produced (Pcs)</th>
+                <th class="p-3 text-right text-emerald-600">Good (Pcs)</th>
+                <th class="p-3 text-right text-rose-600">Scrap (Pcs)</th>
+                <th class="p-3 text-right">Shift Runs</th>
+                <th class="p-3 text-right">Avg Pcs / Shift</th>
+                <th class="p-3 text-right">Scrap Rate</th>
+              </tr>
+            </thead>
+            <tbody id="profile30TableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium">
+              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading 30-day production history...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Charts Telemetry Matrix -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Plant OEE Telemetry (%)</h3>
+            <span class="text-[10px] text-emerald-500 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">Historical Runs</span>
+          </div>
+          <div class="h-60"><canvas id="chartDashOee"></canvas></div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Daily Progress (Good vs Rejects)</h3>
+            <span class="text-[10px] text-indigo-500 font-bold bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-full">Yield Trend</span>
+          </div>
+          <div class="h-60"><canvas id="chartDashProduction"></canvas></div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Top CNC Cycle Times (Seconds)</h3>
+            <span class="text-[10px] text-blue-500 font-bold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Profile Speeds</span>
+          </div>
+          <div class="h-60"><canvas id="chartDashCycleTime"></canvas></div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Tool Stock Distribution (4 Main Types)</h3>
+            <span class="text-[10px] text-cyan-500 font-bold bg-cyan-50 dark:bg-cyan-950/40 px-2 py-0.5 rounded-full">Physical Units</span>
+          </div>
+          <div class="h-60 flex items-center justify-center"><canvas id="chartDashTools"></canvas></div>
+        </div>
+      </div>
     </section>
 
-    <!-- PROFILES -->
-    <section id="view-profiles" class="hidden space-y-6 fade-in">
-        <div class="flex justify-between bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <div><h3 class="font-black uppercase tracking-wider text-sm">⚙️ Profiles</h3></div>
-            <button onclick="openProfileModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm">+ Add</button>
+    <!-- ============================================================== -->
+    <!-- SECTION 2: CNC PROFILES DATABASE                               -->
+    <!-- ============================================================== -->
+    <section id="view-logs" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <span>+</span> Log New Profile
+          </button>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-3xl border shadow-sm overflow-x-auto border-slate-200 dark:border-slate-700">
-            <table class="w-full text-left text-sm whitespace-nowrap">
-                <thead class="bg-slate-50 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 uppercase border-b">
-                    <tr><th class="p-3.5">Code</th><th class="p-3.5">Desc</th><th class="p-3.5">Cycle</th><th class="p-3.5">Actions</th></tr>
-                </thead>
-                <tbody id="profilesTable" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs"></tbody>
-            </table>
+        <div class="flex items-center gap-2">
+          <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">Excel (.xlsx)</button>
+          <button onclick="generateEngineeringReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">PDF Catalog</button>
         </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+          <div class="w-full md:w-80">
+            <input type="text" id="logSearchInput" oninput="applyFiltersAndRender()" placeholder="Search profile code, description..." class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="filterSort" onchange="applyFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none">
+              <option value="profile_asc">Profile Code (A-Z)</option>
+              <option value="profile_desc">Profile Code (Z-A)</option>
+              <option value="cycle_asc">Cycle Time (Fastest)</option>
+              <option value="cycle_desc">Cycle Time (Slowest)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="p-3.5">#</th>
+                <th class="p-3.5">Profile Code</th>
+                <th class="p-3.5">Description</th>
+                <th class="p-3.5">Length / Dim</th>
+                <th class="p-3.5">Cycle Time</th>
+                <th class="p-3.5">Feed Speed</th>
+                <th class="p-3.5">Tooling</th>
+                <th class="p-3.5 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs">
+              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading production records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
-    <!-- TOOLS -->
-    <section id="view-tools" class="hidden space-y-6 fade-in">
-        <div class="flex justify-between bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 class="font-black uppercase text-sm">🛠️ Tools</h3>
-            <button onclick="openToolModal()" class="bg-cyan-600 text-white px-4 py-2 rounded-xl text-xs font-bold">+ Add Tool</button>
+    <!-- ============================================================== -->
+    <!-- SECTION 3: PRODUCTION PLANNING & SHIFTS                        -->
+    <!-- ============================================================== -->
+    <section id="view-production" class="hidden space-y-6">
+      <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 rounded-3xl shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+        <div>
+          <h3 class="font-black text-lg">CNC 5000 Shift Schedule</h3>
+          <p class="text-xs text-blue-200 mt-1">Component Plant Milling Operations</p>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-3xl border shadow-sm overflow-x-auto border-slate-200 dark:border-slate-700">
-            <table class="w-full text-left text-sm whitespace-nowrap">
-                <thead class="bg-slate-50 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 uppercase border-b">
-                    <tr><th class="p-3.5">Category</th><th class="p-3.5">Type/Dia</th><th class="p-3.5 text-center">Stock</th><th class="p-3.5">Actions</th></tr>
-                </thead>
-                <tbody id="toolsTable" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs"></tbody>
-            </table>
+        <div class="grid grid-cols-2 gap-3 text-xs bg-black/20 p-3 rounded-xl border border-white/10 backdrop-blur-sm">
+          <div>
+            <p class="font-bold text-blue-300">DAY SHIFT</p>
+            <p class="text-[11px] text-white font-semibold">6:00 AM – 6:00 PM</p>
+          </div>
+          <div>
+            <p class="font-bold text-blue-300">NIGHT SHIFT</p>
+            <p class="text-[11px] text-white font-semibold">6:00 PM – 6:00 AM</p>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- SHIFTS & PRODUCTION -->
-    <section id="view-shifts" class="hidden space-y-6 fade-in">
-        <div class="flex flex-wrap justify-between gap-3 bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 class="font-black uppercase text-sm">📅 Shift Logs</h3>
-            <button onclick="openShiftModal()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold">+ Log Shift</button>
-        </div>
-        <div class="bg-white dark:bg-slate-800 rounded-3xl border shadow-sm overflow-x-auto border-slate-200 dark:border-slate-700">
-            <table class="w-full text-left text-sm whitespace-nowrap">
-                <thead class="bg-slate-50 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 uppercase border-b">
-                    <tr>
-                        <th class="p-3.5">Date</th><th class="p-3.5">Shift</th><th class="p-3.5">EPF</th>
-                        <th class="p-3.5 text-right">OEE %</th><th class="p-3.5">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="shiftsTable" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs"></tbody>
-            </table>
-        </div>
-    </section>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider">Assemble Job Order</h3>
+            <button onclick="clearPlanningCart()" class="text-xs text-rose-500 hover:underline font-semibold">Clear All</button>
+          </div>
 
-    <!-- OEE -->
-    <section id="view-oee" class="hidden space-y-6 fade-in">
-        <div class="bg-gradient-to-r from-blue-900 to-slate-900 text-white p-6 rounded-3xl shadow-sm">
-            <h3 class="text-lg font-black mt-0.5">OEE Intelligence (12h Base)</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs mt-4">
-                <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
-                    <span class="text-emerald-400 font-black uppercase text-[10px]">Total Shifts</span>
-                    <p id="oeeTotShifts" class="font-mono font-bold text-white text-lg mt-1">0</p>
-                </div>
-                <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
-                    <span class="text-blue-300 font-black uppercase text-[10px]">Avg Availability</span>
-                    <p id="oeeAvgA" class="font-mono text-white text-lg mt-1">0%</p>
-                </div>
-                <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
-                    <span class="text-amber-300 font-black uppercase text-[10px]">Avg Performance</span>
-                    <p id="oeeAvgP" class="font-mono text-white text-lg mt-1">0%</p>
-                </div>
-                <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
-                    <span class="text-purple-300 font-black uppercase text-[10px]">Avg Quality</span>
-                    <p id="oeeAvgQ" class="font-mono text-white text-lg mt-1">0%</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- PLANNING -->
-    <section id="view-planning" class="hidden space-y-6 fade-in">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border shadow-sm">
-                <h3 class="font-bold text-sm uppercase mb-4">Add to Queue</h3>
-                <div class="space-y-3">
-                    <select id="planProfile" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 text-xs outline-none"><option value="">-- Profile --</option></select>
-                    <input type="number" id="planQty" placeholder="Batch Qty" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 text-xs outline-none">
-                    <button onclick="addToPlan()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">+ Add</button>
-                </div>
-            </div>
-            <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-3xl border shadow-sm">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-bold text-sm uppercase">Queue Estimates</h3>
-                    <button onclick="clearPlan()" class="text-xs text-rose-500">Clear</button>
-                </div>
-                <div id="planList" class="space-y-2 max-h-40 overflow-y-auto"></div>
-                <div class="mt-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border grid grid-cols-2 gap-4 text-center">
-                    <div><p class="text-[11px] font-bold text-slate-400">Total Parts</p><p id="planTotalQty" class="text-xl font-black">0</p></div>
-                    <div><p class="text-[11px] font-bold text-slate-400">Est. Time</p><p id="planTotalTime" class="text-xl font-black text-blue-600">0h 0m</p></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- REPORTS & CSV -->
-    <section id="view-reports" class="hidden space-y-6 fade-in">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
-            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-4">
-                <h3 class="text-sm font-black uppercase text-slate-900 dark:text-white">📑 Export Data</h3>
-                <div class="flex gap-2">
-                    <button onclick="exportPDF()" class="bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm">Export PDF</button>
-                    <button onclick="exportExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm">Export Excel</button>
-                </div>
-            </div>
-            
+          <div class="space-y-3">
             <div>
-                <h3 class="text-sm font-black uppercase text-slate-900 dark:text-white mb-2">📥 Import CSV (Production Records)</h3>
-                <p class="text-xs text-slate-500 mb-4">Required CSV columns: <code>Date, Shift, Team, EPF, Profile, SetupMin, Produced, Good, Reject</code></p>
-                <input type="file" id="csvUpload" accept=".csv" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                <button onclick="processCSV()" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm">Upload & Sync</button>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Target Profile</label>
+              <select id="planProfileSelect" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-medium outline-none">
+                <option value="">-- Choose Profile --</option>
+              </select>
             </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Handling (Sec)</label>
+                <input type="number" id="planHandlingSec" value="30" min="0" max="600" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-medium outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Batch Qty (Pcs)</label>
+                <input type="number" id="planBatchQty" value="50" min="1" max="100000" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-medium outline-none">
+              </div>
+            </div>
+            <button onclick="addProfileToPlanningCart()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-sm">
+              + Add to Production Run
+            </button>
+          </div>
         </div>
+
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider">Planned Assembly Queue</h3>
+              <button onclick="generateJobSheetPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                <span>📄</span> Export Traveler Sheet
+              </button>
+            </div>
+            <div id="planningCartList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p>
+            </div>
+          </div>
+
+          <div class="mt-6 p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Total Parts</p>
+              <p id="calcTotalQty" class="text-xl font-black text-slate-800 dark:text-slate-100 mt-0.5">0 pcs</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Total Time</p>
+              <p id="calcTheorTime" class="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">0h 0m</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Estimated Shifts</p>
+              <p id="calcShiftRequirement" class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">0.0</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- TRASH -->
-    <section id="view-trash" class="hidden space-y-6 fade-in">
-        <div class="bg-gradient-to-r from-rose-700 to-amber-700 text-white p-5 rounded-3xl shadow-sm">
-            <h3 class="text-lg font-black mt-0.5">🗑️ Recovery Vault</h3>
+    <!-- ============================================================== -->
+    <!-- SECTION 3.5: PRODUCTION LOGS & OEE                             -->
+    <!-- ============================================================== -->
+    <section id="view-oee" class="hidden space-y-6">
+      
+      <!-- OEE Calculation Explanation Banner -->
+      <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-6 rounded-3xl shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-white/10 pb-4">
+          <div>
+            <span class="text-[10px] font-black uppercase text-blue-300 tracking-widest">CNC 5000 OPERATIONAL STANDARDS</span>
+            <h3 class="text-lg font-black mt-0.5">OEE Calculation Framework &amp; Shifts</h3>
+          </div>
+          <span class="bg-blue-950/70 border border-blue-400/30 px-3 py-1 rounded-xl text-xs font-bold">12-Hour Operational Shift Base</span>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 space-y-6 overflow-x-auto">
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm space-y-1">
+            <span class="text-emerald-400 font-black uppercase text-[10px]">OEE Formula</span>
+            <p class="font-mono font-bold text-white text-sm">OEE = A × P × Q</p>
+            <p class="text-[11px] text-slate-300">Composite score evaluating uptime availability, speed performance, and defect-free quality.</p>
+          </div>
+
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm space-y-1">
+            <span class="text-blue-300 font-black uppercase text-[10px]">Availability (A)</span>
+            <p class="font-mono font-bold text-white text-sm">Operating / Planned Min</p>
+            <p class="text-[11px] text-slate-300">Planned = 720m (12h) - 90m breaks = 630m. Operating = Planned - Total Downtime.</p>
+          </div>
+
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm space-y-1">
+            <span class="text-amber-300 font-black uppercase text-[10px]">Performance (P)</span>
+            <p class="font-mono font-bold text-white text-sm">Ideal Time / Operating Min</p>
+            <p class="text-[11px] text-slate-300">Ideal time = Σ (Parts Produced × Profile Cycle Time) / 60.</p>
+          </div>
+
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm space-y-1">
+            <span class="text-purple-300 font-black uppercase text-[10px]">Quality (Q)</span>
+            <p class="font-mono font-bold text-white text-sm">Good Parts / Total Parts</p>
+            <p class="text-[11px] text-slate-300">Good parts = Total parts produced minus scrap and dimensional rejects.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- OEE Sub-Navigation -->
+      <div class="flex flex-wrap gap-1.5 bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm text-xs font-bold">
+        <button onclick="switchOeeSubTab('latest')" id="oeeSubBtn-latest" class="px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm">Latest Shift Log</button>
+        <button onclick="switchOeeSubTab('addlog')" id="oeeSubBtn-addlog" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Add / Edit Shift Record</button>
+        <button onclick="switchOeeSubTab('alllogs')" id="oeeSubBtn-alllogs" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">All Logs (Ordered)</button>
+        <button onclick="switchOeeSubTab('oeeanalysis')" id="oeeSubBtn-oeeanalysis" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">OEE Trend Analytics</button>
+      </div>
+
+      <!-- Sub-Tab: Latest Logs -->
+      <div id="oeeSub-latest" class="space-y-4">
+        <div id="latestLogCard" class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6"></div>
+      </div>
+
+      <!-- Sub-Tab: Add / Edit Form -->
+      <div id="oeeSub-addlog" class="hidden space-y-4">
+        <form id="shiftLogForm" onsubmit="submitShiftLog(event)" class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+          <div class="flex justify-between items-center">
             <div>
-                <h4 class="text-xs font-black uppercase text-slate-500 mb-2">Deleted Shifts</h4>
-                <table class="w-full text-left text-xs whitespace-nowrap"><tbody id="trashShifts"></tbody></table>
+              <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">DAILY LOG BOOK ENTRY</span>
+              <h4 id="shiftLogFormTitle" class="font-black text-sm uppercase text-slate-900 dark:text-white">CNC Machine — Shift Production Slip</h4>
+            </div>
+            <span id="shiftLogEditingBadge" class="hidden text-[10px] font-bold uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 px-2.5 py-1 rounded-full">Editing existing shift</span>
+          </div>
+          <input type="hidden" id="shiftFormId">
+          
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
+            <div>
+              <label class="block font-bold mb-1">Date *</label>
+              <input type="date" id="logDate" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
             </div>
             <div>
-                <h4 class="text-xs font-black uppercase text-slate-500 mb-2">Deleted Profiles</h4>
-                <table class="w-full text-left text-xs whitespace-nowrap"><tbody id="trashProfiles"></tbody></table>
+              <label class="block font-bold mb-1">Shift *</label>
+              <select id="logShiftType" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 font-bold outline-none">
+                <option value="Day">Day (6:00 AM – 6:00 PM)</option>
+                <option value="Night">Night (6:00 PM – 6:00 AM)</option>
+              </select>
             </div>
-        </div>
-    </section>
+            <div>
+              <label class="block font-bold mb-1">Team *</label>
+              <select id="logTeam" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 font-bold outline-none">
+                <option value="A">Team A</option>
+                <option value="B">Team B</option>
+                <option value="C">Team C</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">EPF No.</label>
+              <input type="text" id="logEpf" placeholder="e.g., 4521" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Break Time (min)</label>
+              <input type="number" id="logPlannedBreak" value="90" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
+            </div>
+          </div>
 
-</main>
+          <!-- Dynamic Profile Rows -->
+          <!-- DATALIST FOR PROFILE AUTOCOMPLETE -->
+          <datalist id="profileDataList"></datalist>
+          
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Profiles Produced in Shift</span>
+              <button type="button" onclick="addProfileCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Profile Slot</button>
+            </div>
+            <div id="profileCardsContainer" class="space-y-2"></div>
+          </div>
 
-<!-- ================= MODALS ================= -->
+          <!-- Checklist Conditions from Slip -->
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl">
+            <div>
+              <label class="block font-bold mb-1">Was Machine Planned or Not?</label>
+              <select id="logWasPlanned" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-semibold">
+                <option value="yes">Yes (Planned)</option>
+                <option value="no">No (Unplanned)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Other Department Used Machine?</label>
+              <select id="logOtherDept" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-semibold">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">If yes, Time Period</label>
+              <input type="text" id="logOtherDeptPeriod" placeholder="e.g. 10:00 AM - 11:30 AM" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none">
+            </div>
+          </div>
 
-<!-- Profile Modal -->
-<div id="profileModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl">
-        <div class="flex justify-between items-center mb-4"><h3 class="font-black text-sm uppercase">Profile Setup</h3><button onclick="closeProfileModal()" class="text-xl font-bold">×</button></div>
-        <form onsubmit="saveProfile(event)" class="space-y-3 text-xs">
-            <input type="hidden" id="profId">
-            <div><label class="font-bold">Code *</label><input id="profCode" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
-            <div><label class="font-bold">Cycle Time (sec) *</label><input type="number" id="profCycle" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
-            <div><label class="font-bold">Desc / Tooling</label><input id="profDesc" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
-            <button type="submit" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-bold mt-2">Save</button>
+          <!-- Downtime Events from Slip -->
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Down Time (min) &amp; Reason</span>
+              <button type="button" onclick="addDowntimeCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Downtime Event</button>
+            </div>
+            <div id="downtimeCardsContainer" class="space-y-2"></div>
+          </div>
+
+          <!-- Other Notes & Verification Signs -->
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+            <div class="sm:col-span-4">
+              <label class="block font-bold mb-1">Other Notes</label>
+              <input type="text" id="logOtherNotes" placeholder="Special occurrences, tooling observations, material changes..." class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block font-bold mb-1">Operator Name</label>
+              <input type="text" id="logOperator" placeholder="Operator Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Supervisor Sign</label>
+              <input type="text" id="logSupervisorSign" placeholder="e.g., Jane Doe" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Quality Sign</label>
+              <input type="text" id="logQualitySign" placeholder="QA Officer Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
+            <button type="button" onclick="resetShiftLogForm()" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl text-xs font-bold">Clear</button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-sm">Save Shift Record</button>
+          </div>
         </form>
-    </div>
-</div>
+      </div>
 
-<!-- Tool Modal -->
-<div id="toolModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl">
-        <div class="flex justify-between items-center mb-4"><h3 class="font-black text-sm uppercase">Tool Setup</h3><button onclick="closeToolModal()" class="text-xl font-bold">×</button></div>
-        <form onsubmit="saveTool(event)" class="space-y-3 text-xs">
-            <input type="hidden" id="toolId">
-            <div><label class="font-bold">Category *</label><select id="toolCat" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5"><option>Milling</option><option>Drilling</option><option>Tapping</option></select></div>
-            <div><label class="font-bold">Diameter / Type *</label><input id="toolDia" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5"></div>
-            <div><label class="font-bold">Stock *</label><input type="number" id="toolStock" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5"></div>
-            <button type="submit" class="w-full bg-cyan-600 text-white py-2.5 rounded-xl font-bold mt-2">Save</button>
-        </form>
-    </div>
-</div>
+      <!-- Sub-Tab: All Logs (Ordered Table with Actions) -->
+      <div id="oeeSub-alllogs" class="hidden space-y-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
+                <tr>
+                  <th class="p-3.5">Date</th>
+                  <th class="p-3.5">Shift</th>
+                  <th class="p-3.5">Team</th>
+                  <th class="p-3.5">EPF</th>
+                  <th class="p-3.5 text-right">Produced</th>
+                  <th class="p-3.5 text-right">Good</th>
+                  <th class="p-3.5 text-right">Reject</th>
+                  <th class="p-3.5 text-right">Downtime</th>
+                  <th class="p-3.5 text-right">OEE</th>
+                  <th class="p-3.5 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="shiftsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
+                <tr><td colspan="10" class="p-6 text-center text-slate-400">Loading shift logs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-<!-- Shift Modal -->
-<div id="shiftModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4"><h3 class="font-black text-sm uppercase">Log Shift Production</h3><button onclick="closeShiftModal()" class="text-xl font-bold">×</button></div>
-        <form onsubmit="saveShift(event)" class="space-y-4 text-xs">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div><label class="font-bold">Date *</label><input type="date" id="shDate" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2"></div>
-                <div><label class="font-bold">Shift *</label><select id="shType" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2"><option>Day</option><option>Night</option></select></div>
-                <div><label class="font-bold">Team *</label><select id="shTeam" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2"><option>A</option><option>B</option><option>C</option></select></div>
-                <div><label class="font-bold">EPF</label><input id="shEpf" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2"></div>
-            </div>
-            
-            <div class="border-t pt-3 border-slate-200 dark:border-slate-700">
-                <div class="flex justify-between items-center"><span class="font-bold uppercase">Production Rows</span><button type="button" onclick="addProdRow()" class="text-blue-600 font-bold">+ Add Row</button></div>
-                <div id="shProdRows" class="space-y-2 mt-2"></div>
-            </div>
-            
-            <div class="border-t pt-3 border-slate-200 dark:border-slate-700">
-                <div class="flex justify-between items-center"><span class="font-bold uppercase">Downtime</span><button type="button" onclick="addDtRow()" class="text-amber-600 font-bold">+ Add Downtime</button></div>
-                <div id="shDtRows" class="space-y-2 mt-2"></div>
-            </div>
-            
-            <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold shadow-sm">Calculate OEE & Save Log</button>
-        </form>
-    </div>
-</div>
+      <!-- Sub-Tab: OEE Analysis -->
+      <div id="oeeSub-oeeanalysis" class="hidden space-y-4">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+          <h4 class="font-bold text-xs uppercase">Overall Production Telemetry (A / P / Q / OEE by Shift)</h4>
+          <div class="h-72"><canvas id="chartOeeTelemetryFull"></canvas></div>
+        </div>
+      </div>
+    </section>
 
-<script>
-    // SUPABASE CONFIG (Ensuring correct headers to return data)
+    <!-- ============================================================== -->
+    <!-- SECTION 5: TOOLS INVENTORY (4 CORE CATEGORIES & FULL CRUD)     -->
+    <!-- ============================================================== -->
+    <section id="view-tools" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div>
+          <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">CNC Tools Inventory</h3>
+          <p class="text-[11px] text-slate-400">4 Main Operational Categories: Milling, Drilling, Tapping &amp; Chamfering</p>
+        </div>
+        <button onclick="openToolsFormModal()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2.5 rounded-2xl text-xs font-black transition flex items-center gap-1.5 shadow-md shadow-cyan-600/20">
+          <span>+</span> Add New Tool
+        </button>
+      </div>
+
+      <!-- 4 Category Tiles -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div onclick="toolsFilterByCategory('Milling')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
+          <span class="text-2xl">🌀</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Milling Bits</p>
+          <p id="catCount-Milling" class="text-sm font-black text-slate-700 dark:text-slate-200 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Flat &amp; Ball Nose</span>
+        </div>
+
+        <div onclick="toolsFilterByCategory('Drilling')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
+          <span class="text-2xl">🔩</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Drilling Bits</p>
+          <p id="catCount-Drilling" class="text-sm font-black text-slate-700 dark:text-slate-200 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Through &amp; Blind Holes</span>
+        </div>
+
+        <div onclick="toolsFilterByCategory('Tapping')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
+          <span class="text-2xl">📐</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Tapping Bits</p>
+          <p id="catCount-Tapping" class="text-sm font-black text-slate-700 dark:text-slate-200 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Threading &amp; Helical</span>
+        </div>
+
+        <div onclick="toolsFilterByCategory('Chamfer')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
+          <span class="text-2xl">✂</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Chamfer Tools</p>
+          <p id="catCount-Chamfer" class="text-sm font-black text-slate-700 dark:text-slate-200 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Edge Deburring</span>
+        </div>
+      </div>
+
+      <!-- Tools Table -->
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <input type="text" id="toolSearchInput" oninput="applyToolsFiltersAndRender()" placeholder="Search diameter, sub-type, rack..." class="w-64 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-medium outline-none">
+            <select id="filterCategorySelect" onchange="applyToolsFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+              <option value="ALL">All 4 Categories</option>
+              <option value="Milling">Milling (Flat &amp; Ball Nose)</option>
+              <option value="Drilling">Drilling</option>
+              <option value="Tapping">Tapping</option>
+              <option value="Chamfer">Chamfering</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="exportToolsToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">Export Excel</button>
+            <button onclick="generateToolsInventoryPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">PDF Catalog</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-bold uppercase border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="p-3.5">#</th>
+                <th class="p-3.5">Category</th>
+                <th class="p-3.5">Sub-Type</th>
+                <th class="p-3.5">Diameter</th>
+                <th class="p-3.5">Description</th>
+                <th class="p-3.5 text-center">Stock</th>
+                <th class="p-3.5">Location</th>
+                <th class="p-3.5 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
+              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading tools from database...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SECTION 6: RESTOCK NOTICE                                      -->
+    <!-- ============================================================== -->
+    <section id="view-toolsreq" class="hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 text-white p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl">
+        <div>
+          <span class="text-[10px] font-black uppercase text-cyan-400 tracking-widest">OFFICIAL MEMORANDUM</span>
+          <h3 class="text-lg font-black mt-0.5">CNC Machine Tools Restocking Notice</h3>
+          <p class="text-xs text-slate-400 mt-1">Formal notice addressed to supervisor(s) for tools below safe operating levels (&lt; 2 pcs)</p>
+        </div>
+      </div>
+
+      <!-- DYNAMIC CONFIGURATION BLOCK -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">Document Details & Routing</h4>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Date</label>
+              <input type="date" id="memoDate" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Prepared By (Sender)</label>
+              <input type="text" id="memoSender" value="Poojitha Dilshan" placeholder="Your Name" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none">
+            </div>
+          </div>
+
+          <!-- Dynamic Recipients Manager -->
+          <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col h-full">
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Address To (Select Recipients)</label>
+            <div id="recipientsList" class="flex-grow space-y-2 overflow-y-auto max-h-32 mb-3 pr-1">
+               <!-- Checkboxes inject here -->
+            </div>
+            <div class="flex gap-2 mt-auto pt-3 border-t border-slate-200 dark:border-slate-700">
+               <input type="text" id="newRecipName" placeholder="Name" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-1.5 text-xs outline-none">
+               <input type="text" id="newRecipRole" placeholder="Role/Title" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-1.5 text-xs outline-none">
+               <button type="button" onclick="addNewRecipient()" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <div class="flex justify-between items-center">
+          <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Selected Tools for Notice</h4>
+          <button onclick="autoPopulateLowStock()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ Load Low Stock (&lt;2)</button>
+        </div>
+        <div id="requisitionItemsContainer" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+          <p class="text-xs text-slate-400 italic">No tools selected yet. Click "+ Load Low Stock".</p>
+        </div>
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+          <button onclick="generateFormalSupervisorLetterPDF()" class="bg-rose-600 hover:bg-rose-700 text-white font-black px-6 py-2.5 rounded-xl text-xs transition shadow-lg shadow-rose-600/20">Export PDF Letter</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SECTION 7: REPORTS & AUDITS                                    -->
+    <!-- ============================================================== -->
+    <section id="view-reports" class="hidden space-y-6">
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">EXECUTIVE AUDITING ENGINE</span>
+            <h3 class="text-lg font-black text-slate-900 dark:text-white mt-0.5">CNC 5000 Plant Intelligence Reports</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="exportReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-sm">Export PDF Report</button>
+            <button onclick="exportReportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-sm">Export Multi-Sheet Excel</button>
+          </div>
+        </div>
+        <div id="reportPreviewCard" class="space-y-6 pt-2">
+          <!-- Rich Web Analytics Rendered Here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SECTION 8: RECYCLE & DISPOSAL BIN ARCHIVE                      -->
+    <!-- ============================================================== -->
+    <section id="view-trash" class="hidden space-y-6">
+      <div class="bg-gradient-to-r from-amber-600/90 to-rose-700/90 text-white p-5 rounded-3xl shadow-sm flex justify-between items-center">
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-widest text-amber-200">CENTRAL RECOVERY VAULT</span>
+          <h3 class="text-lg font-black mt-0.5">Recycle &amp; Disposal Bin Archive</h3>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 space-y-4">
+        <div>
+          <h4 class="text-xs font-black uppercase text-slate-500 mb-2">CNC Profiles</h4>
+          <div id="trashProfilesTableBody" class="space-y-2"></div>
+        </div>
+        <div>
+          <h4 class="text-xs font-black uppercase text-slate-500 mb-2">Tools</h4>
+          <div id="trashToolsTableBody" class="space-y-2"></div>
+        </div>
+        <div>
+          <h4 class="text-xs font-black uppercase text-slate-500 mb-2">Shift Records</h4>
+          <div id="trashShiftsTableBody" class="space-y-2"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODALS (VIEW, ADD, EDIT)                                       -->
+  <!-- ============================================================== -->
+
+  <!-- Modal: Profile Add/Edit -->
+  <div id="modalForm" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="formModalTitle" class="text-base font-black text-slate-900 dark:text-white">CNC Profile Entry</h3>
+        <button onclick="closeFormModal()" class="text-slate-400 text-xl font-bold">×</button>
+      </div>
+      <form id="recordForm" onsubmit="submitForm(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="formRowId">
+        <div>
+          <label class="block font-bold mb-1">Profile Code *</label>
+          <input type="text" id="formProfile" required placeholder="e.g., PRO-684" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Description / Feature</label>
+          <input type="text" id="formDescription" placeholder="e.g., Side milling & slotting" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Length / Dimensions</label>
+          <input type="text" id="formLength" placeholder="e.g., 2437.4 mm" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Cycle Time (Seconds) *</label>
+          <input type="number" id="formCycleSeconds" min="1" max="7200" required placeholder="e.g., 93" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-mono font-bold">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Feed Speed (mm/min)</label>
+          <input type="text" id="formFeedSpeeds" placeholder="e.g., Feed 600" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Tooling Configuration</label>
+          <input type="text" id="formTooling" placeholder="e.g., Single tool / Two tools" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeFormModal()" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Cancel</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold">Save Recipe</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Profile Inspector -->
+  <div id="modalViewProfile" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
+        <div>
+          <span class="text-[10px] font-black uppercase text-blue-600">PROFILE RECIPE INSPECTOR</span>
+          <h3 id="viewProfTitle" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">-</h3>
+        </div>
+        <button onclick="document.getElementById('modalViewProfile').classList.add('hidden')" class="text-slate-400 text-xl font-bold">×</button>
+      </div>
+      <div id="viewProfBody" class="space-y-2 text-xs"></div>
+      <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+        <button onclick="document.getElementById('modalViewProfile').classList.add('hidden')" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Tool Inspector -->
+  <div id="modalViewTool" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
+        <div>
+          <span class="text-[10px] font-black uppercase text-cyan-600">TOOL SPECIFICATION INSPECTOR</span>
+          <h3 id="viewToolTitle" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">-</h3>
+        </div>
+        <button onclick="document.getElementById('modalViewTool').classList.add('hidden')" class="text-slate-400 text-xl font-bold">×</button>
+      </div>
+      <div id="viewToolBody" class="space-y-2 text-xs"></div>
+      <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+        <button onclick="document.getElementById('modalViewTool').classList.add('hidden')" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal: Shift Inspector -->
+  <div id="modalViewShift" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
+        <div>
+          <span class="text-[10px] font-black uppercase text-indigo-600">SHIFT PERFORMANCE INSPECTOR</span>
+          <h3 id="viewShiftTitle" class="text-lg font-black text-slate-900 dark:text-white mt-0.5">-</h3>
+        </div>
+        <button onclick="document.getElementById('modalViewShift').classList.add('hidden')" class="text-slate-400 text-xl font-bold">×</button>
+      </div>
+      <div id="viewShiftBody" class="space-y-3 text-xs max-h-[60vh] overflow-y-auto pr-2"></div>
+      <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+        <button onclick="document.getElementById('modalViewShift').classList.add('hidden')" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Tool Add / Edit -->
+  <div id="toolsModalForm" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="toolsFormModalTitle" class="text-base font-black text-slate-900 dark:text-white">Log Tool to Inventory</h3>
+        <button onclick="closeToolsFormModal()" class="text-slate-400 text-xl font-bold">×</button>
+      </div>
+      <form id="toolsToolForm" onsubmit="submitToolForm(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="toolsFormId">
+        <div>
+          <label class="block font-bold mb-1">Category *</label>
+          <select id="toolsFormCategory" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 font-bold outline-none">
+            <option value="Milling">Milling (Flat &amp; Ball Nose)</option>
+            <option value="Drilling">Drilling</option>
+            <option value="Tapping">Tapping</option>
+            <option value="Chamfer">Chamfering</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Sub-Type</label>
+          <input type="text" id="toolsFormSubType" placeholder="e.g., Ball Nose End Mill" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Diameter / Size *</label>
+          <input type="text" id="toolsFormDiameter" required placeholder="e.g., 10.0 mm" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Description</label>
+          <input type="text" id="toolsFormDescription" placeholder="e.g., Slotting & pocketing" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Stock Quantity *</label>
+          <input type="number" id="toolsFormStock" min="0" required placeholder="e.g., 5" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold text-cyan-600">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Storage Location / Rack</label>
+          <input type="text" id="toolsFormLocation" placeholder="e.g., Rack A-02" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeToolsFormModal()" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Cancel</button>
+          <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-2 rounded-xl font-bold">Save Tool</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // --- DATABASE CONNECTIONS (Split accurately to prevent infinite loading bugs) ---
     const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ocmFvYWRmZGVnamZ3Y2tycWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNDAwNzUsImV4cCI6MjEwMjYxNjA3NX0.X3LBq4lh7OarSjmw0kGukG0xw0k_P-qQlE3owXEfhOc";
+    const SUPABASE_ANON_KEY = "sb_publishable_s8wnE3RfwJRQxO2NyPdWTg_YBssVkbM";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function apiFetch(table, method = 'GET', body = null) {
-        const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
-        const options = { method, headers };
-        if (body) options.body = JSON.stringify(body);
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, options);
-        if (!response.ok) throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-        return method === 'DELETE' ? true : response.json();
-    }
+    const TOOLS_SUPABASE_URL = "https://cayqxybekaksppzbnnrw.supabase.co";
+    const TOOLS_SUPABASE_ANON_KEY = "sb_publishable_tAP8MprpVsHZtoBapEBnUA_v9uoUZ70";
+    const toolsClient = supabase.createClient(TOOLS_SUPABASE_URL, TOOLS_SUPABASE_ANON_KEY);
 
-    // STATE
-    let profiles = [], tools = [], shifts = [], prodRecords = [], trashData = { profiles: [], shifts: [] }, planItems = [];
-    
-    // UI UTILS
-    function showToast(msg, type='success') {
-        document.getElementById('toastMsg').textContent = msg;
-        const toast = document.getElementById('toast');
-        toast.className = `fixed bottom-5 right-5 z-50 transform transition-all duration-300 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border ${type==='error'?'border-red-500':'border-slate-700'}`;
-        setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 4000);
-    }
-    function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
-    function switchTab(tabId) {
-        document.querySelectorAll('main > section').forEach(el => { el.classList.add('hidden'); el.classList.remove('fade-in'); });
-        document.getElementById(`view-${tabId}`).classList.remove('hidden');
-        document.getElementById(`view-${tabId}`).classList.add('fade-in');
-        document.querySelectorAll('[id^="nav-"]').forEach(btn => btn.classList.remove('bg-blue-600','text-white','border-blue-600'));
-        const active = document.getElementById(`nav-${tabId}`);
-        if(active) active.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
-    }
+    let records = [];
+    let trashRecords = [];
+    let displayedRecords = [];
+    let toolsList = [];
+    let toolsTrash = [];
+    let toolsDisplayed = [];
+    let toolsNoticeList = [];
+    let shifts = [];
+    let trashShifts = [];
+    let productionRecords = [];
+    let downtimeEvents = [];
+    let planningCart = [];
 
-    // LOAD DATA
-    async function loadData() {
-        document.getElementById('syncStatus').textContent = 'Syncing...';
-        try {
-            // Fetch Active Records (deleted_at is null)
-            profiles = await apiFetch('cnc_cycle_times?deleted_at=is.null&select=*&order=id.asc');
-            tools = await apiFetch('cnc_tool_bits?deleted_at=is.null&select=*&order=id.asc');
-            shifts = await apiFetch('shifts?deleted_at=is.null&select=*,production_records(*),downtime_records(*)&order=date.desc');
-            
-            // Fetch Trash Records
-            trashData.profiles = await apiFetch('cnc_cycle_times?deleted_at=not.is.null&select=*');
-            trashData.shifts = await apiFetch('shifts?deleted_at=not.is.null&select=*');
-            
-            renderAll();
-        } catch(e) { showToast('Sync error: ' + e.message, 'error'); }
-        document.getElementById('syncStatus').textContent = 'Connected';
+    // --- RECIPIENTS LOGIC (Updated LocalStorage Key to prevent cached names) ---
+    let memoRecipients = [
+        { id: 1, name: 'John Doe', role: 'Plant Supervisor', selected: true }
+    ];
+
+    let profilesLoaded = false;
+    let toolsLoaded = false;
+
+    let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null;
+    let chartProfile30Inst = null;
+    let chartOeeTelemetryInst = null;
+    let profile30CurrentAngle = 'quantity';
+    let cardCounter = 0, dtCounter = 0;
+
+    const fmtPct = v => (v === null || v === undefined || isNaN(v)) ? '-' : (v * 100).toFixed(1) + '%';
+    const fmtDateISO = d => (!d ? '' : ((d instanceof Date) ? d : new Date(d)).toISOString().slice(0, 10));
+    const todayISO = () => fmtDateISO(new Date());
+
+    function formatDuration(sec) {
+      if (!sec || isNaN(sec)) return '0s';
+      const s = parseInt(sec, 10);
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return m > 0 ? `${m}m ${r}s` : `${r}s`;
     }
 
-    function renderAll() {
-        // PROFILES
-        document.getElementById('profilesTable').innerHTML = profiles.map(p => `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800">
-                <td class="p-3.5 font-bold">${p.profile}</td><td class="p-3.5">${p.description||'-'}</td>
-                <td class="p-3.5 text-blue-600 font-bold">${p.cycle_sec}s</td>
-                <td class="p-3.5"><button onclick="softDelete('cnc_cycle_times','${p.id}')" class="text-rose-500 font-bold">Trash</button></td>
-            </tr>`).join('') || `<tr><td colspan="4" class="p-4 text-center">No profiles</td></tr>`;
-        
-        // TOOLS
-        document.getElementById('toolsTable').innerHTML = tools.map(t => `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800">
-                <td class="p-3.5">${t.category}</td><td class="p-3.5">${t.diameter}</td>
-                <td class="p-3.5 text-center font-bold ${t.stock<3?'text-rose-500':''}">${t.stock}</td>
-                <td class="p-3.5"><button onclick="softDelete('cnc_tool_bits','${t.id}')" class="text-rose-500 font-bold">Trash</button></td>
-            </tr>`).join('') || `<tr><td colspan="4" class="p-4 text-center">No tools</td></tr>`;
-            
-        // SHIFTS
-        document.getElementById('shiftsTable').innerHTML = shifts.map(s => `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800">
-                <td class="p-3.5 font-bold">${s.date}</td><td class="p-3.5">${s.shift_type} (${s.team})</td>
-                <td class="p-3.5">${s.epf||'-'}</td><td class="p-3.5 text-right font-bold text-purple-600">${s.oee ? (s.oee*100).toFixed(1) : 0}%</td>
-                <td class="p-3.5"><button onclick="softDelete('shifts','${s.id}')" class="text-rose-500 font-bold">Trash</button></td>
-            </tr>`).join('') || `<tr><td colspan="5" class="p-4 text-center">No shifts</td></tr>`;
-
-        // TRASH
-        document.getElementById('trashProfiles').innerHTML = trashData.profiles.map(p => `
-            <tr><td class="p-2">${p.profile}</td><td class="p-2 text-right">
-            <button onclick="restoreRec('cnc_cycle_times','${p.id}')" class="text-emerald-500 mr-2">Restore</button>
-            <button onclick="hardDelete('cnc_cycle_times','${p.id}')" class="text-rose-500">Del</button></td></tr>`).join('');
-        document.getElementById('trashShifts').innerHTML = trashData.shifts.map(s => `
-            <tr><td class="p-2">${s.date} Shift ${s.shift_type}</td><td class="p-2 text-right">
-            <button onclick="restoreRec('shifts','${s.id}')" class="text-emerald-500 mr-2">Restore</button>
-            <button onclick="hardDelete('shifts','${s.id}')" class="text-rose-500">Del</button></td></tr>`).join('');
-
-        // DASHBOARD & OEE CALCULATION
-        document.getElementById('dashProfiles').textContent = profiles.length;
-        document.getElementById('dashTools').textContent = tools.reduce((a,b)=>a+(b.stock||0), 0);
-        document.getElementById('dashShifts').textContent = shifts.length;
-        
-        let sumA=0, sumP=0, sumQ=0, sumOEE=0;
-        shifts.forEach(s => { sumA+=Number(s.availability||0); sumP+=Number(s.performance||0); sumQ+=Number(s.quality||0); sumOEE+=Number(s.oee||0); });
-        const sc = shifts.length || 1;
-        document.getElementById('dashOEE').textContent = ((sumOEE/sc)*100).toFixed(1)+'%';
-        document.getElementById('oeeTotShifts').textContent = shifts.length;
-        document.getElementById('oeeAvgA').textContent = ((sumA/sc)*100).toFixed(1)+'%';
-        document.getElementById('oeeAvgP').textContent = ((sumP/sc)*100).toFixed(1)+'%';
-        document.getElementById('oeeAvgQ').textContent = ((sumQ/sc)*100).toFixed(1)+'%';
-        
-        updatePlanDropdown();
-        renderCharts();
+    function normalizeToolCategory(cat) {
+      const c = (cat || '').toLowerCase();
+      if (c.includes('drill')) return 'Drilling';
+      if (c.includes('tap')) return 'Tapping';
+      if (c.includes('chamfer')) return 'Chamfer';
+      return 'Milling';
     }
 
-    // CRUD / TRASH OPS
-    async function softDelete(table, id) {
-        if(!confirm('Move to Trash?')) return;
-        await apiFetch(`${table}?id=eq.${id}`, 'PATCH', { deleted_at: new Date().toISOString() });
-        showToast('Moved to Trash'); loadData();
-    }
-    async function restoreRec(table, id) {
-        await apiFetch(`${table}?id=eq.${id}`, 'PATCH', { deleted_at: null });
-        showToast('Restored!'); loadData();
-    }
-    async function hardDelete(table, id) {
-        if(!confirm('Permanently delete? Cannot be undone.')) return;
-        await apiFetch(`${table}?id=eq.${id}`, 'DELETE');
-        showToast('Deleted permanently'); loadData();
-    }
-
-    // MODALS
-    function openProfileModal(){ document.getElementById('profileModal').classList.remove('hidden'); document.getElementById('profId').value=''; }
-    function closeProfileModal(){ document.getElementById('profileModal').classList.add('hidden'); }
-    async function saveProfile(e) {
-        e.preventDefault();
-        const p = { profile: document.getElementById('profCode').value, cycle_sec: parseInt(document.getElementById('profCycle').value), description: document.getElementById('profDesc').value };
-        await apiFetch('cnc_cycle_times', 'POST', p);
-        showToast('Profile saved'); closeProfileModal(); loadData();
-    }
-    
-    function openToolModal(){ document.getElementById('toolModal').classList.remove('hidden'); document.getElementById('toolId').value=''; }
-    function closeToolModal(){ document.getElementById('toolModal').classList.add('hidden'); }
-    async function saveTool(e) {
-        e.preventDefault();
-        const t = { category: document.getElementById('toolCat').value, diameter: document.getElementById('toolDia').value, stock: parseInt(document.getElementById('toolStock').value) };
-        await apiFetch('cnc_tool_bits', 'POST', t);
-        showToast('Tool saved'); closeToolModal(); loadData();
-    }
-
-    // SHIFT LOGIC (Relational Save & True OEE)
-    function openShiftModal(){ 
-        document.getElementById('shiftModal').classList.remove('hidden'); 
-        document.getElementById('shDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('shProdRows').innerHTML = ''; document.getElementById('shDtRows').innerHTML = '';
-        addProdRow();
-    }
-    function closeShiftModal(){ document.getElementById('shiftModal').classList.add('hidden'); }
-    function addProdRow() {
-        const opts = profiles.map(p=>`<option value="${p.id}" data-cyc="${p.cycle_sec}">${p.profile} (${p.cycle_sec}s)</option>`).join('');
-        document.getElementById('shProdRows').insertAdjacentHTML('beforeend', `
-            <div class="grid grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-800 p-2 rounded sh-prod-row">
-                <select class="p-id border rounded p-1 w-full text-[10px]">${opts}</select>
-                <input type="number" placeholder="Prod" class="p-prod border rounded p-1 w-full text-[10px]" onchange="calcSc(this)">
-                <input type="number" placeholder="Good" class="p-good border rounded p-1 w-full text-[10px]" onchange="calcSc(this)">
-                <input type="number" placeholder="Rej" readonly class="p-rej border bg-slate-100 rounded p-1 w-full text-[10px] text-rose-500">
-            </div>`);
-    }
-    function calcSc(el) {
-        const r = el.closest('.sh-prod-row');
-        const p = parseInt(r.querySelector('.p-prod').value)||0, g = parseInt(r.querySelector('.p-good').value)||0;
-        r.querySelector('.p-rej').value = Math.max(0, p - g);
-    }
-    function addDtRow() {
-        document.getElementById('shDtRows').insertAdjacentHTML('beforeend', `
-            <div class="flex gap-2 bg-amber-50 p-2 rounded sh-dt-row">
-                <input type="text" placeholder="Reason" class="d-rsn border rounded p-1 flex-1 text-[10px]">
-                <input type="number" placeholder="Mins" class="d-min border rounded p-1 w-16 text-[10px]">
-            </div>`);
-    }
-    async function saveShift(e) {
-        e.preventDefault();
-        
-        // 1. Gather Data
-        const date = document.getElementById('shDate').value;
-        const shift_type = document.getElementById('shType').value;
-        const team = document.getElementById('shTeam').value;
-        const epf = document.getElementById('shEpf').value;
-        
-        let prodTotal=0, goodTotal=0, idealCycleSecs=0;
-        const pRows = Array.from(document.querySelectorAll('.sh-prod-row')).map(r => {
-            const pid = r.querySelector('.p-id').value;
-            const sel = r.querySelector('.p-id');
-            const cyc = parseInt(sel.options[sel.selectedIndex].dataset.cyc);
-            const p = parseInt(r.querySelector('.p-prod').value)||0;
-            const g = parseInt(r.querySelector('.p-good').value)||0;
-            prodTotal+=p; goodTotal+=g; idealCycleSecs+=(cyc*p);
-            return { profile_id: pid, production_date: date, shift_type, team, epf, produced_qty: p, good_qty: g, reject_qty: Math.max(0,p-g), cycle_sec: cyc };
-        }).filter(x => x.produced_qty > 0);
-        
-        let dtMins=0;
-        const dRows = Array.from(document.querySelectorAll('.sh-dt-row')).map(r => {
-            const m = parseInt(r.querySelector('.d-min').value)||0; dtMins+=m;
-            return { reason: r.querySelector('.d-rsn').value, duration_minutes: m };
-        }).filter(x => x.duration_minutes > 0);
-
-        // 2. TRUE OEE CALCULATION (12H Base)
-        const planned_minutes = 720; const break_minutes = 90;
-        const idealOpMin = planned_minutes - break_minutes;
-        const actualOpMin = Math.max(0, idealOpMin - dtMins);
-        
-        const A = idealOpMin > 0 ? (actualOpMin / idealOpMin) : 0;
-        const P = actualOpMin > 0 ? ((idealCycleSecs / 60) / actualOpMin) : 0;
-        const Q = prodTotal > 0 ? (goodTotal / prodTotal) : 0;
-        const OEE = A * P * Q;
-
-        // 3. Save Relational Structure
-        try {
-            // A. Create Shift
-            const shiftRes = await apiFetch('shifts', 'POST', [{ date, shift_type, team, epf, planned_minutes, break_minutes, downtime_minutes: dtMins, availability: A, performance: P, quality: Q, oee: OEE }]);
-            const newShiftId = shiftRes[0].id;
-            
-            // B. Attach Production Records
-            if(pRows.length > 0) {
-                pRows.forEach(pr => pr.shift_id = newShiftId);
-                await apiFetch('production_records', 'POST', pRows);
-            }
-            // C. Attach Downtime
-            if(dRows.length > 0) {
-                dRows.forEach(dr => dr.shift_id = newShiftId);
-                await apiFetch('downtime_records', 'POST', dRows);
-            }
-            
-            showToast('Shift logged & OEE calculated!'); closeShiftModal(); loadData();
-        } catch(err) { showToast('Error saving shift: ' + err.message, 'error'); }
-    }
-
-    // CHARTS
-    let cOEE=null, cTools=null;
-    function renderCharts() {
-        if(cOEE) cOEE.destroy(); if(cTools) cTools.destroy();
-        const shSorted = [...shifts].sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(-7);
-        cOEE = new Chart(document.getElementById('chartOEE'), { type: 'line',
-            data: { labels: shSorted.map(s=>s.date.substring(5)), datasets: [{ label: 'OEE %', data: shSorted.map(s=>Number(s.oee)*100), borderColor: '#8b5cf6', fill: true, backgroundColor: 'rgba(139,92,246,0.1)', tension: 0.3 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} } }
-        });
-        const tc={}; tools.forEach(t=>{ tc[t.category] = (tc[t.category]||0)+t.stock; });
-        cTools = new Chart(document.getElementById('chartTools'), { type: 'doughnut',
-            data: { labels: Object.keys(tc), datasets: [{ data: Object.values(tc), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
-        });
-    }
-
-    // PLAN
-    function updatePlanDropdown() { document.getElementById('planProfile').innerHTML = '<option value="">-- Profile --</option>' + profiles.map(p=>`<option value="${p.id}">${p.profile}</option>`).join(''); }
-    function addToPlan() {
-        const id = document.getElementById('planProfile').value, qty = parseInt(document.getElementById('planQty').value)||50;
-        const p = profiles.find(x=>x.id===id); if(!p) return; planItems.push({...p, qty}); renderPlan();
-    }
-    function renderPlan() {
-        let tQ=0, tS=0;
-        document.getElementById('planList').innerHTML = planItems.map((i,x) => {
-            const sec = i.cycle_sec * i.qty; tQ+=i.qty; tS+=sec;
-            return `<div class="flex justify-between bg-slate-50 p-2 rounded text-xs"><span><b>${i.profile}</b> x${i.qty}</span><button onclick="planItems.splice(${x},1);renderPlan()" class="text-rose-500">✕</button></div>`;
-        }).join('');
-        document.getElementById('planTotalQty').textContent = tQ;
-        document.getElementById('planTotalTime').textContent = `${Math.floor(tS/3600)}h ${Math.round((tS%3600)/60)}m`;
-    }
-    function clearPlan() { planItems=[]; renderPlan(); }
-
-    // EXPORT PDF
-    function exportPDF() {
-        if(shifts.length === 0) return showToast('No data', 'error');
-        const doc = new jspdf.jsPDF();
-        doc.text("CNC 5000 OEE & Production Report", 14, 15);
-        const tableData = shifts.map(s => {
-            let tp = 0; if(s.production_records) s.production_records.forEach(r => tp += r.produced_qty);
-            return [s.date, s.shift_type, s.team, tp, (s.oee*100).toFixed(1)+'%'];
-        });
-        doc.autoTable({ head: [['Date', 'Shift', 'Team', 'Parts Produced', 'OEE']], body: tableData, startY: 20 });
-        doc.save(`CNC_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-        showToast('PDF Exported');
-    }
-
-    // EXPORT EXCEL
-    function exportExcel() {
-        if(shifts.length === 0) return showToast('No data', 'error');
-        const flatData = [];
-        shifts.forEach(s => {
-            if(s.production_records && s.production_records.length > 0) {
-                s.production_records.forEach(pr => {
-                    const prof = profiles.find(p => p.id === pr.profile_id)?.profile || 'Unknown';
-                    flatData.push({ Date: s.date, Shift: s.shift_type, Team: s.team, EPF: s.epf, Profile: prof, Produced: pr.produced_qty, Good: pr.good_qty, Reject: pr.reject_qty, OEE_Percentage: (s.oee*100).toFixed(1) });
-                });
-            } else {
-                flatData.push({ Date: s.date, Shift: s.shift_type, Team: s.team, EPF: s.epf, Profile: '-', Produced: 0, Good: 0, Reject: 0, OEE_Percentage: (s.oee*100).toFixed(1) });
-            }
-        });
-        const ws = XLSX.utils.json_to_sheet(flatData);
-        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Production");
-        XLSX.writeFile(wb, `CNC_Data_${new Date().toISOString().split('T')[0]}.xlsx`);
-        showToast('Excel Exported');
-    }
-
-    // CSV IMPORT
-    function processCSV() {
-        const file = document.getElementById('csvUpload').files[0];
-        if(!file) return showToast('Select a CSV file first', 'error');
-        Papa.parse(file, { header: true, skipEmptyLines: true, complete: async function(results) {
+    // --- RECIPIENTS DATA MANAGEMENT ---
+    function loadRecipients() {
+        const saved = localStorage.getItem('cnc5000_memo_recipients');
+        if (saved) {
             try {
-                // Bulk insert directly to production records. 
-                // Note: For full integrity, ensure shift_id mapping. This simplified import creates direct production_records.
-                const payload = results.data.map(row => {
-                    // Find profile ID by Code
-                    const pMatch = profiles.find(p => p.profile === row.Profile);
-                    return {
-                        production_date: row.Date, shift_type: row.Shift, team: row.Team, epf: row.EPF,
-                        profile_id: pMatch ? pMatch.id : null, 
-                        setup_min: parseInt(row.SetupMin)||0, produced_qty: parseInt(row.Produced)||0, 
-                        good_qty: parseInt(row.Good)||0, reject_qty: parseInt(row.Reject)||0
-                    };
-                });
-                await apiFetch('production_records', 'POST', payload);
-                showToast(`Imported ${payload.length} rows successfully!`);
-                loadData();
-            } catch (err) { showToast('Import failed: ' + err.message, 'error'); }
-        }});
+                memoRecipients = JSON.parse(saved);
+            } catch(e) {}
+        }
+        renderRecipients();
     }
 
-    // INIT
-    document.addEventListener('DOMContentLoaded', () => { switchTab('dashboard'); loadData(); setInterval(loadData, 60000); });
-</script>
+    function saveRecipients() {
+        localStorage.setItem('cnc5000_memo_recipients', JSON.stringify(memoRecipients));
+    }
+
+    function renderRecipients() {
+        const container = document.getElementById('recipientsList');
+        if (!container) return;
+        
+        if (memoRecipients.length === 0) {
+            container.innerHTML = `<p class="text-xs text-slate-400 italic">No recipients added.</p>`;
+            return;
+        }
+
+        container.innerHTML = memoRecipients.map(r => `
+            <div class="flex items-center justify-between bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                <label class="flex items-center gap-2 cursor-pointer w-full">
+                    <input type="checkbox" onchange="toggleRecipient(${r.id})" ${r.selected ? 'checked' : ''} class="w-4 h-4 text-blue-600 rounded border-slate-300">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-slate-900 dark:text-white">${r.name}</span>
+                        <span class="text-[10px] text-slate-500">${r.role}</span>
+                    </div>
+                </label>
+                <button onclick="removeRecipient(${r.id})" class="text-rose-500 hover:text-rose-700 font-bold px-2 text-sm">&times;</button>
+            </div>
+        `).join('');
+    }
+
+    function toggleRecipient(id) {
+        const r = memoRecipients.find(x => x.id === id);
+        if (r) {
+            r.selected = !r.selected;
+            saveRecipients();
+        }
+    }
+
+    function removeRecipient(id) {
+        memoRecipients = memoRecipients.filter(x => x.id !== id);
+        saveRecipients();
+        renderRecipients();
+    }
+
+    function addNewRecipient() {
+        const nameInp = document.getElementById('newRecipName');
+        const roleInp = document.getElementById('newRecipRole');
+        const name = nameInp.value.trim();
+        const role = roleInp.value.trim();
+        
+        if (!name || !role) {
+            alert("Please enter both Name and Role/Title.");
+            return;
+        }
+
+        const newId = memoRecipients.length > 0 ? Math.max(...memoRecipients.map(r => r.id)) + 1 : 1;
+        memoRecipients.push({ id: newId, name, role, selected: true });
+        saveRecipients();
+        renderRecipients();
+        
+        nameInp.value = '';
+        roleInp.value = '';
+    }
+
+    function calculateShiftOee(shift) {
+      const prods = productionRecords.filter(p => p.shift_id === shift.id);
+      const dts = downtimeEvents.filter(d => d.shift_id === shift.id);
+
+      const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
+      const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
+      const good = Math.max(0, produced - rejected);
+      const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
+
+      const plannedBreak = parseInt(shift.planned_break_min, 10) || 90;
+      const plannedMin = Math.max(0, 720 - plannedBreak);
+      const operatingMin = Math.max(0, plannedMin - downtimeMin);
+
+      let idealMin = 0;
+      prods.forEach(p => {
+        const code = (p.profile_code || '').trim().toUpperCase();
+        let cycleSec = p.ideal_cycle_seconds;
+        if (cycleSec == null || cycleSec <= 0) {
+            const profileRec = records.find(r => (r.profile || '').trim().toUpperCase() === code);
+            cycleSec = profileRec ? (parseFloat(profileRec.cycle_seconds) || 0) : 0;
+        }
+        idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
+      });
+
+      const availability = plannedMin > 0 ? (operatingMin / plannedMin) : 0;
+      const performance = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0;
+      const quality = produced > 0 ? (good / produced) : 0;
+      const oee = availability * performance * quality;
+
+      return {
+        produced, rejected, good, downtimeMin,
+        plannedMin, operatingMin, idealMin,
+        availability, performance, quality, oee
+      };
+    }
+
+    // --- NOTIFICATION ---
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toastNotification');
+      const text = document.getElementById('toastMessage');
+      const icon = document.getElementById('toastIcon');
+      text.innerText = msg;
+      icon.innerText = isError ? "⚠" : "✓";
+      toast.className = isError 
+        ? "fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-0 opacity-100 bg-rose-600 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-rose-500"
+        : "fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-0 opacity-100 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-slate-700";
+      setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3200);
+    }
+
+    // --- TAB SWITCHING ---
+    function switchTab(tabId) {
+      ['dashboard', 'logs', 'oee', 'production', 'tools', 'toolsreq', 'reports', 'trash'].forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const navTile = document.getElementById(`navTile-${t}`);
+        if (view) view.classList.add('hidden');
+        if (navTile) {
+          navTile.className = "p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400";
+        }
+      });
+
+      const targetView = document.getElementById(`view-${tabId}`);
+      const targetTile = document.getElementById(`navTile-${tabId}`);
+      if (targetView) targetView.classList.remove('hidden');
+      if (targetTile) {
+        targetTile.className = "p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-blue-600 border-blue-600 text-white shadow-md";
+      }
+
+      if (tabId === 'dashboard') renderMasterDashboard();
+      if (tabId === 'logs') applyFiltersAndRender();
+      if (tabId === 'oee') { renderShiftsTable(); renderLatestShiftCard(); renderOeeTelemetryChart(); }
+      if (tabId === 'production') renderPlanningCart();
+      if (tabId === 'tools') applyToolsFiltersAndRender();
+      if (tabId === 'toolsreq') renderToolsNoticeList();
+      if (tabId === 'reports') renderReportPreview();
+      if (tabId === 'trash') renderBinArchive();
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      document.querySelectorAll('.themeIcon').forEach(el => el.innerText = isDark ? '☀' : '🌙');
+      renderMasterDashboard();
+    }
+
+    (function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.querySelectorAll('.themeIcon').forEach(el => el.innerText = '☀');
+      }
+    })();
+
+    // --- DATA FETCHING ---
+    async function fetchAllData() {
+      const { data, error } = await supabaseClient.from('cnc_cycle_times').select('*');
+      if (error) {
+        console.error('Failed to load cnc_cycle_times:', error.message);
+        document.getElementById('syncStatus').innerText = 'Offline';
+      }
+      records = (data || []).filter(r => !r.is_deleted);
+      trashRecords = (data || []).filter(r => r.is_deleted);
+
+      await fetchOeeData();
+      applyFiltersAndRender();
+      populatePlanningDropdown();
+      profilesLoaded = true;
+      renderMasterDashboard();
+    }
+
+    async function fetchOeeData() {
+      const [shiftsRes, prodRes, downtimeRes] = await Promise.all([
+        supabaseClient.from('shifts').select('*').order('shift_date', { ascending: false }),
+        supabaseClient.from('production_records').select('*'),
+        supabaseClient.from('downtime_events').select('*')
+      ]);
+
+      if (!shiftsRes.error) {
+        const allShifts = shiftsRes.data || [];
+        shifts = allShifts.filter(s => !s.is_deleted);
+        trashShifts = allShifts.filter(s => s.is_deleted);
+        productionRecords = prodRes.data || [];
+        downtimeEvents = downtimeRes.data || [];
+      } else {
+        console.error('Failed to load shifts:', shiftsRes.error.message);
+      }
+
+      renderShiftsTable();
+      renderLatestShiftCard();
+      renderReportPreview();
+      render30DayProfileAnalytics();
+      renderOeeTelemetryChart();
+    }
+
+    async function fetchToolsData() {
+      const { data, error } = await toolsClient.from('cnc_tool_bits').select('*');
+      if (error) console.error('Failed to load cnc_tool_bits:', error.message);
+      const raw = (data || []).filter(t => t.category !== 'Face Mill');
+      toolsList = raw.filter(t => !t.is_deleted);
+      toolsTrash = raw.filter(t => t.is_deleted);
+
+      toolsLoaded = true;
+      refreshToolsDashboard();
+      applyToolsFiltersAndRender();
+      renderMasterDashboard();
+      renderBinArchive();
+    }
+
+    // --- DASHBOARD TELEMETRY ---
+    function renderMasterDashboard() {
+      if (!profilesLoaded || !toolsLoaded) return;
+
+      document.getElementById('dashTotalProfiles').innerText = records.length;
+      if (records.length > 0) {
+        const max = Math.max(...records.map(r => r.cycle_seconds || 0));
+        document.getElementById('dashMaxCycleSummary').innerText = `Max: ${formatDuration(max)}`;
+      } else {
+        document.getElementById('dashMaxCycleSummary').innerText = 'Max: -';
+      }
+
+      const totalStockPcs = toolsList.reduce((acc, t) => acc + (parseInt(t.stock) || 0), 0);
+      const lowStockCount = toolsList.filter(t => (parseInt(t.stock) || 0) < 2).length;
+      document.getElementById('dashToolsStock').innerText = `${totalStockPcs} pcs`;
+      document.getElementById('dashLowStockSummary').innerText = `${lowStockCount} low-stock tool(s)`;
+
+      if (shifts.length > 0) {
+        const oeeResults = shifts.map(s => calculateShiftOee(s));
+        const avgA = oeeResults.reduce((s, r) => s + r.availability, 0) / oeeResults.length;
+        const avgP = oeeResults.reduce((s, r) => s + r.performance, 0) / oeeResults.length;
+        const avgQ = oeeResults.reduce((s, r) => s + r.quality, 0) / oeeResults.length;
+        const avgOee = oeeResults.reduce((s, r) => s + r.oee, 0) / oeeResults.length;
+        document.getElementById('dashOeeAvg').innerText = fmtPct(avgOee);
+        document.getElementById('dashApqSummary').innerText = `A: ${fmtPct(avgA)} | P: ${fmtPct(avgP)} | Q: ${fmtPct(avgQ)}`;
+
+        const latest = oeeResults[0];
+        document.getElementById('dashProducedToday').innerText = `${latest.produced} pcs`;
+        document.getElementById('dashScrapSummary').innerText = `Good: ${latest.good} | Rej: ${latest.rejected}`;
+      } else {
+        document.getElementById('dashOeeAvg').innerText = '0.0%';
+        document.getElementById('dashApqSummary').innerText = 'A: - | P: - | Q: -';
+        document.getElementById('dashProducedToday').innerText = '0 pcs';
+        document.getElementById('dashScrapSummary').innerText = 'Good: 0 | Rej: 0';
+      }
+
+      refreshToolsDashboard();
+      renderDashboardCharts();
+      render30DayProfileAnalytics();
+    }
+
+    function refreshToolsDashboard() {
+      const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 };
+      toolsList.forEach(t => {
+        const norm = normalizeToolCategory(t.category);
+        counts[norm] += (parseInt(t.stock) || 0);
+      });
+
+      const m = document.getElementById('catCount-Milling'); if (m) m.innerText = `${counts.Milling} pcs`;
+      const d = document.getElementById('catCount-Drilling'); if (d) d.innerText = `${counts.Drilling} pcs`;
+      const tp = document.getElementById('catCount-Tapping'); if (tp) tp.innerText = `${counts.Tapping} pcs`;
+      const ch = document.getElementById('catCount-Chamfer'); if (ch) ch.innerText = `${counts.Chamfer} pcs`;
+    }
+
+    function renderDashboardCharts() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#475569';
+      const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+      const recentShifts = [...shifts].reverse().slice(-8);
+      const shiftLabels = recentShifts.map(s => s.shift_date.slice(5));
+      const goodData = recentShifts.map(s => {
+        const prods = productionRecords.filter(p => p.shift_id === s.id);
+        const prod = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
+        const rej = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
+        return Math.max(0, prod - rej);
+      });
+      const rejData = recentShifts.map(s => {
+        const prods = productionRecords.filter(p => p.shift_id === s.id);
+        return prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
+      });
+
+      if (chartDashProductionInst) chartDashProductionInst.destroy();
+      const ctxProd = document.getElementById('chartDashProduction');
+      if (ctxProd) {
+        chartDashProductionInst = new Chart(ctxProd.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: shiftLabels.length ? shiftLabels : ['No Shifts'],
+            datasets: [
+              { label: 'Good', data: goodData.length ? goodData : [0], backgroundColor: '#10b981', borderRadius: 4, stack: 's' },
+              { label: 'Rejects', data: rejData.length ? rejData : [0], backgroundColor: '#f43f5e', borderRadius: 4, stack: 's' }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 9 } } } },
+            scales: {
+              x: { stacked: true, ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } },
+              y: { stacked: true, ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor }, beginAtZero: true }
+            }
+          }
+        });
+      }
+
+      const oeeSeries = recentShifts.map(s => (calculateShiftOee(s).oee * 100));
+      if (chartDashOeeInst) chartDashOeeInst.destroy();
+      const ctxOee = document.getElementById('chartDashOee');
+      if (ctxOee) {
+        chartDashOeeInst = new Chart(ctxOee.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: shiftLabels.length ? shiftLabels : ['No Shifts'],
+            datasets: [{
+              label: 'OEE %',
+              data: oeeSeries.length ? oeeSeries : [0],
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16,185,129,0.15)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } },
+              y: { ticks: { color: textColor, font: { size: 9 }, callback: v => v + '%' }, grid: { color: gridColor }, beginAtZero: true, max: 100 }
+            }
+          }
+        });
+      }
+
+      const topCycleProfiles = [...records].sort((a, b) => (b.cycle_seconds || 0) - (a.cycle_seconds || 0)).slice(0, 8);
+      if (chartDashCycleTimeInst) chartDashCycleTimeInst.destroy();
+      const ctxCycle = document.getElementById('chartDashCycleTime');
+      if (ctxCycle) {
+        chartDashCycleTimeInst = new Chart(ctxCycle.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: topCycleProfiles.length ? topCycleProfiles.map(r => r.profile) : ['No Profiles'],
+            datasets: [{
+              label: 'Cycle Time (s)',
+              data: topCycleProfiles.length ? topCycleProfiles.map(r => r.cycle_seconds) : [0],
+              backgroundColor: '#3b82f6',
+              borderRadius: 4
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor }, beginAtZero: true },
+              y: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } }
+            }
+          }
+        });
+      }
+
+      const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 };
+      toolsList.forEach(t => { counts[normalizeToolCategory(t.category)] += (parseInt(t.stock) || 0); });
+
+      if (chartDashToolsInst) chartDashToolsInst.destroy();
+      const ctxTools = document.getElementById('chartDashTools');
+      if (ctxTools) {
+        chartDashToolsInst = new Chart(ctxTools.getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Milling', 'Drilling', 'Tapping', 'Chamfer'],
+            datasets: [{ data: [counts.Milling, counts.Drilling, counts.Tapping, counts.Chamfer], backgroundColor: ['#0284c7', '#0ea5e9', '#10b981', '#8b5cf6'], borderWidth: 0 }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 9 } } } }
+          }
+        });
+      }
+    }
+
+    function renderOeeTelemetryChart() {
+      const canvas = document.getElementById('chartOeeTelemetryFull');
+      if (!canvas) return;
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#475569';
+      const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+      const chronological = [...shifts].sort((a, b) => a.shift_date.localeCompare(b.shift_date));
+      const labels = chronological.map(s => `${s.shift_date} ${s.shift_type === 'Night' ? '(N)' : '(D)'}`);
+      const results = chronological.map(s => calculateShiftOee(s));
+
+      if (chartOeeTelemetryInst) chartOeeTelemetryInst.destroy();
+      chartOeeTelemetryInst = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels.length ? labels : ['No shifts logged'],
+          datasets: [
+            { label: 'OEE', data: results.length ? results.map(r => r.oee * 100) : [0], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.3 },
+            { label: 'Availability', data: results.length ? results.map(r => r.availability * 100) : [0], borderColor: '#3b82f6', borderDash: [4, 4], fill: false, tension: 0.3 },
+            { label: 'Performance', data: results.length ? results.map(r => r.performance * 100) : [0], borderColor: '#f59e0b', borderDash: [4, 4], fill: false, tension: 0.3 },
+            { label: 'Quality', data: results.length ? results.map(r => r.quality * 100) : [0], borderColor: '#8b5cf6', borderDash: [4, 4], fill: false, tension: 0.3 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } } },
+          scales: {
+            x: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } },
+            y: { ticks: { color: textColor, font: { size: 9 }, callback: v => v + '%' }, grid: { color: gridColor }, min: 0, max: 120 }
+          }
+        }
+      });
+    }
+
+    function setProfile30Angle(angle) {
+      profile30CurrentAngle = angle;
+      ['quantity', 'shifts', 'rejects'].forEach(a => {
+        const btn = document.getElementById(`btnAngle-${a}`);
+        if (btn) {
+          btn.className = a === angle
+            ? "px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold"
+            : "px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold";
+        }
+      });
+      render30DayProfileAnalytics();
+    }
+
+    function render30DayProfileAnalytics() {
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const thresholdISO = fmtDateISO(thirtyDaysAgo);
+
+      const recentShifts = shifts.filter(s => s.shift_date >= thresholdISO);
+      const recentShiftIds = new Set(recentShifts.map(s => s.id));
+
+      const profileMap = {};
+      productionRecords.filter(p => recentShiftIds.has(p.shift_id)).forEach(p => {
+        const code = (p.profile_code || 'PRO-684').trim().toUpperCase();
+        if (!profileMap[code]) {
+          profileMap[code] = { code, produced: 0, rejected: 0, good: 0, shiftIds: new Set() };
+        }
+        const prodQty = parseInt(p.produced) || 0;
+        const rejQty = parseInt(p.rejected) || 0;
+        profileMap[code].produced += prodQty;
+        profileMap[code].rejected += rejQty;
+        profileMap[code].good += Math.max(0, prodQty - rejQty);
+        profileMap[code].shiftIds.add(p.shift_id);
+      });
+
+      const profileList = Object.values(profileMap).map(item => ({
+        ...item,
+        shiftsCount: item.shiftIds.size,
+        avgPerShift: item.shiftIds.size > 0 ? (item.produced / item.shiftIds.size).toFixed(1) : '0',
+        scrapRatePct: item.produced > 0 ? ((item.rejected / item.produced) * 100).toFixed(1) : '0.0'
+      }));
+
+      if (profile30CurrentAngle === 'quantity') profileList.sort((a, b) => b.produced - a.produced);
+      else if (profile30CurrentAngle === 'shifts') profileList.sort((a, b) => b.shiftsCount - a.shiftsCount);
+      else if (profile30CurrentAngle === 'rejects') profileList.sort((a, b) => parseFloat(b.scrapRatePct) - parseFloat(a.scrapRatePct));
+
+      const tbody = document.getElementById('profile30TableBody');
+      if (tbody) {
+        if (profileList.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No profile production logs found in the last 30 days.</td></tr>`;
+        } else {
+          tbody.innerHTML = profileList.map((p, idx) => `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition">
+              <td class="p-3 font-semibold text-slate-400">${idx + 1}</td>
+              <td class="p-3 font-black text-slate-900 dark:text-white">${p.code}</td>
+              <td class="p-3 text-right font-mono font-bold text-blue-600 dark:text-blue-400">${p.produced}</td>
+              <td class="p-3 text-right font-mono text-emerald-600">${p.good}</td>
+              <td class="p-3 text-right font-mono text-rose-600">${p.rejected}</td>
+              <td class="p-3 text-right font-bold">${p.shiftsCount} shift(s)</td>
+              <td class="p-3 text-right font-mono">${p.avgPerShift}</td>
+              <td class="p-3 text-right font-mono font-bold ${parseFloat(p.scrapRatePct) > 5 ? 'text-rose-500' : 'text-slate-600 dark:text-slate-300'}">${p.scrapRatePct}%</td>
+            </tr>
+          `).join('');
+        }
+      }
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#475569';
+      const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+      const chartLabels = profileList.slice(0, 10).map(p => p.code);
+      let chartData = [], chartDatasetLabel = '', chartColor = '#3b82f6';
+
+      if (profile30CurrentAngle === 'quantity') {
+        chartData = profileList.slice(0, 10).map(p => p.produced);
+        chartDatasetLabel = 'Total Produced (Pcs)';
+        chartColor = '#3b82f6';
+      } else if (profile30CurrentAngle === 'shifts') {
+        chartData = profileList.slice(0, 10).map(p => p.shiftsCount);
+        chartDatasetLabel = 'Shift Count';
+        chartColor = '#10b981';
+      } else if (profile30CurrentAngle === 'rejects') {
+        chartData = profileList.slice(0, 10).map(p => parseFloat(p.scrapRatePct));
+        chartDatasetLabel = 'Scrap Rate (%)';
+        chartColor = '#f43f5e';
+      }
+
+      if (chartProfile30Inst) chartProfile30Inst.destroy();
+      const ctx30 = document.getElementById('chartProfile30Days');
+      if (ctx30) {
+        chartProfile30Inst = new Chart(ctx30.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: chartLabels.length ? chartLabels : ['No Data'],
+            datasets: [{
+              label: chartDatasetLabel,
+              data: chartData.length ? chartData : [0],
+              backgroundColor: chartColor,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: textColor, font: { size: 10, weight: 'bold' } }, grid: { display: false } },
+              y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, beginAtZero: true }
+            }
+          }
+        });
+      }
+    }
+
+    // --- PROFILES TABLE (FULL CRUD: VIEW, EDIT, INSTANT DUPLICATE, DELETE) ---
+    function applyFiltersAndRender() {
+      const q = (document.getElementById('logSearchInput')?.value || '').toLowerCase();
+      displayedRecords = records.filter(r => (r.profile || '').toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q));
+
+      const tbody = document.getElementById('logsTableBody');
+      if (!tbody) return;
+
+      if (displayedRecords.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No profile logs found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = displayedRecords.map((r, i) => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+          <td class="p-3.5 font-semibold text-slate-400">${i + 1}</td>
+          <td class="p-3.5 font-bold">${r.profile}</td>
+          <td class="p-3.5">${r.description || '-'}</td>
+          <td class="p-3.5">${r.length || '-'}</td>
+          <td class="p-3.5 font-mono font-bold text-blue-600">${r.cycle_seconds}s</td>
+          <td class="p-3.5 font-mono">${r.feed_speeds || '-'}</td>
+          <td class="p-3.5">${r.tooling || 'Single tool'}</td>
+          <td class="p-3.5 text-center space-x-2">
+            <button onclick="viewProfileDetails(${r.id})" class="text-blue-600 hover:underline font-bold">View</button>
+            <button onclick="openFormModal(${r.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
+            <button onclick="duplicateProfileDirectly(${r.id})" class="text-emerald-600 hover:underline font-bold">Duplicate</button>
+            <button onclick="softDeleteRecord(${r.id})" class="text-rose-600 hover:underline font-bold">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function viewProfileDetails(id) {
+      const r = records.find(item => item.id === id);
+      if (!r) return;
+      document.getElementById('viewProfTitle').innerText = r.profile;
+      document.getElementById('viewProfBody').innerHTML = `
+        <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl">
+          <div><span class="text-slate-400 font-bold">Cycle Time:</span> <b class="text-blue-600 font-mono">${r.cycle_seconds}s</b> (${formatDuration(r.cycle_seconds)})</div>
+          <div><span class="text-slate-400 font-bold">Tooling:</span> <b>${r.tooling || 'Single tool'}</b></div>
+          <div><span class="text-slate-400 font-bold">Feed Speed:</span> <b>${r.feed_speeds || '-'}</b></div>
+          <div><span class="text-slate-400 font-bold">Length:</span> <b>${r.length || '-'}</b></div>
+        </div>
+        <div class="pt-2"><span class="text-slate-400 font-bold">Description:</span> <p class="text-slate-700 dark:text-slate-200">${r.description || 'No description recorded.'}</p></div>
+      `;
+      document.getElementById('modalViewProfile').classList.remove('hidden');
+    }
+
+    async function duplicateProfileDirectly(id) {
+      const item = records.find(r => r.id === id);
+      if (!item) return;
+      const clonePayload = {
+        profile: `${item.profile} (Copy)`,
+        description: item.description,
+        length: item.length,
+        cycle_seconds: item.cycle_seconds,
+        feed_speeds: item.feed_speeds,
+        tooling: item.tooling,
+        is_deleted: false,
+        record_date: todayISO()
+      };
+      
+      const { error } = await supabaseClient.from('cnc_cycle_times').insert([clonePayload]);
+      if (error) {
+        alert("Failed to duplicate profile: " + error.message);
+      } else {
+        showToast(`Duplicated ${item.profile} successfully!`);
+        fetchAllData();
+      }
+    }
+
+    function openFormModal(id = null) {
+      const modal = document.getElementById('modalForm');
+      const title = document.getElementById('formModalTitle');
+      const form = document.getElementById('recordForm');
+      form.reset();
+      document.getElementById('formRowId').value = '';
+
+      if (id) {
+        const item = records.find(r => r.id === id);
+        if (item) {
+          title.innerText = `Edit Profile Recipe: ${item.profile}`;
+          document.getElementById('formRowId').value = item.id;
+          document.getElementById('formProfile').value = item.profile || '';
+          document.getElementById('formDescription').value = item.description || '';
+          document.getElementById('formLength').value = item.length || '';
+          document.getElementById('formCycleSeconds').value = item.cycle_seconds || '';
+          document.getElementById('formFeedSpeeds').value = item.feed_speeds || '';
+          document.getElementById('formTooling').value = item.tooling || '';
+        }
+      } else {
+        title.innerText = 'Log New CNC Profile Recipe';
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function closeFormModal() {
+      document.getElementById('modalForm').classList.add('hidden');
+    }
+
+    async function submitForm(e) {
+      e.preventDefault();
+      const id = document.getElementById('formRowId').value;
+      const payload = {
+        profile: document.getElementById('formProfile').value.trim().toUpperCase(),
+        description: document.getElementById('formDescription').value.trim(),
+        length: document.getElementById('formLength').value.trim(),
+        cycle_seconds: parseInt(document.getElementById('formCycleSeconds').value, 10) || 0,
+        feed_speeds: document.getElementById('formFeedSpeeds').value.trim(),
+        tooling: document.getElementById('formTooling').value.trim() || 'Single tool',
+        is_deleted: false
+      };
+
+      try {
+        if (id) {
+          const { error } = await supabaseClient.from('cnc_cycle_times').update(payload).eq('id', id);
+          if (error) throw new Error(error.message);
+        } else {
+          payload.record_date = todayISO();
+          const { error } = await supabaseClient.from('cnc_cycle_times').insert([payload]);
+          if (error) throw new Error(error.message);
+        }
+        closeFormModal();
+        showToast("Profile saved successfully!");
+        fetchAllData();
+      } catch (error) {
+        alert("Database Error: " + error.message);
+      }
+    }
+
+    async function softDeleteRecord(id) {
+      if (!confirm('Move this CNC Profile to the Recovery Vault?')) return;
+      await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true }).eq('id', id);
+      fetchAllData();
+    }
+
+    // --- PRODUCTION & OEE (SMART PROFILE SYNC INTEGRATED) ---
+    function switchOeeSubTab(sub) {
+      ['latest', 'addlog', 'alllogs', 'oeeanalysis'].forEach(s => {
+        document.getElementById(`oeeSub-${s}`)?.classList.add('hidden');
+        document.getElementById(`oeeSubBtn-${s}`)?.classList.remove('bg-blue-600', 'text-white');
+      });
+      document.getElementById(`oeeSub-${sub}`)?.classList.remove('hidden');
+      document.getElementById(`oeeSubBtn-${sub}`)?.classList.add('bg-blue-600', 'text-white');
+
+      if (sub === 'latest') renderLatestShiftCard();
+      if (sub === 'alllogs') renderShiftsTable();
+    }
+
+    function renderLatestShiftCard() {
+      const card = document.getElementById('latestLogCard');
+      if (!card) return;
+      if (shifts.length === 0) {
+        card.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No shift logs found. Click "Add / Edit Shift Record" to enter one.</p>`;
+        return;
+      }
+      const s = shifts[0];
+      const r = calculateShiftOee(s);
+      card.innerHTML = `
+        <div class="flex justify-between items-start mb-3">
+          <div>
+            <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400">LATEST SHIFT LOG</span>
+            <h3 class="text-lg font-black mt-0.5">${s.shift_date} — ${s.shift_type} Shift (Team ${s.team})</h3>
+          </div>
+          <button onclick="editShiftRecord(${s.id})" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold">Edit Shift</button>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-center text-xs mb-3">
+          <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl"><span class="text-slate-400 font-bold">PRODUCED</span><p class="text-xl font-black">${r.produced} pcs</p></div>
+          <div class="bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-2xl"><span class="text-emerald-500 font-bold">GOOD</span><p class="text-xl font-black text-emerald-600">${r.good} pcs</p></div>
+          <div class="bg-rose-50 dark:bg-rose-950/40 p-3 rounded-2xl"><span class="text-rose-500 font-bold">SCRAP</span><p class="text-xl font-black text-rose-600">${r.rejected} pcs</p></div>
+        </div>
+        <div class="grid grid-cols-4 gap-3 text-center text-xs">
+          <div class="bg-blue-50 dark:bg-blue-950/40 p-3 rounded-2xl"><span class="text-blue-500 font-bold">AVAILABILITY</span><p class="text-lg font-black text-blue-600">${fmtPct(r.availability)}</p></div>
+          <div class="bg-amber-50 dark:bg-amber-950/40 p-3 rounded-2xl"><span class="text-amber-500 font-bold">PERFORMANCE</span><p class="text-lg font-black text-amber-600">${fmtPct(r.performance)}</p></div>
+          <div class="bg-purple-50 dark:bg-purple-950/40 p-3 rounded-2xl"><span class="text-purple-500 font-bold">QUALITY</span><p class="text-lg font-black text-purple-600">${fmtPct(r.quality)}</p></div>
+          <div class="bg-emerald-600 text-white p-3 rounded-2xl"><span class="font-bold text-emerald-100">OEE</span><p class="text-lg font-black">${fmtPct(r.oee)}</p></div>
+        </div>
+      `;
+    }
+
+    function renderShiftsTable() {
+      const tbody = document.getElementById('shiftsTableBody');
+      if (!tbody) return;
+
+      if (shifts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No shift records logged yet. Click "Add / Edit Shift Record".</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = shifts.map(s => {
+        const r = calculateShiftOee(s);
+        return `
+          <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30">
+            <td class="p-3.5 font-bold">${s.shift_date}</td>
+            <td class="p-3.5">${s.shift_type}</td>
+            <td class="p-3.5">Team ${s.team}</td>
+            <td class="p-3.5">${s.epf_no || '-'}</td>
+            <td class="p-3.5 text-right font-mono font-bold">${r.produced}</td>
+            <td class="p-3.5 text-right font-mono text-emerald-600">${r.good}</td>
+            <td class="p-3.5 text-right font-mono text-rose-600">${r.rejected}</td>
+            <td class="p-3.5 text-right font-mono">${r.downtimeMin}m</td>
+            <td class="p-3.5 text-right font-mono font-bold ${r.oee >= 0.85 ? 'text-emerald-600' : (r.oee >= 0.6 ? 'text-amber-600' : 'text-rose-600')}">${fmtPct(r.oee)}</td>
+            <td class="p-3.5 text-center space-x-2">
+              <button onclick="viewShiftDetails(${s.id})" class="text-blue-600 hover:underline font-bold">View</button>
+              <button onclick="editShiftRecord(${s.id})" class="text-amber-600 hover:underline font-bold">Edit</button>
+              <button onclick="deleteShiftRecord(${s.id})" class="text-rose-600 hover:underline font-bold">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function viewShiftDetails(id) {
+      const s = shifts.find(item => item.id === id);
+      if (!s) return;
+      const r = calculateShiftOee(s);
+      const prods = productionRecords.filter(p => p.shift_id === id);
+
+      document.getElementById('viewShiftTitle').innerText = `${s.shift_date} — ${s.shift_type} Shift (Team ${s.team})`;
+      document.getElementById('viewShiftBody').innerHTML = `
+        <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl mb-2">
+          <div><span class="text-slate-400 font-bold">Operator:</span> <b>${s.operator_name || 'N/A'}</b></div>
+          <div><span class="text-slate-400 font-bold">EPF:</span> <b>${s.epf_no || '-'}</b></div>
+          <div><span class="text-slate-400 font-bold">Downtime:</span> <b class="text-rose-600 font-mono">${r.downtimeMin} min</b></div>
+          <div><span class="text-slate-400 font-bold">OEE Score:</span> <b class="text-blue-600 font-mono">${fmtPct(r.oee)}</b></div>
+        </div>
+        <table class="w-full text-left text-xs border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden block">
+          <thead class="bg-slate-100 dark:bg-slate-700/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-200">
+            <tr><th class="p-2">Profile</th><th class="p-2">Cycle Time</th><th class="p-2 text-right">Target</th><th class="p-2 text-right">Produced</th><th class="p-2 text-right">Reject</th></tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700 w-full table">
+            ${prods.map(p => `<tr><td class="p-2 font-bold">${p.profile_code}</td><td class="p-2 font-mono text-slate-500">${p.ideal_cycle_seconds || '- '}s</td><td class="p-2 text-right font-mono">${p.target}</td><td class="p-2 text-right font-mono text-blue-600 font-bold">${p.produced}</td><td class="p-2 text-right font-mono text-rose-600">${p.rejected}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      `;
+      document.getElementById('modalViewShift').classList.remove('hidden');
+    }
+
+    function addProfileCard(prefill = null) {
+      cardCounter++;
+      const cid = cardCounter;
+      const container = document.getElementById('profileCardsContainer');
+      const div = document.createElement('div');
+      div.className = "p-3 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-700/30 grid grid-cols-2 lg:grid-cols-7 gap-2 items-center text-xs";
+      div.id = `profCard-${cid}`;
+
+      let prefillCycle = '';
+      if (prefill) {
+         if (prefill.ideal_cycle_seconds) {
+             prefillCycle = prefill.ideal_cycle_seconds;
+         } else if (prefill.profile_code) {
+             const r = records.find(x => x.profile.toUpperCase() === prefill.profile_code.toUpperCase());
+             if (r) prefillCycle = r.cycle_seconds;
+         }
+      }
+
+      div.innerHTML = `
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Profile Code</label>
+          <input type="text" list="profileDataList" oninput="window.autoFillCycleTime(this)" placeholder="e.g. PRO-684" class="profCodeInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold focus:ring-2 focus:ring-blue-500 outline-none transition" value="${prefill ? prefill.profile_code : ''}">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Cycle (s)</label>
+          <input type="number" placeholder="90" class="profCycleInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-mono text-blue-600 font-bold outline-none" value="${prefillCycle}">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Setup (min)</label>
+          <input type="number" placeholder="0" class="profSetupInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 outline-none" value="${prefill && prefill.setup_min !== undefined ? prefill.setup_min : '0'}">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Target (Pcs)</label>
+          <input type="number" placeholder="50" class="profTargetInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 outline-none" value="${prefill ? prefill.target : '0'}">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Produced</label>
+          <input type="number" placeholder="50" class="profProducedInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-blue-600 dark:text-blue-400 outline-none" value="${prefill ? prefill.produced : '0'}">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Rejected</label>
+          <input type="number" placeholder="0" class="profRejectedInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-rose-600 font-bold outline-none" value="${prefill ? prefill.rejected : '0'}">
+        </div>
+        <div class="col-span-2 lg:col-span-1">
+          <label class="block text-[10px] font-bold text-slate-400 mb-0.5">Reject Reason</label>
+          <div class="flex items-center gap-1">
+            <input type="text" placeholder="Reason..." class="profRejectReasonInput w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 outline-none" value="${prefill && prefill.reject_reason ? prefill.reject_reason : ''}">
+            <button type="button" onclick="document.getElementById('profCard-${cid}').remove()" class="text-rose-500 font-bold px-1.5 text-base hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg">×</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+
+      if (prefill && prefill.profile_code && !prefillCycle) {
+          const inp = div.querySelector('.profCodeInput');
+          if (inp) window.autoFillCycleTime(inp);
+      }
+    }
+
+    window.autoFillCycleTime = function(input) {
+        const code = input.value.trim().toUpperCase();
+        const rec = records.find(r => (r.profile||'').toUpperCase() === code);
+        const container = input.closest('div').parentElement;
+        const cycleInput = container.querySelector('.profCycleInput');
+        if (rec && cycleInput) {
+            cycleInput.value = rec.cycle_seconds;
+        }
+    };
+
+    function addDowntimeCard(prefill = null) {
+      dtCounter++;
+      const cid = dtCounter;
+      const container = document.getElementById('downtimeCardsContainer');
+      const div = document.createElement('div');
+      div.className = "p-3 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-700/30 flex flex-wrap gap-2 items-center text-xs";
+      div.id = `dtCard-${cid}`;
+      const reasons = ['Breakdown', 'Setup', 'Tool Change', 'Material Waiting', 'Power Outage', 'Other'];
+      div.innerHTML = `
+        <select class="dtReasonSelect bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-semibold outline-none">
+          ${reasons.map(r => `<option value="${r}" ${prefill && prefill.reason === r ? 'selected' : ''}>${r === 'Setup' ? 'Setup / Changeover' : r}</option>`).join('')}
+        </select>
+        <input type="number" placeholder="Duration (min)" class="dtDurationInput bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 w-28 font-bold outline-none" value="${prefill ? prefill.duration_min : '15'}">
+        <button type="button" onclick="document.getElementById('dtCard-${cid}').remove()" class="text-rose-500 font-bold px-2 text-base">×</button>
+      `;
+      container.appendChild(div);
+    }
+
+    function resetShiftLogForm() {
+      document.getElementById('shiftLogForm').reset();
+      document.getElementById('shiftFormId').value = '';
+      document.getElementById('shiftLogEditingBadge').classList.add('hidden');
+      document.getElementById('shiftLogFormTitle').innerText = 'CNC Machine — Shift Production Slip';
+      document.getElementById('profileCardsContainer').innerHTML = '';
+      document.getElementById('downtimeCardsContainer').innerHTML = '';
+      document.getElementById('logDate').value = todayISO();
+      
+      addProfileCard({ profile_code: 'PRO-684', target: 50, produced: 50, rejected: 0, reject_reason: '' });
+      addProfileCard();
+      addProfileCard();
+    }
+
+    async function submitShiftLog(e) {
+      e.preventDefault();
+      
+      const shiftId = document.getElementById('shiftFormId').value;
+      const shiftPayload = {
+        shift_date: document.getElementById('logDate').value,
+        shift_type: document.getElementById('logShiftType').value,
+        team: document.getElementById('logTeam').value,
+        epf_no: document.getElementById('logEpf').value.trim(),
+        operator_name: document.getElementById('logOperator').value.trim(),
+        planned_break_min: parseInt(document.getElementById('logPlannedBreak').value, 10) || 90,
+        was_planned: document.getElementById('logWasPlanned').value === 'yes',
+        other_dept_used: document.getElementById('logOtherDept').value === 'yes',
+        other_dept_period: document.getElementById('logOtherDeptPeriod').value.trim(),
+        other_notes: document.getElementById('logOtherNotes').value.trim(),
+        supervisor_sign: document.getElementById('logSupervisorSign').value.trim(),
+        quality_sign: document.getElementById('logQualitySign').value.trim(),
+        is_deleted: false
+      };
+
+      try {
+        let activeShiftId = shiftId;
+        if (shiftId) {
+          const { error: updErr } = await supabaseClient.from('shifts').update(shiftPayload).eq('id', shiftId);
+          if (updErr) throw new Error("Update Shift Error: " + updErr.message);
+          
+          await supabaseClient.from('production_records').delete().eq('shift_id', shiftId);
+          await supabaseClient.from('downtime_events').delete().eq('shift_id', shiftId);
+        } else {
+          const { data, error: insErr } = await supabaseClient.from('shifts').insert([shiftPayload]).select();
+          if (insErr) throw new Error("Insert Shift Error: " + insErr.message);
+          if (!data || data.length === 0) throw new Error("Shift saved, but Supabase returned no data.");
+          activeShiftId = data[0].id;
+        }
+
+        const profElements = document.querySelectorAll('#profileCardsContainer > div');
+        const prodPayloads = [];
+        const cycleTimeSyncPayloads = [];
+        const cycleTimeUpdatePromises = [];
+
+        profElements.forEach(el => {
+          const codeInput = el.querySelector('.profCodeInput');
+          if (!codeInput) return;
+          const code = codeInput.value.trim().toUpperCase();
+          const cycleSec = parseInt(el.querySelector('.profCycleInput').value, 10) || 0;
+          const setup_min = parseInt(el.querySelector('.profSetupInput').value, 10) || 0;
+          const target = parseInt(el.querySelector('.profTargetInput').value, 10) || 0;
+          const produced = parseInt(el.querySelector('.profProducedInput').value, 10) || 0;
+          const rejected = parseInt(el.querySelector('.profRejectedInput').value, 10) || 0;
+          const reject_reason = el.querySelector('.profRejectReasonInput').value.trim();
+
+          if (code) {
+            prodPayloads.push({ 
+                shift_id: activeShiftId, 
+                profile_code: code, 
+                ideal_cycle_seconds: cycleSec, 
+                setup_min, 
+                target, 
+                produced, 
+                rejected, 
+                reject_reason 
+            });
+
+            if (cycleSec > 0) {
+                const existingProfile = records.find(r => (r.profile||'').toUpperCase() === code);
+                if (!existingProfile) {
+                    if (!cycleTimeSyncPayloads.some(p => p.profile === code)) {
+                        cycleTimeSyncPayloads.push({
+                            profile: code,
+                            cycle_seconds: cycleSec,
+                            description: 'Auto-added from Daily Shift Log',
+                            record_date: todayISO(),
+                            is_deleted: false
+                        });
+                    }
+                } else if (existingProfile.cycle_seconds !== cycleSec) {
+                    cycleTimeUpdatePromises.push(
+                        supabaseClient.from('cnc_cycle_times')
+                        .update({ cycle_seconds: cycleSec })
+                        .eq('id', existingProfile.id)
+                    );
+                }
+            }
+          }
+        });
+
+        if (cycleTimeSyncPayloads.length > 0) {
+            await supabaseClient.from('cnc_cycle_times').insert(cycleTimeSyncPayloads);
+        }
+        if (cycleTimeUpdatePromises.length > 0) {
+            await Promise.all(cycleTimeUpdatePromises);
+        }
+
+        if (prodPayloads.length > 0) {
+          const { error: pErr } = await supabaseClient.from('production_records').insert(prodPayloads);
+          if (pErr) throw new Error("Profiles Insert Error: " + pErr.message);
+        }
+
+        const dtElements = document.querySelectorAll('#downtimeCardsContainer > div');
+        const dtPayloads = [];
+        dtElements.forEach(el => {
+          const reason = el.querySelector('.dtReasonSelect').value;
+          const duration_min = parseInt(el.querySelector('.dtDurationInput').value, 10) || 0;
+          if (duration_min > 0) {
+            dtPayloads.push({ shift_id: activeShiftId, reason, duration_min });
+          }
+        });
+
+        if (dtPayloads.length > 0) {
+          const { error: dErr } = await supabaseClient.from('downtime_events').insert(dtPayloads);
+          if (dErr) throw new Error("Downtime Insert Error: " + dErr.message);
+        }
+
+        showToast(shiftId ? "Shift log & Profiles updated!" : "Shift log saved successfully!");
+        resetShiftLogForm();
+        
+        await fetchAllData(); 
+        switchOeeSubTab('alllogs');
+      } catch (err) {
+        alert("Backend Sync Failed: \n" + err.message);
+        console.error(err);
+      }
+    }
+
+    function editShiftRecord(id) {
+      const s = shifts.find(item => item.id === id);
+      if (!s) return;
+
+      document.getElementById('shiftFormId').value = s.id;
+      document.getElementById('logDate').value = s.shift_date;
+      document.getElementById('logShiftType').value = s.shift_type;
+      document.getElementById('logTeam').value = s.team;
+      document.getElementById('logEpf').value = s.epf_no || '';
+      document.getElementById('logOperator').value = s.operator_name || '';
+      document.getElementById('logPlannedBreak').value = s.planned_break_min || 90;
+
+      document.getElementById('logWasPlanned').value = (s.was_planned === false) ? 'no' : 'yes';
+      document.getElementById('logOtherDept').value = (s.other_dept_used === true) ? 'yes' : 'no';
+      document.getElementById('logOtherDeptPeriod').value = s.other_dept_period || '';
+      document.getElementById('logOtherNotes').value = s.other_notes || '';
+      document.getElementById('logSupervisorSign').value = s.supervisor_sign || '';
+      document.getElementById('logQualitySign').value = s.quality_sign || '';
+
+      document.getElementById('shiftLogFormTitle').innerText = `Edit Shift Record #${s.id}`;
+      document.getElementById('shiftLogEditingBadge').classList.remove('hidden');
+
+      const profContainer = document.getElementById('profileCardsContainer');
+      const dtContainer = document.getElementById('downtimeCardsContainer');
+      profContainer.innerHTML = '';
+      dtContainer.innerHTML = '';
+
+      const prods = productionRecords.filter(p => p.shift_id === s.id);
+      const dts = downtimeEvents.filter(d => d.shift_id === s.id);
+
+      if (prods.length > 0) prods.forEach(p => addProfileCard(p));
+      else addProfileCard();
+
+      if (dts.length > 0) dts.forEach(d => addDowntimeCard(d));
+
+      switchOeeSubTab('addlog');
+    }
+
+    async function deleteShiftRecord(id) {
+      if (!confirm('Move this Shift Record to the Recovery Vault?')) return;
+      await supabaseClient.from('shifts').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
+      fetchOeeData();
+    }
+
+    // --- PRODUCTION PLANNER & DATALIST SYNC ---
+    function populatePlanningDropdown() {
+      const sel = document.getElementById('planProfileSelect');
+      const dlist = document.getElementById('profileDataList'); 
+      
+      let selOptions = '<option value="">-- Choose Profile --</option>';
+      let dlistOptions = '';
+
+      records.forEach(r => {
+        selOptions += `<option value="${r.id}">${r.profile} (${r.cycle_seconds}s)</option>`;
+        dlistOptions += `<option value="${r.profile}">Cycle: ${r.cycle_seconds}s</option>`;
+      });
+
+      if (sel) sel.innerHTML = selOptions;
+      if (dlist) dlist.innerHTML = dlistOptions;
+    }
+
+    function addProfileToPlanningCart() {
+      const sel = document.getElementById('planProfileSelect');
+      const profId = parseInt(sel.value, 10);
+      if (!profId) {
+        alert('Please select a target profile.');
+        return;
+      }
+      const item = records.find(r => r.id === profId);
+      if (!item) return;
+
+      const handling = parseInt(document.getElementById('planHandlingSec').value, 10) || 0;
+      const qty = parseInt(document.getElementById('planBatchQty').value, 10) || 1;
+
+      planningCart.push({
+        id: item.id,
+        profile: item.profile,
+        cycle_seconds: item.cycle_seconds,
+        handling_seconds: handling,
+        qty: qty
+      });
+
+      renderPlanningCart();
+    }
+
+    function clearPlanningCart() {
+      planningCart = [];
+      renderPlanningCart();
+    }
+
+    function removeCartItem(idx) {
+      planningCart.splice(idx, 1);
+      renderPlanningCart();
+    }
+
+    function renderPlanningCart() {
+      const container = document.getElementById('planningCartList');
+      if (!container) return;
+
+      if (planningCart.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p>';
+        document.getElementById('calcTotalQty').innerText = '0 pcs';
+        document.getElementById('calcTheorTime').innerText = '0h 0m';
+        document.getElementById('calcShiftRequirement').innerText = '0.0';
+        return;
+      }
+
+      let totalQty = 0;
+      let totalSeconds = 0;
+
+      container.innerHTML = planningCart.map((c, idx) => {
+        const itemSec = (c.cycle_seconds + c.handling_seconds) * c.qty;
+        totalQty += c.qty;
+        totalSeconds += itemSec;
+        return `
+          <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl text-xs">
+            <div>
+              <b class="text-blue-600 dark:text-blue-400">${c.profile}</b>
+              <span class="text-slate-400 ml-2">Qty: <b>${c.qty}</b> | Pace: <b>${c.cycle_seconds + c.handling_seconds}s/pc</b></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-slate-500">${formatDuration(itemSec)}</span>
+              <button onclick="removeCartItem(${idx})" class="text-rose-500 font-bold px-1.5">×</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('calcTotalQty').innerText = `${totalQty} pcs`;
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      document.getElementById('calcTheorTime').innerText = `${hrs}h ${mins}m`;
+
+      const netShiftSec = 10.5 * 3600; 
+      const estShifts = (totalSeconds / netShiftSec).toFixed(1);
+      document.getElementById('calcShiftRequirement').innerText = estShifts;
+    }
+
+    function generateJobSheetPDF() {
+      if (planningCart.length === 0) {
+        alert("Planning queue is empty!");
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("CNC 5000 - Production Traveler Job Sheet", 14, 15);
+      const rows = planningCart.map((c, idx) => [idx + 1, c.profile, `${c.cycle_seconds}s`, `${c.handling_seconds}s`, c.qty, formatDuration((c.cycle_seconds + c.handling_seconds) * c.qty)]);
+      doc.autoTable({
+        head: [['#', 'Profile', 'Cycle Time', 'Handling', 'Batch Qty', 'Total Time']],
+        body: rows,
+        startY: 22
+      });
+      doc.save("CNC_5000_Traveler_Sheet.pdf");
+      showToast("Traveler sheet exported.");
+    }
+
+    // --- REPORT PREVIEW & COMPREHENSIVE EXPORTS ---
+    function renderReportPreview() {
+      const card = document.getElementById('reportPreviewCard');
+      if (!card) return;
+
+      if (shifts.length === 0) {
+          card.innerHTML = '<p class="text-slate-500 text-sm">No data available for analysis.</p>';
+          return;
+      }
+
+      const oeeResults = shifts.map(s => calculateShiftOee(s));
+      const totalShifts = shifts.length;
+      const totalProduced = oeeResults.reduce((sum, r) => sum + r.produced, 0);
+      const totalRejects = oeeResults.reduce((sum, r) => sum + r.rejected, 0);
+      const totalGood = totalProduced - totalRejects;
+      
+      const avgOee = (oeeResults.reduce((sum, r) => sum + r.oee, 0) / totalShifts);
+      const avgA = (oeeResults.reduce((sum, r) => sum + r.availability, 0) / totalShifts);
+      const avgP = (oeeResults.reduce((sum, r) => sum + r.performance, 0) / totalShifts);
+      const avgQ = (oeeResults.reduce((sum, r) => sum + r.quality, 0) / totalShifts);
+      
+      const totalDowntimeMin = oeeResults.reduce((sum, r) => sum + r.downtimeMin, 0);
+
+      // Downtime Reasons Data
+      const dtMap = {};
+      downtimeEvents.forEach(d => {
+         dtMap[d.reason] = (dtMap[d.reason] || 0) + (parseInt(d.duration_min)||0);
+      });
+      const dtArr = Object.entries(dtMap).map(([reason, min]) => ({reason, min})).sort((a,b) => b.min - a.min);
+
+      // Profile Yield Data
+      const pMap = {};
+      productionRecords.forEach(p => {
+         pMap[p.profile_code] = pMap[p.profile_code] || {produced:0, rejected:0};
+         pMap[p.profile_code].produced += parseInt(p.produced)||0;
+         pMap[p.profile_code].rejected += parseInt(p.rejected)||0;
+      });
+      const pArr = Object.entries(pMap).map(([code, data]) => ({
+          code, 
+          good: data.produced - data.rejected, 
+          rejected: data.rejected,
+          rejectRate: data.produced > 0 ? ((data.rejected/data.produced)*100).toFixed(1) : 0
+      })).sort((a,b) => b.good - a.good).slice(0,5);
+
+      card.innerHTML = `
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-center text-xs">
+          <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl"><span class="text-slate-400 font-bold">TOTAL SHIFTS</span><p class="text-xl font-black">${totalShifts}</p></div>
+          <div class="bg-blue-50 dark:bg-blue-950/40 p-3 rounded-2xl"><span class="text-blue-500 font-bold">TOTAL PRODUCED</span><p class="text-xl font-black text-blue-600">${totalProduced}</p></div>
+          <div class="bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-2xl"><span class="text-emerald-500 font-bold">TOTAL GOOD</span><p class="text-xl font-black text-emerald-600">${totalGood}</p></div>
+          <div class="bg-rose-50 dark:bg-rose-950/40 p-3 rounded-2xl"><span class="text-rose-500 font-bold">TOTAL SCRAP</span><p class="text-xl font-black text-rose-600">${totalRejects}</p></div>
+          <div class="bg-amber-50 dark:bg-amber-950/40 p-3 rounded-2xl"><span class="text-amber-500 font-bold">AVG OEE</span><p class="text-xl font-black text-amber-600">${fmtPct(avgOee)}</p></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+           <div class="border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+              <h4 class="text-xs font-black uppercase text-slate-500 mb-3">Downtime Analysis (${totalDowntimeMin} min total)</h4>
+              ${dtArr.length === 0 ? '<p class="text-xs text-slate-400">No downtime logged.</p>' : 
+                `<table class="w-full text-xs text-left">
+                  <thead class="text-[10px] text-slate-400 border-b border-slate-200 dark:border-slate-700"><tr><th class="pb-1">Reason</th><th class="pb-1 text-right">Minutes</th><th class="pb-1 text-right">% of Total</th></tr></thead>
+                  <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                    ${dtArr.map(d => `<tr><td class="py-1.5 font-bold">${d.reason}</td><td class="py-1.5 text-right font-mono text-rose-500">${d.min}m</td><td class="py-1.5 text-right font-mono">${((d.min/totalDowntimeMin)*100).toFixed(1)}%</td></tr>`).join('')}
+                  </tbody>
+                </table>`
+              }
+           </div>
+
+           <div class="border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+              <h4 class="text-xs font-black uppercase text-slate-500 mb-3">Top 5 Profiles Yield Analysis</h4>
+              ${pArr.length === 0 ? '<p class="text-xs text-slate-400">No production logs.</p>' : 
+                `<table class="w-full text-xs text-left">
+                  <thead class="text-[10px] text-slate-400 border-b border-slate-200 dark:border-slate-700"><tr><th class="pb-1">Profile Code</th><th class="pb-1 text-right">Good Output</th><th class="pb-1 text-right">Scrap Rate</th></tr></thead>
+                  <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                    ${pArr.map(p => `<tr><td class="py-1.5 font-bold text-blue-600 dark:text-blue-400">${p.code}</td><td class="py-1.5 text-right font-mono text-emerald-600">${p.good}</td><td class="py-1.5 text-right font-mono ${p.rejectRate > 5 ? 'text-rose-500 font-bold' : ''}">${p.rejectRate}%</td></tr>`).join('')}
+                  </tbody>
+                </table>`
+              }
+           </div>
+        </div>
+      `;
+    }
+
+    function exportReportPDF() {
+      if (shifts.length === 0) { alert("No data available to export."); return; }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("CNC 5000 - Comprehensive Operations Report", 14, 15);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Generated on: ${todayISO()}`, 14, 21);
+
+      const oeeResults = shifts.map(s => calculateShiftOee(s));
+      const totalShifts = shifts.length;
+      const totalProduced = oeeResults.reduce((sum, r) => sum + r.produced, 0);
+      const totalRejects = oeeResults.reduce((sum, r) => sum + r.rejected, 0);
+      const avgOee = (oeeResults.reduce((sum, r) => sum + r.oee, 0) / totalShifts);
+      const totalDowntimeMin = oeeResults.reduce((sum, r) => sum + r.downtimeMin, 0);
+
+      // Section 1: Executive Summary
+      doc.autoTable({
+        head: [['Total Shifts', 'Total Output', 'Total Scrap', 'Total Downtime', 'Avg OEE %']],
+        body: [[totalShifts, totalProduced, totalRejects, `${totalDowntimeMin} min`, fmtPct(avgOee)]],
+        startY: 28,
+        theme: 'grid',
+        headStyles: { fillColor: [37, 99, 235] },
+        styles: { halign: 'center', fontStyle: 'bold' }
+      });
+
+      // Section 2: Downtime Analysis
+      const dtMap = {};
+      downtimeEvents.forEach(d => { dtMap[d.reason] = (dtMap[d.reason] || 0) + (parseInt(d.duration_min)||0); });
+      const dtRows = Object.entries(dtMap).sort((a,b) => b[1] - a[1]).map(([r, m]) => [r, `${m} min`, `${((m/totalDowntimeMin)*100).toFixed(1)}%`]);
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Downtime Reason Breakdown", 14, doc.lastAutoTable.finalY + 12);
+      
+      doc.autoTable({
+        head: [['Reason', 'Total Duration', '% of Total Downtime']],
+        body: dtRows,
+        startY: doc.lastAutoTable.finalY + 15,
+        theme: 'striped',
+        headStyles: { fillColor: [71, 85, 105] }
+      });
+
+      // Section 3: Profile Yield Analysis
+      const pMap = {};
+      productionRecords.forEach(p => {
+         pMap[p.profile_code] = pMap[p.profile_code] || {produced:0, rejected:0};
+         pMap[p.profile_code].produced += parseInt(p.produced)||0;
+         pMap[p.profile_code].rejected += parseInt(p.rejected)||0;
+      });
+      const pRows = Object.entries(pMap).sort((a,b) => (b[1].produced-b[1].rejected) - (a[1].produced-a[1].rejected)).map(([c, d]) => [c, d.produced, d.produced - d.rejected, d.rejected, d.produced > 0 ? ((d.rejected/d.produced)*100).toFixed(1) + '%' : '0%']);
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Profile Yield & Scrap Rates", 14, doc.lastAutoTable.finalY + 12);
+
+      doc.autoTable({
+        head: [['Profile Code', 'Target Achieved', 'Good Parts', 'Scrapped', 'Scrap Rate']],
+        body: pRows,
+        startY: doc.lastAutoTable.finalY + 15,
+        theme: 'striped',
+        headStyles: { fillColor: [71, 85, 105] }
+      });
+
+      // Section 4: Full Shift Log
+      const shiftRows = shifts.map(s => {
+        const r = calculateShiftOee(s);
+        return [s.shift_date, s.shift_type, s.team, r.produced, r.good, r.rejected, `${r.downtimeMin}m`, fmtPct(r.oee)];
+      });
+      
+      doc.addPage();
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Detailed Shift Logs", 14, 15);
+
+      doc.autoTable({
+        head: [['Date', 'Shift', 'Team', 'Produced', 'Good', 'Scrap', 'Downtime', 'OEE']],
+        body: shiftRows,
+        startY: 20,
+        theme: 'grid',
+        headStyles: { fillColor: [37, 99, 235] }
+      });
+
+      doc.save("CNC_5000_Detailed_Operations_Report.pdf");
+      showToast("Comprehensive PDF Report exported.");
+    }
+
+    function exportReportExcel() {
+      if (shifts.length === 0) { alert("No data available to export."); return; }
+      const wb = XLSX.utils.book_new();
+
+      // Sheet 1: Detailed Shift Logs
+      const shiftRows = shifts.map(s => {
+        const r = calculateShiftOee(s);
+        return {
+          Date: s.shift_date,
+          Shift: s.shift_type,
+          Team: s.team,
+          EPF: s.epf_no,
+          Produced: r.produced,
+          Good: r.good,
+          Reject: r.rejected,
+          Downtime_Min: r.downtimeMin,
+          Availability: fmtPct(r.availability),
+          Performance: fmtPct(r.performance),
+          Quality: fmtPct(r.quality),
+          OEE: fmtPct(r.oee)
+        };
+      });
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(shiftRows), "Shift_Logs");
+
+      // Sheet 2: Downtime Analysis
+      const dtMap = {};
+      let totalDt = 0;
+      downtimeEvents.forEach(d => { 
+          const m = parseInt(d.duration_min)||0;
+          dtMap[d.reason] = (dtMap[d.reason] || 0) + m; 
+          totalDt += m;
+      });
+      const dtRows = Object.entries(dtMap).sort((a,b) => b[1] - a[1]).map(([Reason, Minutes]) => ({
+          Reason, 
+          Minutes, 
+          Percent_of_Total: totalDt > 0 ? ((Minutes/totalDt)*100).toFixed(1) + '%' : '0%'
+      }));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dtRows), "Downtime_Analysis");
+
+      // Sheet 3: Profile Analysis
+      const pMap = {};
+      productionRecords.forEach(p => {
+         pMap[p.profile_code] = pMap[p.profile_code] || {produced:0, rejected:0};
+         pMap[p.profile_code].produced += parseInt(p.produced)||0;
+         pMap[p.profile_code].rejected += parseInt(p.rejected)||0;
+      });
+      const pRows = Object.entries(pMap).sort((a,b) => (b[1].produced-b[1].rejected) - (a[1].produced-a[1].rejected)).map(([Profile_Code, data]) => ({
+          Profile_Code,
+          Total_Produced: data.produced,
+          Good_Parts: data.produced - data.rejected,
+          Scrap_Parts: data.rejected,
+          Scrap_Rate: data.produced > 0 ? ((data.rejected/data.produced)*100).toFixed(1) + '%' : '0%'
+      }));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pRows), "Profile_Yields");
+
+      XLSX.writeFile(wb, "CNC_5000_Comprehensive_Data.xlsx");
+      showToast("Multi-sheet Excel exported.");
+    }
+
+    function exportToExcel() {
+      const ws = XLSX.utils.json_to_sheet(records);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "CNC_Profiles");
+      XLSX.writeFile(wb, "CNC_5000_Profiles.xlsx");
+    }
+
+    function generateEngineeringReportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("CNC 5000 - Profile Recipes Catalog", 14, 15);
+      const rows = displayedRecords.map((r, idx) => [idx + 1, r.profile, r.description || '', r.length || '', `${r.cycle_seconds}s`, r.feed_speeds || '', r.tooling || 'Single tool']);
+      doc.autoTable({
+        head: [['#', 'Profile', 'Description', 'Length', 'Cycle Time', 'Feed Speed', 'Tooling']],
+        body: rows,
+        startY: 22
+      });
+      doc.save("CNC_5000_Catalog.pdf");
+    }
+
+    function exportToolsToExcel() {
+      const ws = XLSX.utils.json_to_sheet(toolsList);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "CNC_Tools");
+      XLSX.writeFile(wb, "CNC_5000_Tools.xlsx");
+    }
+
+    function generateToolsInventoryPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("CNC 5000 - Tools Inventory Catalog", 14, 15);
+      const rows = toolsDisplayed.map((t, idx) => [idx + 1, t.category, t.sub_type || '', t.diameter, t.stock, t.location || '']);
+      doc.autoTable({
+        head: [['#', 'Category', 'Sub-Type', 'Diameter', 'Stock (pcs)', 'Location']],
+        body: rows,
+        startY: 22
+      });
+      doc.save("CNC_5000_Tools_Inventory.pdf");
+    }
+    
+    // --- PROFESSIONAL MEMO GENERATOR ---
+    function generateFormalSupervisorLetterPDF() {
+      if (toolsNoticeList.length === 0) {
+        alert("Please load or add low-stock tools first!");
+        return;
+      }
+
+      const activeRecipients = memoRecipients.filter(r => r.selected);
+      if (activeRecipients.length === 0) {
+        alert("Please select at least one recipient in the Document Details section to address the memo to.");
+        return;
+      }
+
+      const memoDate = document.getElementById('memoDate').value || todayISO();
+      const senderName = document.getElementById('memoSender').value.trim() || 'Poojitha Dilshan';
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      
+      // Corporate Header Bar
+      doc.setFillColor(37, 99, 235);
+      doc.rect(0, 0, 210, 18, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("CNC 5000 MACHINE", 14, 12);
+      
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text("PRODUCTION FACILITY", 196, 11, { align: 'right' });
+      
+      // Memo Title
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text("INTERNAL MEMORANDUM", 105, 35, { align: 'center' });
+      
+      // Header Details Block
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.5);
+      doc.line(14, 42, 196, 42); 
+      
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("TO:", 14, 52);
+      
+      let currentY = 52;
+      activeRecipients.forEach(r => {
+          doc.setFont("helvetica", "normal");
+          doc.text(`${r.name} (${r.role})`, 40, currentY);
+          currentY += 6; 
+      });
+
+      currentY += 2; // Extra padding
+
+      doc.setFont("helvetica", "bold");
+      doc.text("FROM:", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      doc.text(senderName, 40, currentY);
+      currentY += 7;
+      
+      doc.setFont("helvetica", "bold");
+      doc.text("DATE:", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      doc.text(memoDate, 40, currentY);
+      currentY += 7;
+      
+      doc.setFont("helvetica", "bold");
+      doc.text("SUBJECT:", 14, currentY);
+      doc.setFont("helvetica", "normal");
+      doc.text("Urgent Requisition Notice for Critical Low-Stock CNC Tools", 40, currentY);
+      currentY += 5;
+      
+      doc.line(14, currentY, 196, currentY); 
+      currentY += 10;
+      
+      // Introductory Text
+      doc.setFontSize(10);
+      doc.text("Dear Sir/Madam,", 14, currentY);
+      currentY += 7;
+      doc.text("Please find below the requested list of CNC machine tools that have fallen below the safe", 14, currentY);
+      currentY += 6;
+      doc.text("operating inventory threshold (< 2 pieces). Expedited restocking approval is requested", 14, currentY);
+      currentY += 6;
+      doc.text("to prevent potential production downtime in the facility.", 14, currentY);
+      currentY += 8;
+      
+      // Table Styling
+      const rows = toolsNoticeList.map((t, idx) => [
+        idx + 1, 
+        t.category, 
+        t.diameter, 
+        `${t.stock} pcs`, 
+        `${t.req_qty} pcs`
+      ]);
+      
+      doc.autoTable({
+        head: [['#', 'Tool Category', 'Size / Diameter', 'Current Stock', 'Recommended Order']],
+        body: rows,
+        startY: currentY,
+        theme: 'grid',
+        headStyles: { 
+          fillColor: [37, 99, 235],
+          textColor: [255, 255, 255], 
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 15 },
+          3: { halign: 'center', textColor: [225, 29, 72], fontStyle: 'bold' },
+          4: { halign: 'center', fontStyle: 'bold' }
+        },
+        styles: { fontSize: 10, cellPadding: 5 },
+        alternateRowStyles: { fillColor: [248, 250, 252] }
+      });
+      
+      // Signature Block
+      const finalY = doc.lastAutoTable.finalY || currentY;
+      
+      doc.setFont("helvetica", "normal");
+      doc.text("Prepared & Verified By:", 14, finalY + 25);
+      doc.line(14, finalY + 45, 70, finalY + 45); 
+      doc.setFont("helvetica", "bold");
+      doc.text(senderName, 14, finalY + 52);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text("CNC Operations", 14, finalY + 57);
+
+      doc.save(`CNC5000_Restock_Memo_${memoDate}.pdf`);
+      showToast("Professional Memo exported to PDF.");
+    }
+
+    // --- INITIAL BOOTSTRAP ---
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('memoDate').value = todayISO();
+      loadRecipients();
+      resetShiftLogForm();
+      fetchAllData();
+      fetchToolsData();
+    });
+  </script>
 </body>
 </html>
