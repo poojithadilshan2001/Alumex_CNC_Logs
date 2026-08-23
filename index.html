@@ -14,14 +14,7 @@
   <script>
     tailwind.config = {
       darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
-            toolsteel: { 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
-          }
-        }
-      }
+      theme: { extend: { colors: { brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' } } } }
     }
   </script>
   <!-- Chart.js -->
@@ -39,8 +32,6 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .fade-in { animation: fadeIn 0.3s ease-in; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -53,86 +44,60 @@
     <span id="toastMessage">Action successful</span>
   </div>
 
-  <!-- HEADER & BRAND BAR -->
+  <!-- HEADER -->
   <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-800/95 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 md:px-8 py-3 shadow-sm">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
-        <div class="bg-blue-600 text-white w-10 h-10 rounded-2xl font-black text-lg flex items-center justify-center shadow-md shadow-blue-500/20">5K</div>
+        <div class="bg-blue-600 text-white w-10 h-10 rounded-2xl font-black text-lg flex items-center justify-center shadow-md">5K</div>
         <div>
           <h1 class="text-base md:text-lg font-black text-slate-900 dark:text-white leading-tight tracking-tight">CNC 5000 MACHINE</h1>
           <p class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">Component Plant CNC Intelligence &amp; OEE Operations</p>
         </div>
       </div>
-
       <div class="flex items-center gap-3">
         <div id="syncBadge" class="flex items-center space-x-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-full text-[11px] font-semibold text-amber-700 dark:text-amber-400 transition-colors">
           <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
           <span id="syncStatus">Connecting DB...</span>
         </div>
-        <button onclick="toggleDarkMode()" class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition shadow-sm">
-          <span class="themeIcon text-sm">🌙</span>
-        </button>
+        <button onclick="toggleDarkMode()" class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition shadow-sm">🌙</button>
       </div>
     </div>
   </header>
 
-  <!-- MAIN NAVIGATION HUB -->
+  <!-- NAVIGATION HUB -->
   <div class="max-w-7xl mx-auto px-4 md:px-8 pt-5">
     <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
       <button onclick="switchTab('dashboard')" id="navTile-dashboard" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-blue-600 border-blue-600 text-white shadow-md">
-        <div class="flex justify-between items-center w-full">
-          <span class="text-base">📊</span>
-          <span class="text-[9px] font-mono uppercase bg-white/20 px-1.5 py-0.5 rounded">Hub</span>
-        </div>
+        <div class="flex justify-between items-center w-full"><span class="text-base">📊</span><span class="text-[9px] font-mono uppercase bg-white/20 px-1.5 py-0.5 rounded">Hub</span></div>
         <div class="mt-2"><p class="text-xs font-black leading-tight">Dashboard</p><p class="text-[10px] opacity-80 truncate">Telemetry</p></div>
       </button>
-
-      <button onclick="switchTab('logs')" id="navTile-logs" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-        <div class="flex justify-between items-center w-full">
-          <span class="text-base">⚙️</span>
-          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Profiles</span>
-        </div>
+      <button onclick="switchTab('logs')" id="navTile-logs" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+        <div class="flex justify-between items-center w-full"><span class="text-base">⚙️</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Profiles</span></div>
         <div class="mt-2"><p class="text-xs font-black leading-tight">CNC Cycles</p><p class="text-[10px] text-slate-400 truncate">Recipes &amp; Speeds</p></div>
       </button>
-
-      <button onclick="switchTab('production')" id="navTile-production" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-        <div class="flex justify-between items-center w-full">
-          <span class="text-base">📋</span>
-          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Planner</span>
-        </div>
+      <button onclick="switchTab('production')" id="navTile-production" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+        <div class="flex justify-between items-center w-full"><span class="text-base">📋</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Planner</span></div>
         <div class="mt-2"><p class="text-xs font-black leading-tight">Job Orders</p><p class="text-[10px] text-slate-400 truncate">Shift Estimator</p></div>
       </button>
-
-      <button onclick="switchTab('oee')" id="navTile-oee" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-        <div class="flex justify-between items-center w-full">
-          <span class="text-base">⚡</span>
-          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">OEE</span>
-        </div>
+      <button onclick="switchTab('oee')" id="navTile-oee" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+        <div class="flex justify-between items-center w-full"><span class="text-base">⚡</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">OEE</span></div>
         <div class="mt-2"><p class="text-xs font-black leading-tight">Production</p><p class="text-[10px] text-slate-400 truncate">Shift Logs &amp; APQ</p></div>
       </button>
-
-      <button onclick="switchTab('tools')" id="navTile-tools" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-        <div class="flex justify-between items-center w-full">
-          <span class="text-base">🛠️</span>
-          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Stock</span>
-        </div>
+      <button onclick="switchTab('tools')" id="navTile-tools" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+        <div class="flex justify-between items-center w-full"><span class="text-base">🛠️</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Stock</span></div>
         <div class="mt-2"><p class="text-xs font-black leading-tight">Tools</p><p class="text-[10px] text-slate-400 truncate">4 Core Types</p></div>
       </button>
-
-      <button onclick="switchTab('toolsreq')" id="navTile-toolsreq" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-        <div class="flex justify-between items-center w-full">
-          <span class="text-base">✉️</span>
-          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Notice</span>
-        </div>
+      <button onclick="switchTab('toolsreq')" id="navTile-toolsreq" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+        <div class="flex justify-between items-center w-full"><span class="text-base">✉️</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Notice</span></div>
         <div class="mt-2"><p class="text-xs font-black leading-tight">Restock</p><p class="text-[10px] text-slate-400 truncate">Supervisor Memo</p></div>
       </button>
-
-      <button onclick="switchTab('reports')" id="navTile-reports" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
-        <div class="flex justify-between items-center w-full">
-          <span class="text-base">📑</span>
-          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Audit</span>
-        </div>
+      <button onclick="switchTab('reports')" id="navTile-reports" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+        <div class="flex justify-between items-center w-full"><span class="text-base">📑</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Audit</span></div>
         <div class="mt-2"><p class="text-xs font-black leading-tight">Reports</p><p class="text-[10px] text-slate-400 truncate">Analysis</p></div>
+      </button>
+      <button onclick="switchTab('trash')" id="navTile-trash" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+        <div class="flex justify-between items-center w-full"><span class="text-base">🗑️</span><span id="trashCountBadge" class="hidden bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold font-mono">0</span></div>
+        <div class="mt-2"><p class="text-xs font-black leading-tight">Bin Vault</p><p class="text-[10px] text-slate-400 truncate">Recovery</p></div>
       </button>
     </div>
   </div>
@@ -141,6 +106,7 @@
 
     <!-- SECTION 1: DASHBOARD -->
     <section id="view-dashboard" class="space-y-6 fade-in">
+      <!-- 4 Summary Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div onclick="switchTab('logs')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-blue-500 transition group">
           <div class="flex justify-between items-start">
@@ -173,12 +139,48 @@
           <p id="dashLowStockSummary" class="text-[11px] text-rose-500 font-bold mt-1">0 low stock</p>
         </div>
       </div>
-      
-      <!-- Charts placeholder -->
+
+      <!-- 30-DAY FACTORY RUNS INSIGHT -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+          <div>
+            <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">30-DAY FACTORY RUNS INSIGHT</span>
+            <h3 class="text-base font-black text-slate-900 dark:text-white mt-0.5">Profiles Produced in Last 30 Days</h3>
+          </div>
+        </div>
+        <div class="h-64 w-full"><canvas id="chartProfile30Days"></canvas></div>
+        <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-2xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="p-3">Profile Code</th><th class="p-3 text-right">Produced</th><th class="p-3 text-right text-emerald-600">Good</th>
+                <th class="p-3 text-right text-rose-600">Scrap</th><th class="p-3 text-right">Scrap %</th>
+              </tr>
+            </thead>
+            <tbody id="profile30TableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium">
+              <tr><td colspan="5" class="p-6 text-center text-slate-400">Loading data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4 Grid Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-3">Plant OEE %</h3>
           <div class="h-60"><canvas id="chartDashOee"></canvas></div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-3">Daily Progress</h3>
+          <div class="h-60"><canvas id="chartDashProduction"></canvas></div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-3">Top Cycle Times</h3>
+          <div class="h-60"><canvas id="chartDashCycleTime"></canvas></div>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-3">Tool Distribution</h3>
+          <div class="h-60 flex items-center justify-center"><canvas id="chartDashTools"></canvas></div>
         </div>
       </div>
     </section>
@@ -186,9 +188,7 @@
     <!-- SECTION 2: PROFILES -->
     <section id="view-logs" class="hidden space-y-6">
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-        <div class="flex items-center gap-2">
-          <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm">+ Log New Profile</button>
-        </div>
+        <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm">+ Log New Profile</button>
       </div>
 
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
@@ -199,12 +199,8 @@
           <table class="w-full text-left text-sm">
             <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th class="p-3.5">Code</th>
-                <th class="p-3.5">Description</th>
-                <th class="p-3.5">Length</th>
-                <th class="p-3.5">Cycle</th>
-                <th class="p-3.5">Feed</th>
-                <th class="p-3.5 text-center">Actions</th>
+                <th class="p-3.5">Code</th><th class="p-3.5">Description</th><th class="p-3.5">Length</th>
+                <th class="p-3.5">Cycle</th><th class="p-3.5">Feed</th><th class="p-3.5 text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="logsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs">
@@ -215,14 +211,30 @@
       </div>
     </section>
 
-    <!-- SECTION 3: PLANNING (Minified for brevity, functionality intact) -->
+    <!-- SECTION 3: PRODUCTION PLANNING -->
     <section id="view-production" class="hidden space-y-6">
-        <!-- Planning Content Placeholder (Logic remains intact in JS) -->
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700">
-            <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase mb-4">Job Order Assembly</h3>
-            <select id="planProfileSelect" class="w-full max-w-md bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 text-xs outline-none mb-4"></select>
-            <button onclick="addProfileToPlanningCart()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-xl text-xs">+ Add to Queue</button>
-            <div id="planningCartList" class="mt-4 space-y-2 max-h-56 overflow-y-auto"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase">Job Order Assembly</h3>
+              <div class="space-y-3">
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Target Profile</label>
+                  <select id="planProfileSelect" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 text-xs outline-none"></select>
+                </div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Batch Qty</label>
+                  <input type="number" id="planBatchQty" value="50" min="1" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2 text-xs outline-none">
+                </div>
+                <button onclick="addProfileToPlanningCart()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition">+ Add to Queue</button>
+              </div>
+            </div>
+            <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase">Planned Queue</h3></div>
+                <div id="planningCartList" class="space-y-2 max-h-56 overflow-y-auto"></div>
+                <div class="mt-6 p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-4 text-center">
+                    <div><p class="text-[11px] font-bold text-slate-400 uppercase">Total Parts</p><p id="calcTotalQty" class="text-xl font-black text-slate-800 dark:text-slate-100">0 pcs</p></div>
+                    <div><p class="text-[11px] font-bold text-slate-400 uppercase">Total Time</p><p id="calcTheorTime" class="text-xl font-black text-blue-600">0h 0m</p></div>
+                    <div><p class="text-[11px] font-bold text-slate-400 uppercase">Est. Shifts</p><p id="calcShiftRequirement" class="text-xl font-black text-emerald-600">0.0</p></div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -299,14 +311,29 @@
       </div>
     </section>
     
-    <!-- Empty Sections for routing mapping -->
-    <section id="view-toolsreq" class="hidden space-y-6"><div class="p-6 bg-white dark:bg-slate-800 rounded-3xl">Memo System Active.</div></section>
-    <section id="view-reports" class="hidden space-y-6"><div class="p-6 bg-white dark:bg-slate-800 rounded-3xl">Reports Module Active.</div></section>
-    <section id="view-trash" class="hidden space-y-6"><div class="p-6 bg-white dark:bg-slate-800 rounded-3xl">Trash Module Active.</div></section>
+    <!-- Utilities Sections -->
+    <section id="view-toolsreq" class="hidden space-y-6">
+      <div class="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 text-center">
+        <h3 class="text-lg font-black mb-2">Restock Memo Module</h3>
+        <p class="text-sm text-slate-500">Automatically tracking tools &lt; 2 units.</p>
+      </div>
+    </section>
+    <section id="view-reports" class="hidden space-y-6">
+      <div class="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 text-center">
+        <h3 class="text-lg font-black mb-2">Reporting Module</h3>
+        <p class="text-sm text-slate-500">PDF and Excel Exports ready.</p>
+      </div>
+    </section>
+    <section id="view-trash" class="hidden space-y-6">
+      <div class="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 text-center">
+        <h3 class="text-lg font-black mb-2">Recovery Vault</h3>
+        <p class="text-sm text-slate-500">Deleted items will appear here.</p>
+      </div>
+    </section>
 
   </main>
 
-  <!-- MODALS (Profiles) -->
+  <!-- MODAL: PROFILES -->
   <div id="modalForm" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -329,7 +356,7 @@
     </div>
   </div>
 
-  <!-- MODALS (Tools) -->
+  <!-- MODAL: TOOLS -->
   <div id="toolsModalForm" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -361,8 +388,15 @@
     const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
     const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
     
-    // Initialize Supabase Client
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Initialize Supabase Client Safely
+    let supabase = null;
+    try {
+        if(SUPABASE_URL !== "YOUR_SUPABASE_PROJECT_URL") {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+    } catch(e) {
+        console.error("Supabase init failed", e);
+    }
 
     // ========================================================================
     // ⚠️ SCHEMA MAPPING (Update if your DB column names are different!)
@@ -386,9 +420,9 @@
             table: 'cnc_shifts', // Your Shifts Table Name in Supabase
             cols: {
                 id: 'id', date: 'date', shiftType: 'shift_type', team: 'team', epf: 'epf',
-                profilesData: 'profiles_data', // Ensure this is a JSON or JSONB column in Supabase
-                downtimeData: 'downtime_data', // Ensure this is a JSON or JSONB column in Supabase
-                oeeSummary: 'oee_summary'      // Ensure this is a JSON or JSONB column in Supabase
+                profilesData: 'profiles_data', // Must be a JSON/JSONB column
+                downtimeData: 'downtime_data', // Must be a JSON/JSONB column
+                oeeSummary: 'oee_summary'      // Must be a JSON/JSONB column
             }
         }
     };
@@ -415,15 +449,29 @@
     let planningCart = [];
     let cardCounter = 0, dtCounter = 0;
 
+    let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null, chartProfile30Inst = null;
+
     // ========================================================================
     // SUPABASE DATA FETCHING
     // ========================================================================
     async function loadDataFromSupabase() {
+        const badge = document.getElementById('syncBadge');
+        const status = document.getElementById('syncStatus');
+        const dot = document.getElementById('syncDot');
+
+        if (!supabase) {
+            status.textContent = 'Missing API Keys';
+            badge.className = "flex items-center space-x-1.5 px-3 py-1 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/80 rounded-full text-[11px] font-semibold text-rose-700 dark:text-rose-400 transition-colors";
+            dot.className = "w-2 h-2 rounded-full bg-rose-500";
+            showToast('Please add your Supabase URL and Key in the code!', 'error');
+            
+            // Allow empty arrays to render so the UI doesn't crash
+            renderAll();
+            return;
+        }
+
         try {
-            const badge = document.getElementById('syncBadge');
-            const status = document.getElementById('syncStatus');
-            const dot = document.getElementById('syncDot');
-            status.textContent = 'Connecting...';
+            status.textContent = 'Fetching Data...';
 
             // 1. Fetch Profiles
             const { data: profData, error: profErr } = await supabase.from(DB_MAP.profiles.table).select('*');
@@ -476,14 +524,12 @@
             renderAll();
         } catch (error) {
             console.error("Supabase Connection Failed:", error);
-            
-            // Error UI Update
-            const badge = document.getElementById('syncBadge');
             badge.className = "flex items-center space-x-1.5 px-3 py-1 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/80 rounded-full text-[11px] font-semibold text-rose-700 dark:text-rose-400 transition-colors";
-            document.getElementById('syncDot').className = "w-2 h-2 rounded-full bg-rose-500";
-            document.getElementById('syncStatus').textContent = 'DB Error (Check RLS)';
+            dot.className = "w-2 h-2 rounded-full bg-rose-500";
+            status.textContent = 'DB Error (Check RLS)';
+            showToast(`Database connection failed: ${error.message}.`, 'error');
             
-            showToast(`Database connection failed: ${error.message}. (Check if your Supabase URL/KEY are correct and RLS policies are enabled for anonymous access)`, 'error');
+            renderAll(); // Still render to prevent white screen
         }
     }
 
@@ -492,6 +538,8 @@
     // ========================================================================
     async function submitForm(e) {
         e.preventDefault();
+        if(!supabase) { showToast('Supabase not connected.', 'error'); return; }
+
         const id = document.getElementById('formRowId').value;
         const payload = {
             [DB_MAP.profiles.cols.profile]: document.getElementById('formProfile').value,
@@ -508,9 +556,6 @@
                 if(error) throw error;
                 showToast('Profile Updated in Supabase.');
             } else {
-                // If your database auto-generates IDs (UUID), you don't need to pass one.
-                // If it requires one, uncomment the line below:
-                // payload[DB_MAP.profiles.cols.id] = crypto.randomUUID(); 
                 const { error } = await supabase.from(DB_MAP.profiles.table).insert([payload]);
                 if(error) throw error;
                 showToast('New Profile Saved to Supabase.');
@@ -539,6 +584,8 @@
     // ========================================================================
     async function submitToolForm(e) {
         e.preventDefault();
+        if(!supabase) { showToast('Supabase not connected.', 'error'); return; }
+
         const id = document.getElementById('toolsFormId').value;
         const payload = {
             [DB_MAP.tools.cols.category]: document.getElementById('toolsFormCategory').value,
@@ -581,6 +628,7 @@
     // ========================================================================
     async function submitShiftLog(e) {
         e.preventDefault();
+        if(!supabase) { showToast('Supabase not connected.', 'error'); return; }
         
         let profDataArray = [];
         document.querySelectorAll('#profileCardsContainer > div').forEach(c => {
@@ -600,7 +648,7 @@
             });
         });
 
-        // Calculate OEE (Simple mock calculation)
+        // Calculate basic OEE for saving
         const availability = 0.95, performance = 0.92, quality = 0.98;
         const oeeSumObj = { availability, performance, quality, oee: (availability*performance*quality) };
 
@@ -609,7 +657,7 @@
             [DB_MAP.shifts.cols.shiftType]: document.getElementById('logShiftType').value,
             [DB_MAP.shifts.cols.team]: document.getElementById('logTeam').value,
             [DB_MAP.shifts.cols.epf]: document.getElementById('logEpf').value,
-            [DB_MAP.shifts.cols.profilesData]: profDataArray, // Supabase automatically handles JSONB conversion
+            [DB_MAP.shifts.cols.profilesData]: profDataArray, 
             [DB_MAP.shifts.cols.downtimeData]: dtDataArray,
             [DB_MAP.shifts.cols.oeeSummary]: oeeSumObj
         };
@@ -638,7 +686,6 @@
         }
     }
 
-
     // ========================================================================
     // UI HELPER FUNCTIONS & RENDERING
     // ========================================================================
@@ -656,6 +703,8 @@
       });
       const activeBtn = document.getElementById(`navTile-${tabId}`);
       if(activeBtn) activeBtn.className = 'p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-blue-600 border-blue-600 text-white shadow-md';
+      
+      if(tabId === 'dashboard') updateDashboardMetrics();
     }
 
     function switchOeeSubTab(subId) {
@@ -675,13 +724,15 @@
     }
 
     function applyFiltersAndRender() {
-      const q = document.getElementById('logSearchInput').value.toLowerCase();
-      const filtered = records.filter(r => r.profile.toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q));
+      const el = document.getElementById('logSearchInput');
+      const q = el ? el.value.toLowerCase() : '';
+      const filtered = records.filter(r => (r.profile||'').toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q));
       
       const tbody = document.getElementById('logsTableBody');
+      if(!tbody) return;
       tbody.innerHTML = '';
       if(filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No profiles found in database.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No profiles found.</td></tr>`;
         return;
       }
 
@@ -703,9 +754,10 @@
 
     function applyToolsFiltersAndRender() {
       const tbody = document.getElementById('inventoryTableBody');
+      if(!tbody) return;
       tbody.innerHTML = '';
       if(toolsList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No tools found in database.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No tools found.</td></tr>`;
         return;
       }
 
@@ -726,9 +778,10 @@
 
     function renderShifts() {
         const tbody = document.getElementById('shiftsTableBody');
+        if(!tbody) return;
         tbody.innerHTML = '';
         if(shifts.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No shift logs found in database.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No shift logs found.</td></tr>`;
             return;
         }
 
@@ -751,27 +804,132 @@
         document.getElementById('dashTotalProfiles').textContent = records.length;
         document.getElementById('dashToolsStock').textContent = toolsList.reduce((acc, t) => acc + (t.stock||0), 0) + ' pcs';
         
-        // Basic charts setup
+        let oeeSum = 0; let oeeCount = 0;
+        let todayProd = 0; let todayGood = 0; let todayRej = 0;
+        const todayStr = new Date().toISOString().slice(0,10);
+        
+        shifts.forEach(s => {
+            if(s.oeeSummary && s.oeeSummary.oee) {
+                oeeSum += s.oeeSummary.oee;
+                oeeCount++;
+            }
+            if(s.date === todayStr && s.profiles) {
+                s.profiles.forEach(p => {
+                    todayProd += parseInt(p.prod||0);
+                    todayGood += parseInt(p.good||0);
+                    todayRej += parseInt(p.reject||0);
+                });
+            }
+        });
+
+        if(oeeCount > 0) document.getElementById('dashOeeAvg').textContent = fmtPct(oeeSum / oeeCount);
+        document.getElementById('dashProducedToday').textContent = `${todayProd} pcs`;
+        document.getElementById('dashScrapSummary').textContent = `Good: ${todayGood} | Rej: ${todayRej}`;
+
+        renderDashboardCharts();
+    }
+
+    function renderDashboardCharts() {
+        // Safe destroy previous instances
+        if(chartDashOeeInst) chartDashOeeInst.destroy();
+        if(chartDashProductionInst) chartDashProductionInst.destroy();
+        if(chartDashCycleTimeInst) chartDashCycleTimeInst.destroy();
+        if(chartDashToolsInst) chartDashToolsInst.destroy();
+        if(chartProfile30Inst) chartProfile30Inst.destroy();
+
+        // Safe rendering with null checks
         const oeeCtx = document.getElementById('chartDashOee');
-        if(oeeCtx && chartDashOeeInst) chartDashOeeInst.destroy();
         if(oeeCtx && shifts.length > 0) {
             chartDashOeeInst = new Chart(oeeCtx, {
                 type: 'line',
-                data: { 
-                    labels: shifts.slice(-7).map(s => (s.date||'').slice(5)), 
-                    datasets: [{ label: 'OEE %', data: shifts.slice(-7).map(s => s.oeeSummary ? (s.oeeSummary.oee * 100) : 0), borderColor: '#10b981', tension: 0.3 }] 
-                }
+                data: { labels: shifts.slice(-7).map(s => (s.date||'').slice(5)), datasets: [{ label: 'OEE %', data: shifts.slice(-7).map(s => s.oeeSummary ? (s.oeeSummary.oee * 100) : 0), borderColor: '#10b981', tension: 0.3 }] }
             });
+        }
+
+        const prodCtx = document.getElementById('chartDashProduction');
+        if(prodCtx && shifts.length > 0) {
+            chartDashProductionInst = new Chart(prodCtx, {
+                type: 'bar',
+                data: { labels: shifts.slice(-7).map(s => (s.date||'').slice(5)), datasets: [{ label: 'Produced', data: shifts.slice(-7).map(s => s.profiles ? s.profiles.reduce((a,b)=>a+(b.prod||0),0) : 0), backgroundColor: '#3b82f6' }] }
+            });
+        }
+
+        const cycCtx = document.getElementById('chartDashCycleTime');
+        if(cycCtx && records.length > 0) {
+            const topSpeeds = [...records].sort((a,b) => a.cycle_sec - b.cycle_sec).slice(0,5);
+            chartDashCycleTimeInst = new Chart(cycCtx, {
+                type: 'bar',
+                data: { labels: topSpeeds.map(r => r.profile), datasets: [{ label: 'Seconds', data: topSpeeds.map(r => r.cycle_sec), backgroundColor: '#f59e0b' }] }
+            });
+        }
+
+        const toolCtx = document.getElementById('chartDashTools');
+        if(toolCtx && toolsList.length > 0) {
+            const counts = {'Milling':0, 'Drilling':0, 'Tapping':0, 'Chamfer':0};
+            toolsList.forEach(t => { if(counts[t.category] !== undefined) counts[t.category] += (t.stock||0); });
+            chartDashToolsInst = new Chart(toolCtx, {
+                type: 'doughnut',
+                data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }] },
+                options: { plugins: { legend: { position: 'right' } } }
+            });
+        }
+        
+        // 30-Day Table Data processing
+        const table30 = document.getElementById('profile30TableBody');
+        const c30Ctx = document.getElementById('chartProfile30Days');
+        if(table30 && c30Ctx) {
+            if(shifts.length === 0) {
+                table30.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No shift data available for last 30 days.</td></tr>`;
+            } else {
+                // Mock calculation logic for presentation
+                const profDataMap = {};
+                shifts.forEach(s => {
+                    if(s.profiles) {
+                        s.profiles.forEach(p => {
+                            if(!profDataMap[p.profileId]) profDataMap[p.profileId] = { prod: 0, good: 0, rej: 0, shifts: 0 };
+                            profDataMap[p.profileId].prod += (p.prod||0);
+                            profDataMap[p.profileId].good += (p.good||0);
+                            profDataMap[p.profileId].rej += (p.reject||0);
+                            profDataMap[p.profileId].shifts += 1;
+                        });
+                    }
+                });
+                
+                table30.innerHTML = '';
+                const labels30 = [];
+                const data30 = [];
+
+                Object.keys(profDataMap).forEach(k => {
+                    const r = records.find(x => x.id == k);
+                    const name = r ? r.profile : 'Unknown';
+                    const d = profDataMap[k];
+                    const pct = d.prod > 0 ? ((d.rej / d.prod)*100).toFixed(1) + '%' : '0%';
+                    
+                    labels30.push(name);
+                    data30.push(d.prod);
+
+                    table30.innerHTML += `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                            <td class="p-3 font-bold">${escapeHtml(name)}</td>
+                            <td class="p-3 text-right font-mono">${d.prod}</td>
+                            <td class="p-3 text-right font-mono text-emerald-600">${d.good}</td>
+                            <td class="p-3 text-right font-mono text-rose-600">${d.rej}</td>
+                            <td class="p-3 text-right font-bold text-rose-600">${pct}</td>
+                        </tr>
+                    `;
+                });
+                
+                chartProfile30Inst = new Chart(c30Ctx, {
+                    type: 'bar',
+                    data: { labels: labels30, datasets: [{ label: 'Quantity Produced', data: data30, backgroundColor: '#6366f1' }] },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
         }
     }
 
     // Modal UI Logics
-    function openFormModal() {
-        document.getElementById('recordForm').reset();
-        document.getElementById('formRowId').value = '';
-        document.getElementById('formModalTitle').textContent = 'Log New CNC Profile';
-        document.getElementById('modalForm').classList.remove('hidden');
-    }
+    function openFormModal() { document.getElementById('recordForm').reset(); document.getElementById('formRowId').value = ''; document.getElementById('formModalTitle').textContent = 'Log New CNC Profile'; document.getElementById('modalForm').classList.remove('hidden'); }
     function closeFormModal() { document.getElementById('modalForm').classList.add('hidden'); }
     function editProfile(id) {
         const r = records.find(x => x.id == id);
@@ -852,12 +1010,36 @@
         if(!pid) return;
         const r = records.find(x => x.id == pid);
         if(!r) return;
-        planningCart.push({ id: Date.now(), profileName: r.profile, cycle: r.cycle_sec });
-        document.getElementById('planningCartList').innerHTML += `
-            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700 p-2.5 rounded-xl border border-slate-200 dark:border-slate-600 mt-2">
-                <p class="text-xs font-bold">${r.profile}</p>
-                <p class="text-xs text-blue-500">${r.cycle_sec}s Cycle</p>
-            </div>`;
+        const qty = parseInt(document.getElementById('planBatchQty').value) || 0;
+        
+        planningCart.push({ id: Date.now(), profileName: r.profile, cycle: r.cycle_sec, qty: qty });
+        renderPlanningCart();
+    }
+    
+    function renderPlanningCart() {
+        const list = document.getElementById('planningCartList');
+        if(!list) return;
+        list.innerHTML = '';
+        let totalQty = 0, totalSecs = 0;
+        
+        planningCart.forEach(item => {
+            totalQty += item.qty;
+            totalSecs += (item.cycle * item.qty);
+            list.innerHTML += `
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700 p-2.5 rounded-xl border border-slate-200 dark:border-slate-600 mt-2">
+                    <div>
+                        <p class="text-xs font-bold">${item.profileName} <span class="font-normal text-slate-400">x ${item.qty}</span></p>
+                        <p class="text-[10px] text-blue-500">${item.cycle}s Cycle</p>
+                    </div>
+                    <button onclick="planningCart = planningCart.filter(x => x.id !== ${item.id}); renderPlanningCart();" class="text-rose-500 font-black px-2">×</button>
+                </div>`;
+        });
+        
+        document.getElementById('calcTotalQty').textContent = `${totalQty} pcs`;
+        const hrs = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        document.getElementById('calcTheorTime').textContent = `${hrs}h ${mins}m`;
+        document.getElementById('calcShiftRequirement').textContent = (totalSecs / 3600 / 10.5).toFixed(1);
     }
 
     // ========================================================================
