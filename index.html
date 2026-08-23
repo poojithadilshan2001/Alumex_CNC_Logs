@@ -26,15 +26,14 @@
   </script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Supabase JS Client -->
+  <!-- Supabase JS Client v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- SheetJS (Excel/CSV parsing and exporting) -->
+  <!-- SheetJS & PDF Utilities -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <!-- PDF.js (For extracting text from uploaded PDFs) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-  <!-- jsPDF & AutoTable (For generating PDFs) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -224,11 +223,6 @@
             <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">30-DAY FACTORY RUNS INSIGHT</span>
             <h3 class="text-base font-black text-slate-900 dark:text-white mt-0.5">Profiles Produced in Last 30 Days</h3>
             <p class="text-xs text-slate-400">Analyze production volume, shift occurrences, and reject ratios.</p>
-          </div>
-          <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded-2xl text-xs font-bold">
-            <button onclick="setProfile30Angle('quantity')" id="btnAngle-quantity" class="px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold">By Quantity</button>
-            <button onclick="setProfile30Angle('shifts')" id="btnAngle-shifts" class="px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold">By Shifts</button>
-            <button onclick="setProfile30Angle('rejects')" id="btnAngle-rejects" class="px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold">By Scrap %</button>
           </div>
         </div>
 
@@ -494,28 +488,18 @@
 
       <!-- OEE Sub-Navigation -->
       <div class="flex flex-wrap gap-1.5 bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm text-xs font-bold">
-        <button onclick="switchOeeSubTab('latest')" id="oeeSubBtn-latest" class="px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm">Latest Shift</button>
-        <button onclick="switchOeeSubTab('addlog')" id="oeeSubBtn-addlog" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Add/Edit</button>
-        <button onclick="switchOeeSubTab('alllogs')" id="oeeSubBtn-alllogs" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">All Logs</button>
-        <button onclick="switchOeeSubTab('oeeanalysis')" id="oeeSubBtn-oeeanalysis" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">OEE Analytics</button>
-      </div>
-
-      <!-- Latest Log -->
-      <div id="oeeSub-latest" class="space-y-4">
-        <div id="latestLogCard" class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-            <p class="text-slate-500 text-sm">Please select a shift from the 'All Logs' tab to view details.</p>
-        </div>
+        <button onclick="switchOeeSubTab('addlog')" id="oeeSubBtn-addlog" class="px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm">Add/Edit Shift Log</button>
+        <button onclick="switchOeeSubTab('alllogs')" id="oeeSubBtn-alllogs" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-700">View All Logs</button>
       </div>
 
       <!-- Add/Edit Form -->
-      <div id="oeeSub-addlog" class="hidden space-y-4">
+      <div id="oeeSub-addlog" class="space-y-4">
         <form id="shiftLogForm" onsubmit="submitShiftLog(event)" class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
           <div class="flex justify-between items-center">
             <div>
               <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">SHIFT LOG</span>
               <h4 id="shiftLogFormTitle" class="font-black text-sm uppercase text-slate-900 dark:text-white">CNC Machine — Shift Slip</h4>
             </div>
-            <span id="shiftLogEditingBadge" class="hidden text-[10px] font-bold uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 px-2.5 py-1 rounded-full">Editing</span>
           </div>
           <input type="hidden" id="shiftFormId">
           
@@ -557,52 +541,12 @@
             <div id="profileCardsContainer" class="space-y-2"></div>
           </div>
 
-          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl">
-            <div>
-              <label class="block font-bold mb-1">Planned?</label>
-              <select id="logWasPlanned" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-semibold">
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div>
-              <label class="block font-bold mb-1">Other Dept Used?</label>
-              <select id="logOtherDept" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-semibold">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-              </select>
-            </div>
-            <div>
-              <label class="block font-bold mb-1">If Yes, Time Period</label>
-              <input type="text" id="logOtherDeptPeriod" placeholder="e.g. 10:00-11:30" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none">
-            </div>
-          </div>
-
           <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
             <div class="flex justify-between items-center">
               <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Downtime</span>
               <button type="button" onclick="addDowntimeCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Downtime</button>
             </div>
             <div id="downtimeCardsContainer" class="space-y-2"></div>
-          </div>
-
-          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-            <div class="sm:col-span-4">
-              <label class="block font-bold mb-1">Other Notes</label>
-              <input type="text" id="logOtherNotes" placeholder="Special occurrences..." class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
-            </div>
-            <div class="sm:col-span-2">
-              <label class="block font-bold mb-1">Operator Name</label>
-              <input type="text" id="logOperator" placeholder="Operator Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
-            </div>
-            <div>
-              <label class="block font-bold mb-1">Supervisor</label>
-              <input type="text" id="logSupervisorSign" placeholder="Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
-            </div>
-            <div>
-              <label class="block font-bold mb-1">Quality</label>
-              <input type="text" id="logQualitySign" placeholder="QA Officer" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
-            </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
@@ -635,14 +579,6 @@
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
-
-      <!-- OEE Analysis -->
-      <div id="oeeSub-oeeanalysis" class="hidden space-y-4">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-          <h4 class="font-bold text-xs uppercase">OEE Telemetry (A / P / Q / OEE)</h4>
-          <div class="h-72"><canvas id="chartOeeTelemetryFull"></canvas></div>
         </div>
       </div>
     </section>
@@ -864,23 +800,6 @@
     </div>
   </div>
 
-  <!-- Profile Inspector Modal -->
-  <div id="modalViewProfile" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
-      <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
-        <div>
-          <span class="text-[10px] font-black uppercase text-blue-600">PROFILE INSPECTOR</span>
-          <h3 id="viewProfTitle" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">-</h3>
-        </div>
-        <button onclick="document.getElementById('modalViewProfile').classList.add('hidden')" class="text-slate-400 text-xl font-bold">×</button>
-      </div>
-      <div id="viewProfBody" class="space-y-2 text-xs"></div>
-      <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end">
-        <button onclick="document.getElementById('modalViewProfile').classList.add('hidden')" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Close</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Tool Add/Edit Modal -->
   <div id="toolsModalForm" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -949,26 +868,26 @@
     // ========================================================================
     const DB_MAP = {
         profiles: {
-            table: 'cnc_profiles', // Your Profile Table Name in Supabase
+            table: 'cnc_cycle_times', // Profile Table Name in Supabase
             cols: {
                 id: 'id', profile: 'profile', description: 'description', 
                 length: 'length', cycle_sec: 'cycle_sec', feed: 'feed', tooling: 'tooling'
             }
         },
         tools: {
-            table: 'cnc_tools', // Your Tools Table Name in Supabase
+            table: 'cnc_tool_bits', // Tools Table Name in Supabase
             cols: {
                 id: 'id', category: 'category', subType: 'sub_type', 
                 diameter: 'diameter', desc: 'desc_text', stock: 'stock', loc: 'loc'
             }
         },
         shifts: {
-            table: 'cnc_shifts', // Your Shifts Table Name in Supabase
+            table: 'shifts', // Shifts Table Name in Supabase
             cols: {
                 id: 'id', date: 'date', shiftType: 'shift_type', team: 'team', epf: 'epf',
-                profilesData: 'profiles_data', // Must be a JSON/JSONB column
-                downtimeData: 'downtime_data', // Must be a JSON/JSONB column
-                oeeSummary: 'oee_summary'      // Must be a JSON/JSONB column
+                profilesData: 'profiles_data', 
+                downtimeData: 'downtime_data', 
+                oeeSummary: 'oee_summary'      
             }
         }
     };
@@ -1001,8 +920,6 @@
 
     let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null;
     let chartProfile30Inst = null;
-    let chartOeeTelemetryInst = null;
-    let chartProfileSpecificInst = null;
 
     // ========================================================================
     // UTILITIES
@@ -1797,7 +1714,7 @@
             totalSecs += totalSec;
 
             list.innerHTML += `
-                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-600">
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-600 mt-2">
                     <div>
                         <p class="text-xs font-bold text-slate-900 dark:text-white">${item.profileName} <span class="text-slate-400 font-normal">x ${item.qty}</span></p>
                         <p class="text-[10px] text-slate-500">Cyc: ${item.cycle}s | Hnd: ${item.handling}s</p>
