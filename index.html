@@ -14,24 +14,34 @@
   <script>
     tailwind.config = {
       darkMode: 'class',
-      theme: { extend: { colors: { brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' } } } }
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
+            toolsteel: { 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+          }
+        }
+      }
     }
   </script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Supabase JS Client v2 -->
+  <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- SheetJS & PDF Utilities -->
+  <!-- SheetJS (Excel/CSV parsing and exporting) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- PDF.js (For extracting text from uploaded PDFs) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <!-- jsPDF & AutoTable (For generating PDFs) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-  
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .fade-in { animation: fadeIn 0.3s ease-in; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -44,69 +54,131 @@
     <span id="toastMessage">Action successful</span>
   </div>
 
-  <!-- HEADER -->
+  <!-- HEADER & BRAND BAR -->
   <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-800/95 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 md:px-8 py-3 shadow-sm">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
       <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
-        <div class="bg-blue-600 text-white w-10 h-10 rounded-2xl font-black text-lg flex items-center justify-center shadow-md">5K</div>
+        <div class="bg-blue-600 text-white w-10 h-10 rounded-2xl font-black text-lg flex items-center justify-center shadow-md shadow-blue-500/20">5K</div>
         <div>
           <h1 class="text-base md:text-lg font-black text-slate-900 dark:text-white leading-tight tracking-tight">CNC 5000 MACHINE</h1>
           <p class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">Component Plant CNC Intelligence &amp; OEE Operations</p>
         </div>
       </div>
+
       <div class="flex items-center gap-3">
-        <div id="syncBadge" class="flex items-center space-x-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-full text-[11px] font-semibold text-amber-700 dark:text-amber-400 transition-colors">
+        <div id="syncBadge" class="flex items-center space-x-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-full text-[11px] font-semibold text-amber-700 dark:text-amber-400">
           <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
           <span id="syncStatus">Connecting DB...</span>
         </div>
-        <button onclick="toggleDarkMode()" class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition shadow-sm">🌙</button>
+        <button onclick="toggleDarkMode()" class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition shadow-sm">
+          <span class="themeIcon text-sm">🌙</span>
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- NAVIGATION HUB -->
+  <!-- MAIN VISIBLE NAVIGATION GRID HUB -->
   <div class="max-w-7xl mx-auto px-4 md:px-8 pt-5">
     <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+      
       <button onclick="switchTab('dashboard')" id="navTile-dashboard" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-blue-600 border-blue-600 text-white shadow-md">
-        <div class="flex justify-between items-center w-full"><span class="text-base">📊</span><span class="text-[9px] font-mono uppercase bg-white/20 px-1.5 py-0.5 rounded">Hub</span></div>
-        <div class="mt-2"><p class="text-xs font-black leading-tight">Dashboard</p><p class="text-[10px] opacity-80 truncate">Telemetry</p></div>
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">📊</span>
+          <span class="text-[9px] font-mono uppercase bg-white/20 px-1.5 py-0.5 rounded">Hub</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Dashboard</p>
+          <p class="text-[10px] opacity-80 truncate">Telemetry</p>
+        </div>
       </button>
-      <button onclick="switchTab('logs')" id="navTile-logs" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-        <div class="flex justify-between items-center w-full"><span class="text-base">⚙️</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Profiles</span></div>
-        <div class="mt-2"><p class="text-xs font-black leading-tight">CNC Cycles</p><p class="text-[10px] text-slate-400 truncate">Recipes &amp; Speeds</p></div>
+
+      <button onclick="switchTab('logs')" id="navTile-logs" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">⚙️</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Profiles</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">CNC Cycles</p>
+          <p class="text-[10px] text-slate-400 truncate">Recipes &amp; Speeds</p>
+        </div>
       </button>
-      <button onclick="switchTab('production')" id="navTile-production" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-        <div class="flex justify-between items-center w-full"><span class="text-base">📋</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Planner</span></div>
-        <div class="mt-2"><p class="text-xs font-black leading-tight">Job Orders</p><p class="text-[10px] text-slate-400 truncate">Shift Estimator</p></div>
+
+      <button onclick="switchTab('production')" id="navTile-production" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">📋</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Planner</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Job Orders</p>
+          <p class="text-[10px] text-slate-400 truncate">Shift Estimator</p>
+        </div>
       </button>
-      <button onclick="switchTab('oee')" id="navTile-oee" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-        <div class="flex justify-between items-center w-full"><span class="text-base">⚡</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">OEE</span></div>
-        <div class="mt-2"><p class="text-xs font-black leading-tight">Production</p><p class="text-[10px] text-slate-400 truncate">Shift Logs &amp; APQ</p></div>
+
+      <button onclick="switchTab('oee')" id="navTile-oee" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">⚡</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">OEE</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Production</p>
+          <p class="text-[10px] text-slate-400 truncate">Shift Logs &amp; APQ</p>
+        </div>
       </button>
-      <button onclick="switchTab('tools')" id="navTile-tools" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-        <div class="flex justify-between items-center w-full"><span class="text-base">🛠️</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Stock</span></div>
-        <div class="mt-2"><p class="text-xs font-black leading-tight">Tools</p><p class="text-[10px] text-slate-400 truncate">4 Core Types</p></div>
+
+      <button onclick="switchTab('tools')" id="navTile-tools" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">🛠️</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Stock</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Tools</p>
+          <p class="text-[10px] text-slate-400 truncate">4 Core Types</p>
+        </div>
       </button>
-      <button onclick="switchTab('toolsreq')" id="navTile-toolsreq" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-        <div class="flex justify-between items-center w-full"><span class="text-base">✉️</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Notice</span></div>
-        <div class="mt-2"><p class="text-xs font-black leading-tight">Restock</p><p class="text-[10px] text-slate-400 truncate">Supervisor Memo</p></div>
+
+      <button onclick="switchTab('toolsreq')" id="navTile-toolsreq" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">✉️</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Notice</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Restock</p>
+          <p class="text-[10px] text-slate-400 truncate">Supervisor Memo</p>
+        </div>
       </button>
-      <button onclick="switchTab('reports')" id="navTile-reports" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-        <div class="flex justify-between items-center w-full"><span class="text-base">📑</span><span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Audit</span></div>
-        <div class="mt-2"><p class="text-xs font-black leading-tight">Reports</p><p class="text-[10px] text-slate-400 truncate">Analysis</p></div>
+
+      <button onclick="switchTab('reports')" id="navTile-reports" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">📑</span>
+          <span class="text-[9px] font-mono uppercase bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">Audit</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Reports</p>
+          <p class="text-[10px] text-slate-400 truncate">Detailed Analysis</p>
+        </div>
       </button>
-      <button onclick="switchTab('trash')" id="navTile-trash" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-        <div class="flex justify-between items-center w-full"><span class="text-base">🗑️</span><span id="trashCountBadge" class="hidden bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold font-mono">0</span></div>
-        <div class="mt-2"><p class="text-xs font-black leading-tight">Bin Vault</p><p class="text-[10px] text-slate-400 truncate">Recovery</p></div>
+
+      <button onclick="switchTab('trash')" id="navTile-trash" class="p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400">
+        <div class="flex justify-between items-center w-full">
+          <span class="text-base">🗑️</span>
+          <span id="trashCountBadge" class="hidden bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold font-mono">0</span>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs font-black leading-tight">Bin Vault</p>
+          <p class="text-[10px] text-slate-400 truncate">Recovery</p>
+        </div>
       </button>
+
     </div>
   </div>
 
   <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
-    <!-- SECTION 1: DASHBOARD -->
+    <!-- SECTION 1: MASTER DASHBOARD -->
     <section id="view-dashboard" class="space-y-6 fade-in">
-      <!-- 4 Summary Cards -->
+      
+      <!-- Primary Metric Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div onclick="switchTab('logs')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-blue-500 transition group">
           <div class="flex justify-between items-start">
@@ -114,14 +186,18 @@
             <span class="text-blue-600 text-xs font-black group-hover:translate-x-1 transition-transform">→</span>
           </div>
           <p id="dashTotalProfiles" class="text-3xl font-black text-blue-600 dark:text-blue-400 mt-1">0</p>
+          <p id="dashMaxCycleSummary" class="text-[11px] text-slate-500 mt-1 truncate">Max: -</p>
         </div>
+
         <div onclick="switchTab('oee')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-emerald-500 transition group">
           <div class="flex justify-between items-start">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Plant Composite OEE</span>
             <span class="text-emerald-600 text-xs font-black group-hover:translate-x-1 transition-transform">→</span>
           </div>
           <p id="dashOeeAvg" class="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0.0%</p>
+          <p id="dashApqSummary" class="text-[11px] text-slate-500 mt-1">A: - | P: - | Q: -</p>
         </div>
+
         <div onclick="switchTab('oee')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-indigo-500 transition group">
           <div class="flex justify-between items-start">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Latest Output</span>
@@ -130,6 +206,7 @@
           <p id="dashProducedToday" class="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-1">0 pcs</p>
           <p id="dashScrapSummary" class="text-[11px] text-slate-500 mt-1">Good: 0 | Rej: 0</p>
         </div>
+
         <div onclick="switchTab('tools')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-cyan-500 transition group">
           <div class="flex justify-between items-start">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Tools Units</span>
@@ -140,71 +217,169 @@
         </div>
       </div>
 
-      <!-- 30-DAY FACTORY RUNS INSIGHT -->
+      <!-- 30-DAY PROFILE PRODUCTION MODULE -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
           <div>
             <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">30-DAY FACTORY RUNS INSIGHT</span>
             <h3 class="text-base font-black text-slate-900 dark:text-white mt-0.5">Profiles Produced in Last 30 Days</h3>
+            <p class="text-xs text-slate-400">Analyze production volume, shift occurrences, and reject ratios.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-700/60 p-1.5 rounded-2xl text-xs font-bold">
+            <button onclick="setProfile30Angle('quantity')" id="btnAngle-quantity" class="px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold">By Quantity</button>
+            <button onclick="setProfile30Angle('shifts')" id="btnAngle-shifts" class="px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold">By Shifts</button>
+            <button onclick="setProfile30Angle('rejects')" id="btnAngle-rejects" class="px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold">By Scrap %</button>
           </div>
         </div>
-        <div class="h-64 w-full"><canvas id="chartProfile30Days"></canvas></div>
+
+        <div class="h-64 w-full">
+          <canvas id="chartProfile30Days"></canvas>
+        </div>
+
         <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-2xl">
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-50 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th class="p-3">Profile Code</th><th class="p-3 text-right">Produced</th><th class="p-3 text-right text-emerald-600">Good</th>
-                <th class="p-3 text-right text-rose-600">Scrap</th><th class="p-3 text-right">Scrap %</th>
+                <th class="p-3">#</th>
+                <th class="p-3">Profile Code</th>
+                <th class="p-3 text-right">Produced</th>
+                <th class="p-3 text-right text-emerald-600">Good</th>
+                <th class="p-3 text-right text-rose-600">Scrap</th>
+                <th class="p-3 text-right">Shifts</th>
+                <th class="p-3 text-right">Avg/Shift</th>
+                <th class="p-3 text-right">Scrap %</th>
               </tr>
             </thead>
             <tbody id="profile30TableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium">
-              <tr><td colspan="5" class="p-6 text-center text-slate-400">Loading data...</td></tr>
+              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading 30-day history...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- 4 Grid Charts -->
+      <!-- Charts -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-3">Plant OEE %</h3>
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Plant OEE %</h3>
+            <span class="text-[10px] text-emerald-500 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">History</span>
+          </div>
           <div class="h-60"><canvas id="chartDashOee"></canvas></div>
         </div>
+
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-3">Daily Progress</h3>
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Daily Progress</h3>
+            <span class="text-[10px] text-indigo-500 font-bold bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-full">Yield</span>
+          </div>
           <div class="h-60"><canvas id="chartDashProduction"></canvas></div>
         </div>
+
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-3">Top Cycle Times</h3>
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Top Cycle Times</h3>
+            <span class="text-[10px] text-blue-500 font-bold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Speeds</span>
+          </div>
           <div class="h-60"><canvas id="chartDashCycleTime"></canvas></div>
         </div>
+
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-3">Tool Distribution</h3>
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wider">Tool Distribution</h3>
+            <span class="text-[10px] text-cyan-500 font-bold bg-cyan-50 dark:bg-cyan-950/40 px-2 py-0.5 rounded-full">Units</span>
+          </div>
           <div class="h-60 flex items-center justify-center"><canvas id="chartDashTools"></canvas></div>
         </div>
       </div>
     </section>
 
-    <!-- SECTION 2: PROFILES -->
+    <!-- SECTION 2: CNC PROFILES DATABASE -->
     <section id="view-logs" class="hidden space-y-6">
+      
+      <!-- Profile Analytics -->
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 border-b border-slate-200 dark:border-slate-700 pb-4">
+           <div>
+             <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">PROFILE PERFORMANCE</span>
+             <h3 class="font-black text-lg text-slate-900 dark:text-white">Individual Yield Analytics</h3>
+             <p class="text-xs text-slate-500">Select profile to view historical data.</p>
+           </div>
+           <select id="analyticsProfileSelect" onchange="renderProfileAnalytics()" class="w-full sm:w-auto bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-2 text-sm font-bold outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+             <option value="">-- Loading Profiles --</option>
+           </select>
+        </div>
+  
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+           <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center border border-slate-100 dark:border-slate-700">
+             <span class="text-[10px] font-bold text-slate-400 uppercase">Shifts Run</span>
+             <p id="paTotalShifts" class="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">0</p>
+           </div>
+           <div class="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-2xl text-center border border-blue-100 dark:border-blue-900/50">
+             <span class="text-[10px] font-bold text-blue-500 uppercase">Total Produced</span>
+             <p id="paTotalProd" class="text-2xl font-black text-blue-600 mt-1">0</p>
+           </div>
+           <div class="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-2xl text-center border border-emerald-100 dark:border-emerald-900/50">
+             <span class="text-[10px] font-bold text-emerald-500 uppercase">Good Parts</span>
+             <p id="paTotalGood" class="text-2xl font-black text-emerald-600 mt-1">0</p>
+           </div>
+           <div class="bg-rose-50 dark:bg-rose-950/40 p-4 rounded-2xl text-center border border-rose-100 dark:border-rose-900/50">
+             <span class="text-[10px] font-bold text-rose-500 uppercase">Scrap Rate</span>
+             <p id="paScrapRate" class="text-2xl font-black text-rose-600 mt-1">0.0%</p>
+           </div>
+        </div>
+  
+        <div class="h-64 w-full">
+           <canvas id="chartProfileSpecific"></canvas>
+        </div>
+      </div>
+
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-        <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm">+ Log New Profile</button>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <span>+</span> Log New Profile
+          </button>
+          <input type="file" id="importProfileFile" accept=".xlsx, .xls, .csv, .pdf" class="hidden" onchange="handleProfileImport(event)">
+          <button onclick="document.getElementById('importProfileFile').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1">
+            <span>📥</span> Import
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">Excel</button>
+          <button onclick="generateEngineeringReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">PDF</button>
+        </div>
       </div>
 
       <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-        <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700">
-          <input type="text" id="logSearchInput" oninput="applyFiltersAndRender()" placeholder="Search profile..." class="w-full md:w-80 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+          <div class="w-full md:w-80">
+            <input type="text" id="logSearchInput" oninput="applyFiltersAndRender()" placeholder="Search profile..." class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="filterSort" onchange="applyFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-semibold outline-none">
+              <option value="profile_asc">Profile A-Z</option>
+              <option value="profile_desc">Profile Z-A</option>
+              <option value="cycle_asc">Fastest First</option>
+              <option value="cycle_desc">Slowest First</option>
+            </select>
+          </div>
         </div>
+
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th class="p-3.5">Code</th><th class="p-3.5">Description</th><th class="p-3.5">Length</th>
-                <th class="p-3.5">Cycle</th><th class="p-3.5">Feed</th><th class="p-3.5 text-center">Actions</th>
+                <th class="p-3.5">#</th>
+                <th class="p-3.5">Profile Code</th>
+                <th class="p-3.5">Description</th>
+                <th class="p-3.5">Length</th>
+                <th class="p-3.5">Cycle</th>
+                <th class="p-3.5">Feed</th>
+                <th class="p-3.5">Tooling</th>
+                <th class="p-3.5 text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="logsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700 text-xs">
-              <tr><td colspan="6" class="p-6 text-center text-slate-400">Fetching Data...</td></tr>
+              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading...</td></tr>
             </tbody>
           </table>
         </div>
@@ -213,67 +388,226 @@
 
     <!-- SECTION 3: PRODUCTION PLANNING -->
     <section id="view-production" class="hidden space-y-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-              <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase">Job Order Assembly</h3>
-              <div class="space-y-3">
-                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Target Profile</label>
-                  <select id="planProfileSelect" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 text-xs outline-none"></select>
-                </div>
-                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Batch Qty</label>
-                  <input type="number" id="planBatchQty" value="50" min="1" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2 text-xs outline-none">
-                </div>
-                <button onclick="addProfileToPlanningCart()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition">+ Add to Queue</button>
+      <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 rounded-3xl shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+        <div>
+          <h3 class="font-black text-lg">Facility Shift Schedule</h3>
+          <p class="text-xs text-blue-200 mt-1">CNC 5000 Milling Operations</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-xs bg-black/20 p-3 rounded-xl border border-white/10">
+          <div>
+            <p class="font-bold text-blue-300">DAY SHIFT</p>
+            <p class="text-[11px] text-white">6:00 AM – 6:00 PM</p>
+          </div>
+          <div>
+            <p class="font-bold text-blue-300">NIGHT SHIFT</p>
+            <p class="text-[11px] text-white">6:00 PM – 6:00 AM</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase">Assemble Job Order</h3>
+            <button onclick="clearPlanningCart()" class="text-xs text-rose-500 hover:underline">Clear All</button>
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Target Profile</label>
+              <select id="planProfileSelect" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-medium outline-none">
+                <option value="">-- Choose Profile --</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Handling (Sec)</label>
+                <input type="number" id="planHandlingSec" value="30" min="0" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Batch Qty</label>
+                <input type="number" id="planBatchQty" value="50" min="1" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs outline-none">
               </div>
             </div>
-            <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase">Planned Queue</h3></div>
-                <div id="planningCartList" class="space-y-2 max-h-56 overflow-y-auto"></div>
-                <div class="mt-6 p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-4 text-center">
-                    <div><p class="text-[11px] font-bold text-slate-400 uppercase">Total Parts</p><p id="calcTotalQty" class="text-xl font-black text-slate-800 dark:text-slate-100">0 pcs</p></div>
-                    <div><p class="text-[11px] font-bold text-slate-400 uppercase">Total Time</p><p id="calcTheorTime" class="text-xl font-black text-blue-600">0h 0m</p></div>
-                    <div><p class="text-[11px] font-bold text-slate-400 uppercase">Est. Shifts</p><p id="calcShiftRequirement" class="text-xl font-black text-emerald-600">0.0</p></div>
-                </div>
-            </div>
+            <button onclick="addProfileToPlanningCart()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition">+ Add to Queue</button>
+          </div>
         </div>
+
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-3 gap-2">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white uppercase">Planned Assembly Queue</h3>
+              <button onclick="generateJobSheetPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">📄 Export</button>
+            </div>
+            <div id="planningCartList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <p class="text-xs text-slate-400 italic">No profiles in queue.</p>
+            </div>
+          </div>
+          <div class="mt-6 p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Total Parts</p>
+              <p id="calcTotalQty" class="text-xl font-black text-slate-800 dark:text-slate-100 mt-0.5">0 pcs</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Total Time</p>
+              <p id="calcTheorTime" class="text-xl font-black text-blue-600 mt-0.5">0h 0m</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase">Est. Shifts</p>
+              <p id="calcShiftRequirement" class="text-xl font-black text-emerald-600 mt-0.5">0.0</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- SECTION 4: OEE / SHIFTS -->
+    <!-- SECTION 4: OEE & SHIFTS -->
     <section id="view-oee" class="hidden space-y-6">
+      
+      <!-- OEE Banner -->
+      <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-6 rounded-3xl shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-white/10 pb-4">
+          <div>
+            <span class="text-[10px] font-black uppercase text-blue-300 tracking-widest">OEE FRAMEWORK</span>
+            <h3 class="text-lg font-black mt-0.5">OEE Calculation &amp; Shifts</h3>
+          </div>
+          <span class="bg-blue-950/70 border border-blue-400/30 px-3 py-1 rounded-xl text-xs font-bold">12-Hour Shift Base</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
+            <span class="text-emerald-400 font-black uppercase text-[10px]">OEE Formula</span>
+            <p class="font-mono font-bold text-white text-sm mt-1">OEE = A × P × Q</p>
+          </div>
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
+            <span class="text-blue-300 font-black uppercase text-[10px]">Availability</span>
+            <p class="font-mono text-white text-sm mt-1">Operating / Planned</p>
+          </div>
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
+            <span class="text-amber-300 font-black uppercase text-[10px]">Performance</span>
+            <p class="font-mono text-white text-sm mt-1">Ideal / Operating</p>
+          </div>
+          <div class="bg-black/20 p-4 rounded-2xl border border-white/10">
+            <span class="text-purple-300 font-black uppercase text-[10px]">Quality</span>
+            <p class="font-mono text-white text-sm mt-1">Good / Total</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- OEE Sub-Navigation -->
       <div class="flex flex-wrap gap-1.5 bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm text-xs font-bold">
-        <button onclick="switchOeeSubTab('addlog')" id="oeeSubBtn-addlog" class="px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm">Add/Edit Shift Log</button>
-        <button onclick="switchOeeSubTab('alllogs')" id="oeeSubBtn-alllogs" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-700">View All Logs</button>
+        <button onclick="switchOeeSubTab('latest')" id="oeeSubBtn-latest" class="px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm">Latest Shift</button>
+        <button onclick="switchOeeSubTab('addlog')" id="oeeSubBtn-addlog" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Add/Edit</button>
+        <button onclick="switchOeeSubTab('alllogs')" id="oeeSubBtn-alllogs" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">All Logs</button>
+        <button onclick="switchOeeSubTab('oeeanalysis')" id="oeeSubBtn-oeeanalysis" class="px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">OEE Analytics</button>
+      </div>
+
+      <!-- Latest Log -->
+      <div id="oeeSub-latest" class="space-y-4">
+        <div id="latestLogCard" class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+            <p class="text-slate-500 text-sm">Please select a shift from the 'All Logs' tab to view details.</p>
+        </div>
       </div>
 
       <!-- Add/Edit Form -->
-      <div id="oeeSub-addlog" class="space-y-4">
+      <div id="oeeSub-addlog" class="hidden space-y-4">
         <form id="shiftLogForm" onsubmit="submitShiftLog(event)" class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-          <div><h4 class="font-black text-sm uppercase text-slate-900 dark:text-white">CNC Machine — Shift Slip</h4></div>
+          <div class="flex justify-between items-center">
+            <div>
+              <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">SHIFT LOG</span>
+              <h4 id="shiftLogFormTitle" class="font-black text-sm uppercase text-slate-900 dark:text-white">CNC Machine — Shift Slip</h4>
+            </div>
+            <span id="shiftLogEditingBadge" class="hidden text-[10px] font-bold uppercase bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 px-2.5 py-1 rounded-full">Editing</span>
+          </div>
           <input type="hidden" id="shiftFormId">
-          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-            <div><label class="block font-bold mb-1">Date *</label><input type="date" id="logDate" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold"></div>
-            <div><label class="block font-bold mb-1">Shift *</label>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
+            <div>
+              <label class="block font-bold mb-1">Date *</label>
+              <input type="date" id="logDate" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Shift *</label>
               <select id="logShiftType" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 font-bold outline-none">
-                <option value="Day">Day (6AM-6PM)</option><option value="Night">Night (6PM-6AM)</option>
+                <option value="Day">Day (6AM-6PM)</option>
+                <option value="Night">Night (6PM-6AM)</option>
               </select>
             </div>
-            <div><label class="block font-bold mb-1">Team *</label><input type="text" id="logTeam" placeholder="e.g. A" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold"></div>
-            <div><label class="block font-bold mb-1">Operator EPF</label><input type="text" id="logEpf" placeholder="e.g. 4521" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold"></div>
+            <div>
+              <label class="block font-bold mb-1">Team *</label>
+              <select id="logTeam" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 font-bold outline-none">
+                <option value="A">Team A</option>
+                <option value="B">Team B</option>
+                <option value="C">Team C</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">EPF No.</label>
+              <input type="text" id="logEpf" placeholder="e.g., 4521" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Break (min)</label>
+              <input type="number" id="logPlannedBreak" value="90" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
+            </div>
           </div>
           
-          <div class="border-t border-slate-200 dark:border-slate-700 pt-3">
-            <div class="flex justify-between items-center mb-2"><span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Profiles Produced</span><button type="button" onclick="addProfileCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Profile</button></div>
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Profiles Produced</span>
+              <button type="button" onclick="addProfileCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Profile</button>
+            </div>
             <div id="profileCardsContainer" class="space-y-2"></div>
           </div>
 
-          <div class="border-t border-slate-200 dark:border-slate-700 pt-3">
-            <div class="flex justify-between items-center mb-2"><span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Downtime</span><button type="button" onclick="addDowntimeCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Downtime</button></div>
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl">
+            <div>
+              <label class="block font-bold mb-1">Planned?</label>
+              <select id="logWasPlanned" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-semibold">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Other Dept Used?</label>
+              <select id="logOtherDept" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none font-semibold">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">If Yes, Time Period</label>
+              <input type="text" id="logOtherDeptPeriod" placeholder="e.g. 10:00-11:30" class="w-full bg-white dark:bg-slate-700 border rounded-xl p-2 outline-none">
+            </div>
+          </div>
+
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">Downtime</span>
+              <button type="button" onclick="addDowntimeCard()" class="text-xs font-bold text-blue-600 hover:underline">+ Add Downtime</button>
+            </div>
             <div id="downtimeCardsContainer" class="space-y-2"></div>
+          </div>
+
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-3 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+            <div class="sm:col-span-4">
+              <label class="block font-bold mb-1">Other Notes</label>
+              <input type="text" id="logOtherNotes" placeholder="Special occurrences..." class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block font-bold mb-1">Operator Name</label>
+              <input type="text" id="logOperator" placeholder="Operator Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Supervisor</label>
+              <input type="text" id="logSupervisorSign" placeholder="Name" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Quality</label>
+              <input type="text" id="logQualitySign" placeholder="QA Officer" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+            </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
             <button type="button" onclick="resetShiftLogForm()" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl text-xs font-bold">Clear</button>
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-sm">Save Shift to Supabase</button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-sm">Save Shift to Database</button>
           </div>
         </form>
       </div>
@@ -281,101 +615,313 @@
       <!-- All Logs -->
       <div id="oeeSub-alllogs" class="hidden space-y-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
+                <tr>
+                  <th class="p-3.5">Date</th>
+                  <th class="p-3.5">Shift</th>
+                  <th class="p-3.5">Team</th>
+                  <th class="p-3.5 text-right">Produced</th>
+                  <th class="p-3.5 text-right">Good</th>
+                  <th class="p-3.5 text-right">Reject</th>
+                  <th class="p-3.5 text-right">Down</th>
+                  <th class="p-3.5 text-right">OEE</th>
+                  <th class="p-3.5 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="shiftsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
+                <tr><td colspan="9" class="p-6 text-center text-slate-400">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- OEE Analysis -->
+      <div id="oeeSub-oeeanalysis" class="hidden space-y-4">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+          <h4 class="font-bold text-xs uppercase">OEE Telemetry (A / P / Q / OEE)</h4>
+          <div class="h-72"><canvas id="chartOeeTelemetryFull"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: TOOLS INVENTORY -->
+    <section id="view-tools" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div>
+          <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">CNC Tools Inventory</h3>
+          <p class="text-[11px] text-slate-400">4 Main Categories: Milling, Drilling, Tapping, Chamfering</p>
+        </div>
+        <button onclick="openToolsFormModal()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2.5 rounded-2xl text-xs font-black transition flex items-center gap-1.5 shadow-md shadow-cyan-600/20">
+          <span>+</span> Add New Tool
+        </button>
+      </div>
+
+      <!-- Category Tiles -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div onclick="toolsFilterByCategory('Milling')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
+          <span class="text-2xl">🌀</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Milling</p>
+          <p id="catCount-Milling" class="text-sm font-black text-slate-700 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Flat & Ball Nose</span>
+        </div>
+        <div onclick="toolsFilterByCategory('Drilling')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
+          <span class="text-2xl">🔩</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Drilling</p>
+          <p id="catCount-Drilling" class="text-sm font-black text-slate-700 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Through & Blind</span>
+        </div>
+        <div onclick="toolsFilterByCategory('Tapping')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
+          <span class="text-2xl">📐</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Tapping</p>
+          <p id="catCount-Tapping" class="text-sm font-black text-slate-700 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Threading</span>
+        </div>
+        <div onclick="toolsFilterByCategory('Chamfer')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-cyan-500 transition text-center group shadow-sm">
+          <span class="text-2xl">✂️</span>
+          <p class="text-xs font-black text-slate-900 dark:text-white group-hover:text-cyan-500 mt-1.5">Chamfer</p>
+          <p id="catCount-Chamfer" class="text-sm font-black text-slate-700 font-mono mt-0.5">0 pcs</p>
+          <span class="text-[10px] text-slate-400 block mt-1">Deburring</span>
+        </div>
+      </div>
+
+      <!-- Tools Table -->
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <input type="text" id="toolSearchInput" oninput="applyToolsFiltersAndRender()" placeholder="Search diameter, sub-type..." class="w-64 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs outline-none">
+            <select id="filterCategorySelect" onchange="applyToolsFiltersAndRender()" class="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+              <option value="ALL">All Categories</option>
+              <option value="Milling">Milling</option>
+              <option value="Drilling">Drilling</option>
+              <option value="Tapping">Tapping</option>
+              <option value="Chamfer">Chamfering</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="exportToolsToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">Excel</button>
+            <button onclick="generateToolsInventoryPDF()" class="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm">PDF</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
-            <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
-              <tr><th class="p-3.5">Date</th><th class="p-3.5">Shift</th><th class="p-3.5">Team</th><th class="p-3.5 text-right">OEE</th><th class="p-3.5 text-center">Action</th></tr>
+            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-bold uppercase border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="p-3.5">#</th>
+                <th class="p-3.5">Category</th>
+                <th class="p-3.5">Sub-Type</th>
+                <th class="p-3.5">Diameter</th>
+                <th class="p-3.5">Description</th>
+                <th class="p-3.5 text-center">Stock</th>
+                <th class="p-3.5">Location</th>
+                <th class="p-3.5 text-center">Actions</th>
+              </tr>
             </thead>
-            <tbody id="shiftsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
-              <tr><td colspan="5" class="p-6 text-center text-slate-400">Fetching Data...</td></tr>
+            <tbody id="inventoryTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
+              <tr><td colspan="8" class="p-6 text-center text-slate-400">Loading tools...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- SECTION 5: TOOLS -->
-    <section id="view-tools" class="hidden space-y-6">
-      <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-        <h3 class="text-sm font-black uppercase tracking-wider">CNC Tools Inventory</h3>
-        <button onclick="openToolsFormModal()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2.5 rounded-2xl text-xs font-black shadow-md">+ Add Tool</button>
-      </div>
-      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-        <table class="w-full text-left text-xs">
-          <thead class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-bold uppercase border-b border-slate-200 dark:border-slate-700">
-            <tr><th class="p-3.5">Category</th><th class="p-3.5">Sub-Type</th><th class="p-3.5">Size</th><th class="p-3.5 text-center">Stock</th><th class="p-3.5 text-center">Action</th></tr>
-          </thead>
-          <tbody id="inventoryTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
-            <tr><td colspan="5" class="p-6 text-center text-slate-400">Fetching Data...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-    
-    <!-- Utilities Sections -->
+    <!-- SECTION 6: RESTOCK NOTICE -->
     <section id="view-toolsreq" class="hidden space-y-6">
-      <div class="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 text-center">
-        <h3 class="text-lg font-black mb-2">Restock Memo Module</h3>
-        <p class="text-sm text-slate-500">Automatically tracking tools &lt; 2 units.</p>
+      <div class="bg-slate-900 border border-slate-800 text-white p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl">
+        <div>
+          <span class="text-[10px] font-black uppercase text-cyan-400 tracking-widest">MEMORANDUM</span>
+          <h3 class="text-lg font-black mt-0.5">CNC Tool Restocking Notice</h3>
+          <p class="text-xs text-slate-400 mt-1">For tools below safe operating levels (&lt; 2 pcs)</p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">Document Details</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Date</label>
+              <input type="date" id="memoDate" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Prepared By</label>
+              <input type="text" id="memoSender" value="Poojitha Dilshan" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none">
+            </div>
+          </div>
+          <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Address To</label>
+            <div id="recipientsList" class="flex-grow space-y-2 overflow-y-auto max-h-32 mb-3 pr-1"></div>
+            <div class="flex gap-2 mt-auto pt-3 border-t border-slate-200 dark:border-slate-700">
+               <input type="text" id="newRecipName" placeholder="Name" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 text-xs outline-none">
+               <input type="text" id="newRecipRole" placeholder="Role" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 text-xs outline-none">
+               <button type="button" onclick="addNewRecipient()" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <div class="flex justify-between items-center">
+          <h4 class="text-xs font-black uppercase text-slate-900 dark:text-white">Selected Tools</h4>
+          <button onclick="autoPopulateLowStock()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold">+ Load Low Stock</button>
+        </div>
+        <div id="requisitionItemsContainer" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+          <p class="text-xs text-slate-400 italic">No tools selected. Click "+ Load Low Stock".</p>
+        </div>
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+          <button onclick="generateFormalSupervisorLetterPDF()" class="bg-rose-600 hover:bg-rose-700 text-white font-black px-6 py-2.5 rounded-xl text-xs transition shadow-lg shadow-rose-600/20">Export PDF Letter</button>
+        </div>
       </div>
     </section>
+
+    <!-- SECTION 7: REPORTS -->
     <section id="view-reports" class="hidden space-y-6">
-      <div class="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 text-center">
-        <h3 class="text-lg font-black mb-2">Reporting Module</h3>
-        <p class="text-sm text-slate-500">PDF and Excel Exports ready.</p>
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-widest">EXECUTIVE AUDITING</span>
+            <h3 class="text-lg font-black text-slate-900 dark:text-white mt-0.5">Plant Intelligence Reports</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="exportReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-sm">PDF</button>
+            <button onclick="exportReportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-sm">Excel</button>
+          </div>
+        </div>
+        <div id="reportPreviewCard" class="space-y-6 pt-2">
+            <p class="text-sm text-slate-500 text-center py-10 border-2 border-dashed rounded-xl">Report generation modules are active. Press Export to generate data.</p>
+        </div>
       </div>
     </section>
+
+    <!-- SECTION 8: RECOVERY BIN -->
     <section id="view-trash" class="hidden space-y-6">
-      <div class="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 text-center">
-        <h3 class="text-lg font-black mb-2">Recovery Vault</h3>
-        <p class="text-sm text-slate-500">Deleted items will appear here.</p>
+      <div class="bg-gradient-to-r from-amber-600/90 to-rose-700/90 text-white p-5 rounded-3xl shadow-sm flex justify-between items-center">
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-widest text-amber-200">RECOVERY VAULT</span>
+          <h3 class="text-lg font-black mt-0.5">Recycle & Disposal Bin</h3>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 space-y-4">
+        <div>
+          <h4 class="text-xs font-black uppercase text-slate-500 mb-2">CNC Profiles</h4>
+          <div id="trashProfilesTableBody" class="space-y-2"><p class="text-xs text-slate-400 italic">No deleted items.</p></div>
+        </div>
+        <div>
+          <h4 class="text-xs font-black uppercase text-slate-500 mb-2">Tools</h4>
+          <div id="trashToolsTableBody" class="space-y-2"><p class="text-xs text-slate-400 italic">No deleted items.</p></div>
+        </div>
+        <div>
+          <h4 class="text-xs font-black uppercase text-slate-500 mb-2">Shift Records</h4>
+          <div id="trashShiftsTableBody" class="space-y-2"><p class="text-xs text-slate-400 italic">No deleted items.</p></div>
+        </div>
       </div>
     </section>
 
   </main>
 
-  <!-- MODAL: PROFILES -->
+  <!-- MODALS -->
+
+  <!-- Profile Add/Edit Modal -->
   <div id="modalForm" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="formModalTitle" class="text-base font-black">CNC Profile Entry</h3>
+        <h3 id="formModalTitle" class="text-base font-black text-slate-900 dark:text-white">CNC Profile Entry</h3>
         <button onclick="closeFormModal()" class="text-slate-400 text-xl font-bold">×</button>
       </div>
       <form id="recordForm" onsubmit="submitForm(event)" class="space-y-3 text-xs">
         <input type="hidden" id="formRowId">
-        <div><label class="block font-bold mb-1">Profile Code *</label><input type="text" id="formProfile" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
-        <div><label class="block font-bold mb-1">Description</label><input type="text" id="formDescription" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
-        <div><label class="block font-bold mb-1">Length</label><input type="text" id="formLength" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
-        <div><label class="block font-bold mb-1">Cycle Time (Seconds) *</label><input type="number" id="formCycleSeconds" min="1" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
-        <div><label class="block font-bold mb-1">Feed Speed</label><input type="text" id="formFeedSpeeds" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
-        <div><label class="block font-bold mb-1">Tooling</label><input type="text" id="formTooling" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
+        <div>
+          <label class="block font-bold mb-1">Profile Code *</label>
+          <input type="text" id="formProfile" required placeholder="e.g., AL 684" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Description</label>
+          <input type="text" id="formDescription" placeholder="e.g., Side milling" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Length</label>
+          <input type="text" id="formLength" placeholder="e.g., 2437.4 mm" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Cycle Time (Seconds) *</label>
+          <input type="number" id="formCycleSeconds" min="1" required placeholder="e.g., 93" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-mono font-bold">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Feed Speed</label>
+          <input type="text" id="formFeedSpeeds" placeholder="e.g., Feed 600" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Tooling</label>
+          <input type="text" id="formTooling" placeholder="e.g., 10mm Flat End Mill" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="closeFormModal()" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Cancel</button>
-          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold">Save to Database</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold shadow-sm">Save to Database</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: TOOLS -->
-  <div id="toolsModalForm" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+  <!-- Profile Inspector Modal -->
+  <div id="modalViewProfile" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3">
+        <div>
+          <span class="text-[10px] font-black uppercase text-blue-600">PROFILE INSPECTOR</span>
+          <h3 id="viewProfTitle" class="text-xl font-black text-slate-900 dark:text-white mt-0.5">-</h3>
+        </div>
+        <button onclick="document.getElementById('modalViewProfile').classList.add('hidden')" class="text-slate-400 text-xl font-bold">×</button>
+      </div>
+      <div id="viewProfBody" class="space-y-2 text-xs"></div>
+      <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+        <button onclick="document.getElementById('modalViewProfile').classList.add('hidden')" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tool Add/Edit Modal -->
+  <div id="toolsModalForm" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-base font-black">Tool Inventory Entry</h3>
+        <h3 id="toolsFormModalTitle" class="text-base font-black text-slate-900 dark:text-white">Log Tool to Inventory</h3>
         <button onclick="closeToolsFormModal()" class="text-slate-400 text-xl font-bold">×</button>
       </div>
       <form id="toolsToolForm" onsubmit="submitToolForm(event)" class="space-y-3 text-xs">
         <input type="hidden" id="toolsFormId">
-        <div><label class="block font-bold mb-1">Category *</label>
+        <div>
+          <label class="block font-bold mb-1">Category *</label>
           <select id="toolsFormCategory" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 font-bold outline-none">
-            <option value="Milling">Milling</option><option value="Drilling">Drilling</option><option value="Tapping">Tapping</option><option value="Chamfer">Chamfering</option>
+            <option value="Milling">Milling (Flat & Ball Nose)</option>
+            <option value="Drilling">Drilling</option>
+            <option value="Tapping">Tapping</option>
+            <option value="Chamfer">Chamfering</option>
           </select>
         </div>
-        <div><label class="block font-bold mb-1">Sub-Type</label><input type="text" id="toolsFormSubType" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
-        <div><label class="block font-bold mb-1">Diameter / Size *</label><input type="text" id="toolsFormDiameter" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none"></div>
-        <div><label class="block font-bold mb-1">Stock Quantity *</label><input type="number" id="toolsFormStock" min="0" required class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold"></div>
+        <div>
+          <label class="block font-bold mb-1">Sub-Type</label>
+          <input type="text" id="toolsFormSubType" placeholder="e.g., Ball Nose End Mill" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Diameter / Size *</label>
+          <input type="text" id="toolsFormDiameter" required placeholder="e.g., 10.0 mm" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Description</label>
+          <input type="text" id="toolsFormDescription" placeholder="e.g., Slotting & pocketing" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Stock Quantity *</label>
+          <input type="number" id="toolsFormStock" min="0" required placeholder="e.g., 5" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none font-bold text-cyan-600">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Location / Rack</label>
+          <input type="text" id="toolsFormLocation" placeholder="e.g., Rack A-02" class="w-full bg-slate-50 dark:bg-slate-700 border rounded-xl p-2.5 outline-none">
+        </div>
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="closeToolsFormModal()" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Cancel</button>
-          <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-2 rounded-xl font-bold">Save to Database</button>
+          <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-2 rounded-xl font-bold shadow-sm">Save to Database</button>
         </div>
       </form>
     </div>
@@ -391,7 +937,7 @@
     // Initialize Supabase Client Safely
     let supabase = null;
     try {
-        if(SUPABASE_URL !== "YOUR_SUPABASE_PROJECT_URL") {
+        if(SUPABASE_URL && SUPABASE_URL !== "YOUR_SUPABASE_PROJECT_URL") {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
     } catch(e) {
@@ -448,8 +994,72 @@
     let shifts = [];
     let planningCart = [];
     let cardCounter = 0, dtCounter = 0;
+    
+    let memoRecipients = [
+      { id: Date.now(), name: 'Mr. U.N. Kavinda', role: 'Production & Operations Supervisor', selected: true }
+    ];
 
-    let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null, chartProfile30Inst = null;
+    let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null;
+    let chartProfile30Inst = null;
+    let chartOeeTelemetryInst = null;
+    let chartProfileSpecificInst = null;
+
+    // ========================================================================
+    // UTILITIES
+    // ========================================================================
+    const escapeHtml = v => (v == null ? '' : String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+    const fmtPct = v => (v == null || isNaN(v) || !isFinite(v)) ? '-' : (v * 100).toFixed(1) + '%';
+    const localTodayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+    
+    function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
+
+    // ========================================================================
+    // UI NAVIGATION
+    // ========================================================================
+    function switchTab(tabId) {
+      document.querySelectorAll('main > section').forEach(el => {
+        el.classList.add('hidden');
+        el.classList.remove('fade-in');
+      });
+      const target = document.getElementById(`view-${tabId}`);
+      if(target) {
+        target.classList.remove('hidden');
+        target.classList.add('fade-in');
+      }
+
+      document.querySelectorAll('[id^="navTile-"]').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md');
+        btn.classList.add('bg-white', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300', 'border-slate-200', 'dark:border-slate-700');
+        const iconContainer = btn.querySelector('div > span:nth-child(2)');
+        if(iconContainer && !iconContainer.id) {
+           iconContainer.classList.remove('bg-white/20');
+           iconContainer.classList.add('bg-slate-100', 'dark:bg-slate-700');
+        }
+      });
+
+      const activeBtn = document.getElementById(`navTile-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-white', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300', 'border-slate-200', 'dark:border-slate-700');
+        activeBtn.classList.add('bg-blue-600', 'border-blue-600', 'text-white', 'shadow-md');
+        const iconContainer = activeBtn.querySelector('div > span:nth-child(2)');
+        if(iconContainer && !iconContainer.id) {
+            iconContainer.classList.remove('bg-slate-100', 'dark:bg-slate-700');
+            iconContainer.classList.add('bg-white/20');
+        }
+      }
+
+      if(tabId === 'dashboard') updateDashboardMetrics();
+    }
+
+    function switchOeeSubTab(subId) {
+      document.querySelectorAll('[id^="oeeSub-"]').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`oeeSub-${subId}`).classList.remove('hidden');
+      
+      document.querySelectorAll('[id^="oeeSubBtn-"]').forEach(btn => {
+        btn.className = "px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-700 font-bold";
+      });
+      document.getElementById(`oeeSubBtn-${subId}`).className = "px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold";
+    }
 
     // ========================================================================
     // SUPABASE DATA FETCHING
@@ -461,9 +1071,9 @@
 
         if (!supabase) {
             status.textContent = 'Missing API Keys';
-            badge.className = "flex items-center space-x-1.5 px-3 py-1 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/80 rounded-full text-[11px] font-semibold text-rose-700 dark:text-rose-400 transition-colors";
-            dot.className = "w-2 h-2 rounded-full bg-rose-500";
-            showToast('Please add your Supabase URL and Key in the code!', 'error');
+            badge.className = "flex items-center space-x-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-full text-[11px] font-semibold text-amber-700 dark:text-amber-400 transition-colors";
+            dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
+            showToast('Please insert your Supabase URL and Key in the code to connect.', 'error');
             
             // Allow empty arrays to render so the UI doesn't crash
             renderAll();
@@ -527,7 +1137,7 @@
             badge.className = "flex items-center space-x-1.5 px-3 py-1 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/80 rounded-full text-[11px] font-semibold text-rose-700 dark:text-rose-400 transition-colors";
             dot.className = "w-2 h-2 rounded-full bg-rose-500";
             status.textContent = 'DB Error (Check RLS)';
-            showToast(`Database connection failed: ${error.message}.`, 'error');
+            showToast(`Database connection failed: ${error.message}. (Check Row Level Security Policies)`, 'error');
             
             renderAll(); // Still render to prevent white screen
         }
@@ -538,7 +1148,7 @@
     // ========================================================================
     async function submitForm(e) {
         e.preventDefault();
-        if(!supabase) { showToast('Supabase not connected.', 'error'); return; }
+        if(!supabase) { showToast('Supabase not connected. Please add API keys.', 'error'); return; }
 
         const id = document.getElementById('formRowId').value;
         const payload = {
@@ -569,6 +1179,8 @@
 
     async function deleteProfile(id) {
         if(!confirm('Delete this profile from database?')) return;
+        if(!supabase) { showToast('Supabase not connected.', 'error'); return; }
+        
         try {
             const { error } = await supabase.from(DB_MAP.profiles.table).delete().eq(DB_MAP.profiles.cols.id, id);
             if(error) throw error;
@@ -591,7 +1203,9 @@
             [DB_MAP.tools.cols.category]: document.getElementById('toolsFormCategory').value,
             [DB_MAP.tools.cols.subType]: document.getElementById('toolsFormSubType').value,
             [DB_MAP.tools.cols.diameter]: document.getElementById('toolsFormDiameter').value,
-            [DB_MAP.tools.cols.stock]: parseInt(document.getElementById('toolsFormStock').value)
+            [DB_MAP.tools.cols.desc]: document.getElementById('toolsFormDescription').value,
+            [DB_MAP.tools.cols.stock]: parseInt(document.getElementById('toolsFormStock').value),
+            [DB_MAP.tools.cols.loc]: document.getElementById('toolsFormLocation').value
         };
 
         try {
@@ -613,6 +1227,8 @@
 
     async function deleteTool(id) {
         if(!confirm('Delete this tool from database?')) return;
+        if(!supabase) { showToast('Supabase not connected.', 'error'); return; }
+
         try {
             const { error } = await supabase.from(DB_MAP.tools.table).delete().eq(DB_MAP.tools.cols.id, id);
             if(error) throw error;
@@ -648,9 +1264,33 @@
             });
         });
 
-        // Calculate basic OEE for saving
-        const availability = 0.95, performance = 0.92, quality = 0.98;
-        const oeeSumObj = { availability, performance, quality, oee: (availability*performance*quality) };
+        // Calculate OEE (Simple mock calculation logic)
+        const totalPlannedMin = 720; // 12 hrs
+        const breakMin = parseInt(document.getElementById('logPlannedBreak').value) || 0;
+        const idealOperatingMin = totalPlannedMin - breakMin;
+        
+        let downtimeMin = dtDataArray.reduce((acc, dt) => acc + dt.mins, 0);
+        let actualOperatingMin = Math.max(0, idealOperatingMin - downtimeMin);
+
+        let totalGood = 0; let totalProd = 0; let idealCycleTimeSecSum = 0;
+        profDataArray.forEach(p => {
+            totalProd += p.prod;
+            totalGood += p.good;
+            const ref = records.find(x => x.id === p.profileId);
+            if(ref) idealCycleTimeSecSum += (ref.cycle_sec * p.prod);
+        });
+
+        const availability = idealOperatingMin > 0 ? (actualOperatingMin / idealOperatingMin) : 0;
+        const performance = actualOperatingMin > 0 ? ((idealCycleTimeSecSum / 60) / actualOperatingMin) : 0;
+        const quality = totalProd > 0 ? (totalGood / totalProd) : 0;
+        const oee = availability * performance * quality;
+
+        const oeeSumObj = {
+            availability: Math.min(1, availability),
+            performance: Math.min(1, performance),
+            quality: Math.min(1, quality),
+            oee: Math.min(1, oee)
+        };
 
         const payload = {
             [DB_MAP.shifts.cols.date]: document.getElementById('logDate').value,
@@ -676,6 +1316,8 @@
 
     async function deleteShift(id) {
         if(!confirm('Delete this shift log?')) return;
+        if(!supabase) { showToast('Supabase not connected.', 'error'); return; }
+
         try {
             const { error } = await supabase.from(DB_MAP.shifts.table).delete().eq(DB_MAP.shifts.cols.id, id);
             if(error) throw error;
@@ -687,90 +1329,106 @@
     }
 
     // ========================================================================
-    // UI HELPER FUNCTIONS & RENDERING
+    // UI RENDERING LOGIC (Profiles, Tools, Shifts, Charts)
     // ========================================================================
-    const escapeHtml = v => (v == null ? '' : String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
-    const fmtPct = v => (v == null || isNaN(v)) ? '-' : (v * 100).toFixed(1) + '%';
-    
-    function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
-    function switchTab(tabId) {
-      document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
-      const target = document.getElementById(`view-${tabId}`);
-      if(target) target.classList.remove('hidden');
-      
-      document.querySelectorAll('[id^="navTile-"]').forEach(btn => {
-        btn.className = 'p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400';
-      });
-      const activeBtn = document.getElementById(`navTile-${tabId}`);
-      if(activeBtn) activeBtn.className = 'p-3 rounded-2xl border transition text-left flex flex-col justify-between bg-blue-600 border-blue-600 text-white shadow-md';
-      
-      if(tabId === 'dashboard') updateDashboardMetrics();
-    }
-
-    function switchOeeSubTab(subId) {
-      document.querySelectorAll('[id^="oeeSub-"]').forEach(el => el.classList.add('hidden'));
-      document.getElementById(`oeeSub-${subId}`).classList.remove('hidden');
-      
-      document.querySelectorAll('[id^="oeeSubBtn-"]').forEach(btn => btn.className = "px-3 py-2 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-700 font-bold");
-      document.getElementById(`oeeSubBtn-${subId}`).className = "px-3 py-2 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold";
-    }
-
     function renderAll() {
         applyFiltersAndRender();
         applyToolsFiltersAndRender();
         renderShifts();
         updateDashboardMetrics();
         renderPlanningOptions();
+        populateAnalyticsDropdown();
+        populateMemoRecipients();
     }
 
     function applyFiltersAndRender() {
       const el = document.getElementById('logSearchInput');
       const q = el ? el.value.toLowerCase() : '';
-      const filtered = records.filter(r => (r.profile||'').toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q));
       
+      const sortEl = document.getElementById('filterSort');
+      const sort = sortEl ? sortEl.value : 'profile_asc';
+
+      let filtered = records.filter(r => (r.profile||'').toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q));
+      
+      filtered.sort((a, b) => {
+        if(sort === 'profile_asc') return (a.profile||'').localeCompare(b.profile||'');
+        if(sort === 'profile_desc') return (b.profile||'').localeCompare(a.profile||'');
+        if(sort === 'cycle_asc') return (a.cycle_sec||0) - (b.cycle_sec||0);
+        if(sort === 'cycle_desc') return (b.cycle_sec||0) - (a.cycle_sec||0);
+        return 0;
+      });
+
       const tbody = document.getElementById('logsTableBody');
       if(!tbody) return;
       tbody.innerHTML = '';
       if(filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No profiles found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No profiles found.</td></tr>`;
         return;
       }
 
-      filtered.forEach(r => {
+      filtered.forEach((r, i) => {
         tbody.innerHTML += `
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+            <td class="p-3.5">${i + 1}</td>
             <td class="p-3.5 font-bold">${escapeHtml(r.profile)}</td>
             <td class="p-3.5">${escapeHtml(r.description)}</td>
             <td class="p-3.5">${escapeHtml(r.length)}</td>
-            <td class="p-3.5 font-mono text-blue-600 font-bold">${r.cycle_sec}s</td>
+            <td class="p-3.5 font-mono text-blue-600 dark:text-blue-400 font-bold">${r.cycle_sec}s</td>
             <td class="p-3.5">${escapeHtml(r.feed)}</td>
-            <td class="p-3.5 text-center">
-              <button onclick="editProfile('${r.id}')" class="text-blue-500 font-bold mr-2">Edit</button>
-              <button onclick="deleteProfile('${r.id}')" class="text-rose-500 font-bold">Del</button>
+            <td class="p-3.5 truncate max-w-[120px]">${escapeHtml(r.tooling)}</td>
+            <td class="p-3.5 text-center space-x-2">
+              <button onclick="editProfile('${r.id}')" class="text-blue-500 hover:text-blue-700 font-bold">Edit</button>
+              <button onclick="deleteProfile('${r.id}')" class="text-rose-500 hover:text-rose-700 font-bold">Del</button>
             </td>
           </tr>`;
       });
     }
 
     function applyToolsFiltersAndRender() {
+      const el = document.getElementById('toolSearchInput');
+      const q = el ? el.value.toLowerCase() : '';
+
+      const catEl = document.getElementById('filterCategorySelect');
+      const cat = catEl ? catEl.value : 'ALL';
+
+      let filtered = toolsList.filter(t => 
+        ((t.subType||'').toLowerCase().includes(q)) || ((t.diameter||'').toLowerCase().includes(q))
+      );
+      if(cat !== 'ALL') {
+          filtered = filtered.filter(t => t.category === cat);
+      }
+
+      // Update Top Counts
+      ['Milling', 'Drilling', 'Tapping', 'Chamfer'].forEach(c => {
+          const catCountEl = document.getElementById(`catCount-${c}`);
+          if(catCountEl) catCountEl.textContent = toolsList.filter(t => t.category === c).reduce((a, b) => a + parseInt(b.stock||0), 0) + ' pcs';
+      });
+
       const tbody = document.getElementById('inventoryTableBody');
       if(!tbody) return;
       tbody.innerHTML = '';
-      if(toolsList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No tools found.</td></tr>`;
+      if(filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No tools found.</td></tr>`;
         return;
       }
 
-      toolsList.forEach(t => {
+      filtered.forEach((t, i) => {
+        let stockClass = "text-slate-800 dark:text-slate-200";
+        if(t.stock < 2) stockClass = "text-rose-600 font-black animate-pulse";
+        else if (t.stock < 5) stockClass = "text-amber-500 font-bold";
+
         tbody.innerHTML += `
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+            <td class="p-3.5">${i + 1}</td>
             <td class="p-3.5 font-bold">${escapeHtml(t.category)}</td>
             <td class="p-3.5">${escapeHtml(t.subType)}</td>
             <td class="p-3.5 font-mono">${escapeHtml(t.diameter)}</td>
-            <td class="p-3.5 text-center font-mono ${t.stock < 2 ? 'text-rose-600 font-black animate-pulse' : ''}">${t.stock}</td>
-            <td class="p-3.5 text-center">
-              <button onclick="editTool('${t.id}')" class="text-cyan-600 font-bold mr-2">Edit</button>
-              <button onclick="deleteTool('${t.id}')" class="text-rose-500 font-bold">Del</button>
+            <td class="p-3.5 truncate max-w-[150px]">${escapeHtml(t.desc)}</td>
+            <td class="p-3.5 text-center font-mono text-base ${stockClass}">${t.stock}</td>
+            <td class="p-3.5">${escapeHtml(t.loc)}</td>
+            <td class="p-3.5 text-center space-x-2">
+              <button onclick="editTool('${t.id}')" class="text-cyan-600 hover:text-cyan-800 font-bold">Edit</button>
+              <button onclick="deleteTool('${t.id}')" class="text-rose-500 hover:text-rose-700 font-bold">Del</button>
             </td>
           </tr>`;
       });
@@ -781,32 +1439,58 @@
         if(!tbody) return;
         tbody.innerHTML = '';
         if(shifts.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No shift logs found.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">No shift logs found.</td></tr>`;
             return;
         }
 
-        shifts.forEach(s => {
+        const sorted = [...shifts].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+        sorted.forEach(s => {
+            let totalProd = 0, totalGood = 0, totalRej = 0, dt = 0;
+            if(s.profiles) {
+                s.profiles.forEach(p => {
+                    totalProd += (parseInt(p.prod) || 0);
+                    totalGood += (parseInt(p.good) || 0);
+                    totalRej += (parseInt(p.reject) || 0);
+                });
+            }
+            if(s.downtime) {
+                s.downtime.forEach(d => dt += (parseInt(d.mins)||0));
+            }
             const oee = s.oeeSummary ? fmtPct(s.oeeSummary.oee) : '-';
+
             tbody.innerHTML += `
               <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
                 <td class="p-3.5 font-bold">${escapeHtml(s.date)}</td>
                 <td class="p-3.5">${escapeHtml(s.shiftType)}</td>
                 <td class="p-3.5 font-bold text-blue-600">Team ${escapeHtml(s.team)}</td>
+                <td class="p-3.5 text-right font-mono">${totalProd}</td>
+                <td class="p-3.5 text-right font-mono text-emerald-600">${totalGood}</td>
+                <td class="p-3.5 text-right font-mono text-rose-600">${totalRej}</td>
+                <td class="p-3.5 text-right font-mono text-amber-600">${dt}m</td>
                 <td class="p-3.5 text-right font-bold text-indigo-600">${oee}</td>
                 <td class="p-3.5 text-center">
-                  <button onclick="deleteShift('${s.id}')" class="text-rose-500 font-bold">Del</button>
+                  <button onclick="deleteShift('${s.id}')" class="text-rose-500 hover:text-rose-700 font-bold">Del</button>
                 </td>
               </tr>`;
         });
     }
 
     function updateDashboardMetrics() {
+        // Top 4 cards
         document.getElementById('dashTotalProfiles').textContent = records.length;
-        document.getElementById('dashToolsStock').textContent = toolsList.reduce((acc, t) => acc + (t.stock||0), 0) + ' pcs';
         
+        let toolsTotal = 0; let lowStock = 0;
+        toolsList.forEach(t => { 
+            toolsTotal += parseInt(t.stock||0);
+            if(parseInt(t.stock||0) < 2) lowStock++;
+        });
+        document.getElementById('dashToolsStock').textContent = `${toolsTotal} pcs`;
+        document.getElementById('dashLowStockSummary').textContent = `${lowStock} low stock alert`;
+
         let oeeSum = 0; let oeeCount = 0;
         let todayProd = 0; let todayGood = 0; let todayRej = 0;
-        const todayStr = new Date().toISOString().slice(0,10);
+        const todayStr = localTodayISO();
         
         shifts.forEach(s => {
             if(s.oeeSummary && s.oeeSummary.oee) {
@@ -830,58 +1514,70 @@
     }
 
     function renderDashboardCharts() {
-        // Safe destroy previous instances
         if(chartDashOeeInst) chartDashOeeInst.destroy();
         if(chartDashProductionInst) chartDashProductionInst.destroy();
         if(chartDashCycleTimeInst) chartDashCycleTimeInst.destroy();
         if(chartDashToolsInst) chartDashToolsInst.destroy();
         if(chartProfile30Inst) chartProfile30Inst.destroy();
 
-        // Safe rendering with null checks
+        // 1. OEE Chart
         const oeeCtx = document.getElementById('chartDashOee');
         if(oeeCtx && shifts.length > 0) {
+            const sorted = [...shifts].sort((a,b) => new Date(a.date) - new Date(b.date)).slice(-7);
             chartDashOeeInst = new Chart(oeeCtx, {
                 type: 'line',
-                data: { labels: shifts.slice(-7).map(s => (s.date||'').slice(5)), datasets: [{ label: 'OEE %', data: shifts.slice(-7).map(s => s.oeeSummary ? (s.oeeSummary.oee * 100) : 0), borderColor: '#10b981', tension: 0.3 }] }
+                data: { 
+                    labels: sorted.map(s => (s.date||'').slice(5)), 
+                    datasets: [{ label: 'OEE %', data: sorted.map(s => s.oeeSummary ? (s.oeeSummary.oee * 100).toFixed(1) : 0), borderColor: '#10b981', tension: 0.3, fill: true, backgroundColor: 'rgba(16,185,129,0.1)' }] 
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
+        // 2. Production Chart
         const prodCtx = document.getElementById('chartDashProduction');
         if(prodCtx && shifts.length > 0) {
+            const sorted = [...shifts].sort((a,b) => new Date(a.date) - new Date(b.date)).slice(-7);
             chartDashProductionInst = new Chart(prodCtx, {
                 type: 'bar',
-                data: { labels: shifts.slice(-7).map(s => (s.date||'').slice(5)), datasets: [{ label: 'Produced', data: shifts.slice(-7).map(s => s.profiles ? s.profiles.reduce((a,b)=>a+(b.prod||0),0) : 0), backgroundColor: '#3b82f6' }] }
+                data: { 
+                    labels: sorted.map(s => (s.date||'').slice(5)), 
+                    datasets: [{ label: 'Produced', data: sorted.map(s => s.profiles ? s.profiles.reduce((a,b)=>a+(b.prod||0),0) : 0), backgroundColor: '#3b82f6', borderRadius: 4 }] 
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
+        // 3. Cycle Time Chart
         const cycCtx = document.getElementById('chartDashCycleTime');
         if(cycCtx && records.length > 0) {
-            const topSpeeds = [...records].sort((a,b) => a.cycle_sec - b.cycle_sec).slice(0,5);
+            const topSpeeds = [...records].sort((a,b) => (a.cycle_sec||0) - (b.cycle_sec||0)).slice(0,5);
             chartDashCycleTimeInst = new Chart(cycCtx, {
                 type: 'bar',
-                data: { labels: topSpeeds.map(r => r.profile), datasets: [{ label: 'Seconds', data: topSpeeds.map(r => r.cycle_sec), backgroundColor: '#f59e0b' }] }
+                data: { labels: topSpeeds.map(r => r.profile), datasets: [{ label: 'Seconds', data: topSpeeds.map(r => r.cycle_sec), backgroundColor: '#f59e0b', borderRadius: 4 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
+        // 4. Tools Doughnut
         const toolCtx = document.getElementById('chartDashTools');
         if(toolCtx && toolsList.length > 0) {
             const counts = {'Milling':0, 'Drilling':0, 'Tapping':0, 'Chamfer':0};
-            toolsList.forEach(t => { if(counts[t.category] !== undefined) counts[t.category] += (t.stock||0); });
+            toolsList.forEach(t => { if(counts[t.category] !== undefined) counts[t.category] += parseInt(t.stock||0); });
             chartDashToolsInst = new Chart(toolCtx, {
                 type: 'doughnut',
-                data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }] },
-                options: { plugins: { legend: { position: 'right' } } }
+                data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
             });
         }
-        
-        // 30-Day Table Data processing
-        const table30 = document.getElementById('profile30TableBody');
+
+        // 5. 30-Day Insight Chart and Table
         const c30Ctx = document.getElementById('chartProfile30Days');
-        if(table30 && c30Ctx) {
+        const table30 = document.getElementById('profile30TableBody');
+        if(c30Ctx && table30) {
             if(shifts.length === 0) {
-                table30.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">No shift data available for last 30 days.</td></tr>`;
+                table30.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">No shift data available.</td></tr>`;
             } else {
-                // Mock calculation logic for presentation
                 const profDataMap = {};
                 shifts.forEach(s => {
                     if(s.profiles) {
@@ -899,21 +1595,25 @@
                 const labels30 = [];
                 const data30 = [];
 
-                Object.keys(profDataMap).forEach(k => {
+                Object.keys(profDataMap).forEach((k, idx) => {
                     const r = records.find(x => x.id == k);
                     const name = r ? r.profile : 'Unknown';
                     const d = profDataMap[k];
                     const pct = d.prod > 0 ? ((d.rej / d.prod)*100).toFixed(1) + '%' : '0%';
+                    const avg = d.shifts > 0 ? Math.round(d.prod / d.shifts) : 0;
                     
                     labels30.push(name);
                     data30.push(d.prod);
 
                     table30.innerHTML += `
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                            <td class="p-3">${idx + 1}</td>
                             <td class="p-3 font-bold">${escapeHtml(name)}</td>
                             <td class="p-3 text-right font-mono">${d.prod}</td>
                             <td class="p-3 text-right font-mono text-emerald-600">${d.good}</td>
                             <td class="p-3 text-right font-mono text-rose-600">${d.rej}</td>
+                            <td class="p-3 text-right">${d.shifts}</td>
+                            <td class="p-3 text-right">${avg}</td>
                             <td class="p-3 text-right font-bold text-rose-600">${pct}</td>
                         </tr>
                     `;
@@ -921,16 +1621,25 @@
                 
                 chartProfile30Inst = new Chart(c30Ctx, {
                     type: 'bar',
-                    data: { labels: labels30, datasets: [{ label: 'Quantity Produced', data: data30, backgroundColor: '#6366f1' }] },
-                    options: { responsive: true, maintainAspectRatio: false }
+                    data: { labels: labels30, datasets: [{ label: 'Quantity Produced', data: data30, backgroundColor: '#4f46e5', borderRadius: 4 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 });
             }
         }
     }
 
-    // Modal UI Logics
-    function openFormModal() { document.getElementById('recordForm').reset(); document.getElementById('formRowId').value = ''; document.getElementById('formModalTitle').textContent = 'Log New CNC Profile'; document.getElementById('modalForm').classList.remove('hidden'); }
+    // ========================================================================
+    // MODALS / FORMS LOGIC
+    // ========================================================================
+    function openFormModal() {
+        document.getElementById('recordForm').reset();
+        document.getElementById('formRowId').value = '';
+        document.getElementById('formModalTitle').textContent = 'Log New CNC Profile';
+        document.getElementById('modalForm').classList.remove('hidden');
+    }
+    
     function closeFormModal() { document.getElementById('modalForm').classList.add('hidden'); }
+    
     function editProfile(id) {
         const r = records.find(x => x.id == id);
         if(!r) return;
@@ -945,8 +1654,20 @@
         document.getElementById('modalForm').classList.remove('hidden');
     }
 
-    function openToolsFormModal() { document.getElementById('toolsToolForm').reset(); document.getElementById('toolsFormId').value = ''; document.getElementById('toolsModalForm').classList.remove('hidden'); }
+    function toolsFilterByCategory(cat) {
+        const el = document.getElementById('filterCategorySelect');
+        if(el) { el.value = cat; applyToolsFiltersAndRender(); }
+    }
+
+    function openToolsFormModal() {
+        document.getElementById('toolsToolForm').reset();
+        document.getElementById('toolsFormId').value = '';
+        document.getElementById('toolsFormModalTitle').textContent = 'Log Tool to Inventory';
+        document.getElementById('toolsModalForm').classList.remove('hidden');
+    }
+    
     function closeToolsFormModal() { document.getElementById('toolsModalForm').classList.add('hidden'); }
+    
     function editTool(id) {
         const t = toolsList.find(x => x.id == id);
         if(!t) return;
@@ -954,28 +1675,49 @@
         document.getElementById('toolsFormCategory').value = t.category || '';
         document.getElementById('toolsFormSubType').value = t.subType || '';
         document.getElementById('toolsFormDiameter').value = t.diameter || '';
+        document.getElementById('toolsFormDescription').value = t.desc || '';
         document.getElementById('toolsFormStock').value = t.stock || 0;
+        document.getElementById('toolsFormLocation').value = t.loc || '';
+        document.getElementById('toolsFormModalTitle').textContent = 'Edit Tool Inventory';
         document.getElementById('toolsModalForm').classList.remove('hidden');
     }
 
-    // Shift Helper Functions
+    // ========================================================================
+    // SHIFT & OEE FORM LOGIC
+    // ========================================================================
     function resetShiftLogForm() {
-        document.getElementById('shiftLogForm').reset();
-        const today = new Date();
-        document.getElementById('logDate').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+        const form = document.getElementById('shiftLogForm');
+        if(!form) return;
+        form.reset();
+        document.getElementById('shiftFormId').value = '';
+        document.getElementById('logDate').value = localTodayISO();
         document.getElementById('profileCardsContainer').innerHTML = '';
         document.getElementById('downtimeCardsContainer').innerHTML = '';
         cardCounter = 0; dtCounter = 0;
     }
-    
+
     function addProfileCard() {
         const html = `
             <div id="profCard-${cardCounter}" class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-5 gap-2 relative mt-2">
                 <button type="button" onclick="document.getElementById('profCard-${cardCounter}').remove()" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">×</button>
-                <div class="col-span-2"><select class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none log-profile-sel">${records.map(r => `<option value="${r.id}">${r.profile}</option>`).join('')}</select></div>
-                <div><input type="number" placeholder="Prod" value="0" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none log-profile-prod" onchange="calcScrap(${cardCounter})"></div>
-                <div><input type="number" placeholder="Good" value="0" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none text-emerald-600 log-profile-good" onchange="calcScrap(${cardCounter})"></div>
-                <div><input type="number" placeholder="Rej" value="0" readonly class="w-full bg-slate-100 dark:bg-slate-700 border rounded-lg p-1.5 outline-none text-rose-500 font-bold log-profile-rej"></div>
+                <div class="col-span-2">
+                    <label class="text-[10px] font-bold text-slate-400">Profile</label>
+                    <select class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none log-profile-sel">
+                        ${records.map(r => `<option value="${r.id}">${r.profile}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400">Prod</label>
+                    <input type="number" value="0" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none log-profile-prod" onchange="calcScrap(${cardCounter})">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400">Good</label>
+                    <input type="number" value="0" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none text-emerald-600 log-profile-good" onchange="calcScrap(${cardCounter})">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400">Reject</label>
+                    <input type="number" value="0" readonly class="w-full bg-slate-100 dark:bg-slate-700 border rounded-lg p-1.5 outline-none text-rose-500 font-bold log-profile-rej">
+                </div>
             </div>`;
         document.getElementById('profileCardsContainer').insertAdjacentHTML('beforeend', html);
         cardCounter++;
@@ -983,63 +1725,169 @@
 
     function calcScrap(idx) {
         const card = document.getElementById(`profCard-${idx}`);
-        if(card) card.querySelector('.log-profile-rej').value = Math.max(0, (parseInt(card.querySelector('.log-profile-prod').value)||0) - (parseInt(card.querySelector('.log-profile-good').value)||0));
+        if(!card) return;
+        const prod = parseInt(card.querySelector('.log-profile-prod').value) || 0;
+        const good = parseInt(card.querySelector('.log-profile-good').value) || 0;
+        card.querySelector('.log-profile-rej').value = Math.max(0, prod - good);
     }
 
     function addDowntimeCard() {
         const html = `
             <div id="dtCard-${dtCounter}" class="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-2xl border border-amber-200 dark:border-amber-900/50 grid grid-cols-4 gap-2 relative mt-2">
                 <button type="button" onclick="document.getElementById('dtCard-${dtCounter}').remove()" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">×</button>
-                <div class="col-span-3"><input type="text" placeholder="Reason" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none log-dt-reason"></div>
-                <div><input type="number" placeholder="Mins" value="0" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none font-bold text-amber-600 log-dt-mins"></div>
+                <div class="col-span-3">
+                    <label class="text-[10px] font-bold text-amber-600">Reason</label>
+                    <input type="text" placeholder="e.g. Machine Breakdown" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none log-dt-reason">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-amber-600">Mins</label>
+                    <input type="number" value="0" class="w-full bg-white dark:bg-slate-800 border rounded-lg p-1.5 outline-none font-bold text-amber-600 log-dt-mins">
+                </div>
             </div>`;
         document.getElementById('downtimeCardsContainer').insertAdjacentHTML('beforeend', html);
         dtCounter++;
     }
-    
-    // Planning Helper
+
+    // ========================================================================
+    // PRODUCTION PLANNING
+    // ========================================================================
     function renderPlanningOptions() {
         const sel = document.getElementById('planProfileSelect');
+        if(!sel) return;
+        sel.innerHTML = '<option value="">-- Choose Profile --</option>';
+        records.forEach(r => sel.innerHTML += `<option value="${r.id}">${r.profile} - ${r.description}</option>`);
+    }
+
+    function addProfileToPlanningCart() {
+        const pid = document.getElementById('planProfileSelect').value;
+        if(!pid) { showToast('Select a profile', 'error'); return; }
+        const r = records.find(x => x.id == pid);
+        if(!r) return;
+        
+        planningCart.push({
+            id: Date.now(),
+            profileId: r.id,
+            profileName: r.profile,
+            handling: parseInt(document.getElementById('planHandlingSec').value) || 0,
+            qty: parseInt(document.getElementById('planBatchQty').value) || 0,
+            cycle: r.cycle_sec
+        });
+        
+        renderPlanningCart();
+    }
+
+    function renderPlanningCart() {
+        const list = document.getElementById('planningCartList');
+        if(!list) return;
+        list.innerHTML = '';
+        
+        if(planningCart.length === 0) {
+            list.innerHTML = '<p class="text-xs text-slate-400 italic">No profiles in queue.</p>';
+            document.getElementById('calcTotalQty').textContent = '0 pcs';
+            document.getElementById('calcTheorTime').textContent = '0h 0m';
+            document.getElementById('calcShiftRequirement').textContent = '0.0';
+            return;
+        }
+
+        let totalQty = 0; let totalSecs = 0;
+
+        planningCart.forEach(item => {
+            totalQty += item.qty;
+            const totalSec = (item.cycle + item.handling) * item.qty;
+            totalSecs += totalSec;
+
+            list.innerHTML += `
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-600">
+                    <div>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white">${item.profileName} <span class="text-slate-400 font-normal">x ${item.qty}</span></p>
+                        <p class="text-[10px] text-slate-500">Cyc: ${item.cycle}s | Hnd: ${item.handling}s</p>
+                    </div>
+                    <button onclick="planningCart = planningCart.filter(x => x.id !== ${item.id}); renderPlanningCart();" class="text-rose-500 font-black px-2">×</button>
+                </div>
+            `;
+        });
+
+        document.getElementById('calcTotalQty').textContent = `${totalQty} pcs`;
+        
+        const hrs = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        document.getElementById('calcTheorTime').textContent = `${hrs}h ${mins}m`;
+        
+        // Assume 10.5 hrs productive time per 12 hr shift
+        const productiveHoursPerShift = 10.5;
+        const totalHrs = totalSecs / 3600;
+        document.getElementById('calcShiftRequirement').textContent = (totalHrs / productiveHoursPerShift).toFixed(1);
+    }
+    
+    function clearPlanningCart() { planningCart = []; renderPlanningCart(); }
+
+    // ========================================================================
+    // ANALYTICS, EXPORTS & MEMO
+    // ========================================================================
+    function populateAnalyticsDropdown() {
+        const sel = document.getElementById('analyticsProfileSelect');
         if(!sel) return;
         sel.innerHTML = '<option value="">-- Choose Profile --</option>';
         records.forEach(r => sel.innerHTML += `<option value="${r.id}">${r.profile}</option>`);
     }
 
-    function addProfileToPlanningCart() {
-        const pid = document.getElementById('planProfileSelect').value;
-        if(!pid) return;
-        const r = records.find(x => x.id == pid);
-        if(!r) return;
-        const qty = parseInt(document.getElementById('planBatchQty').value) || 0;
-        
-        planningCart.push({ id: Date.now(), profileName: r.profile, cycle: r.cycle_sec, qty: qty });
-        renderPlanningCart();
-    }
-    
-    function renderPlanningCart() {
-        const list = document.getElementById('planningCartList');
+    function populateMemoRecipients() {
+        const list = document.getElementById('recipientsList');
         if(!list) return;
         list.innerHTML = '';
-        let totalQty = 0, totalSecs = 0;
-        
-        planningCart.forEach(item => {
-            totalQty += item.qty;
-            totalSecs += (item.cycle * item.qty);
+        memoRecipients.forEach(r => {
             list.innerHTML += `
-                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700 p-2.5 rounded-xl border border-slate-200 dark:border-slate-600 mt-2">
-                    <div>
-                        <p class="text-xs font-bold">${item.profileName} <span class="font-normal text-slate-400">x ${item.qty}</span></p>
-                        <p class="text-[10px] text-blue-500">${item.cycle}s Cycle</p>
-                    </div>
-                    <button onclick="planningCart = planningCart.filter(x => x.id !== ${item.id}); renderPlanningCart();" class="text-rose-500 font-black px-2">×</button>
-                </div>`;
+                <label class="flex items-center gap-2 text-xs cursor-pointer">
+                    <input type="checkbox" ${r.selected ? 'checked' : ''} onchange="toggleRecipient(${r.id})" class="rounded text-blue-600 focus:ring-blue-500">
+                    <span class="font-bold">${escapeHtml(r.name)}</span> - <span class="text-slate-500">${escapeHtml(r.role)}</span>
+                </label>
+            `;
         });
+        const dateInput = document.getElementById('memoDate');
+        if(dateInput) dateInput.value = localTodayISO();
+    }
+
+    function toggleRecipient(id) {
+        const r = memoRecipients.find(x => x.id === id);
+        if(r) r.selected = !r.selected;
+    }
+
+    function addNewRecipient() {
+        const n = document.getElementById('newRecipName').value;
+        const r = document.getElementById('newRecipRole').value;
+        if(n && r) {
+            memoRecipients.push({ id: Date.now(), name: n, role: r, selected: true });
+            document.getElementById('newRecipName').value = '';
+            document.getElementById('newRecipRole').value = '';
+            populateMemoRecipients();
+        }
+    }
+
+    function autoPopulateLowStock() {
+        const cont = document.getElementById('requisitionItemsContainer');
+        if(!cont) return;
+        cont.innerHTML = '';
+        const low = toolsList.filter(t => parseInt(t.stock||0) < 2);
         
-        document.getElementById('calcTotalQty').textContent = `${totalQty} pcs`;
-        const hrs = Math.floor(totalSecs / 3600);
-        const mins = Math.floor((totalSecs % 3600) / 60);
-        document.getElementById('calcTheorTime').textContent = `${hrs}h ${mins}m`;
-        document.getElementById('calcShiftRequirement').textContent = (totalSecs / 3600 / 10.5).toFixed(1);
+        if(low.length === 0) {
+            cont.innerHTML = '<p class="text-xs text-slate-400 italic">Inventory levels normal. No tools below safe threshold.</p>';
+            return;
+        }
+
+        low.forEach(t => {
+            cont.innerHTML += `
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mt-2">
+                    <div>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white">${escapeHtml(t.subType)} (${escapeHtml(t.diameter)})</p>
+                        <p class="text-[10px] text-slate-500">${escapeHtml(t.category)} | Current Stock: <span class="text-rose-500 font-bold">${t.stock}</span></p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-[10px] font-bold text-slate-500">Req Qty:</label>
+                        <input type="number" value="5" class="w-16 bg-white dark:bg-slate-800 border rounded-lg p-1.5 text-xs outline-none">
+                    </div>
+                </div>
+            `;
+        });
     }
 
     // ========================================================================
@@ -1048,7 +1896,7 @@
     window.onload = () => {
         switchTab('dashboard'); 
         resetShiftLogForm();
-        loadDataFromSupabase(); // Initial DB fetch
+        loadDataFromSupabase(); // Automatically tries to fetch data from Supabase
     };
   </script>
 </body>
