@@ -963,54 +963,6 @@
     </div>
   </div>
 
-  <!-- ============================================================ -->
-  <!-- SUPABASE SETUP GUIDE MODAL -->
-  <!-- ============================================================ -->
-  <div id="modalSetupGuide" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-base font-black text-slate-900 dark:text-white">🔧 Supabase Setup Guide</h3>
-        <button onclick="document.getElementById('modalSetupGuide').classList.add('hidden')" class="text-slate-400 text-xl font-bold">×</button>
-      </div>
-      <div class="space-y-4 text-xs">
-        <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl">
-          <p class="font-bold text-amber-800 dark:text-amber-300 mb-1">⚠️ Database Not Connected</p>
-          <p class="text-amber-700 dark:text-amber-400">The app is running in <b>Demo Mode</b> with localStorage. To connect to Supabase, follow these steps:</p>
-        </div>
-        
-        <div class="space-y-3">
-          <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl">
-            <p class="font-black text-blue-600 mb-2">Step 1: Create a Supabase Project</p>
-            <p class="text-slate-600 dark:text-slate-300">Go to <a href="https://supabase.com" target="_blank" class="text-blue-600 underline font-bold">supabase.com</a> and create a free project.</p>
-          </div>
-          
-          <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl">
-            <p class="font-black text-blue-600 mb-2">Step 2: Run the SQL Schema</p>
-            <p class="text-slate-600 dark:text-slate-300 mb-2">Go to <b>SQL Editor</b> in Supabase dashboard and run this SQL:</p>
-            <pre class="bg-slate-900 text-green-400 p-3 rounded-xl overflow-x-auto text-[10px] font-mono leading-relaxed whitespace-pre-wrap" id="setupSQL">Loading SQL...</pre>
-            <button onclick="copySetupSQL()" class="mt-2 bg-blue-600 text-white px-3 py-1.5 rounded-lg font-bold text-[10px]">📋 Copy SQL</button>
-          </div>
-          
-          <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl">
-            <p class="font-black text-blue-600 mb-2">Step 3: Get Your Credentials</p>
-            <p class="text-slate-600 dark:text-slate-300 mb-2">Go to <b>Settings → API</b> and copy:</p>
-            <ul class="list-disc pl-4 space-y-1 text-slate-600 dark:text-slate-300">
-              <li><b>Project URL</b> (e.g., https://xxxxx.supabase.co)</li>
-              <li><b>anon public key</b></li>
-            </ul>
-          </div>
-          
-          <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl">
-            <p class="font-black text-blue-600 mb-2">Step 4: Update This File</p>
-            <p class="text-slate-600 dark:text-slate-300">Find these lines at the top of the script and replace with your values:</p>
-            <pre class="bg-slate-900 text-yellow-400 p-3 rounded-xl text-[10px] font-mono">const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
-const SUPABASE_ANON_KEY = "your-anon-key-here";</pre>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
     // ========================================================================
     // ⚠️⚠️⚠️  IMPORTANT: UPDATE THESE CREDENTIALS  ⚠️⚠️⚠️
@@ -1022,11 +974,8 @@ const SUPABASE_ANON_KEY = "your-anon-key-here";</pre>
     const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co";
     const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
     
-    // Detect if using placeholder credentials
-    const IS_DEMO_MODE = SUPABASE_URL.includes('YOUR_SUPABASE') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE');
-    
     let supabaseClient = null;
-    if (!IS_DEMO_MODE && typeof supabase !== 'undefined') {
+    if (typeof supabase !== 'undefined') {
       try {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       } catch (e) {
@@ -1040,119 +989,6 @@ const SUPABASE_ANON_KEY = "your-anon-key-here";</pre>
     if (typeof pdfjsLib !== 'undefined') {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
     }
-
-    // ========================================================================
-    // LOCAL STORAGE DATABASE (Demo Mode Fallback)
-    // ========================================================================
-    const LocalDB = {
-      _key: 'cnc5000_db_v3',
-      _load() {
-        try {
-          const raw = localStorage.getItem(this._key);
-          if (raw) return JSON.parse(raw);
-        } catch(e) {}
-        return { cnc_cycle_times: [], shifts: [], production_records: [], downtime_events: [], cnc_tool_bits: [], _seq: 1000 };
-      },
-      _save(db) { localStorage.setItem(this._key, JSON.stringify(db)); },
-      _nextId(db) { db._seq = (db._seq || 0) + 1; return db._seq; },
-      
-      async select(table, filters) {
-        const db = this._load();
-        let rows = [...(db[table] || [])];
-        if (filters) {
-          Object.keys(filters).forEach(k => {
-            rows = rows.filter(r => r[k] === filters[k]);
-          });
-        }
-        return { data: rows, error: null };
-      },
-      
-      async insert(table, rows) {
-        const db = this._load();
-        if (!db[table]) db[table] = [];
-        const inserted = rows.map(r => ({ ...r, id: this._nextId(db), created_at: new Date().toISOString() }));
-        db[table].push(...inserted);
-        this._save(db);
-        return { data: inserted, error: null };
-      },
-      
-      async update(table, updates, filters) {
-        const db = this._load();
-        if (!db[table]) return { error: null };
-        db[table] = db[table].map(r => {
-          let match = true;
-          Object.keys(filters).forEach(k => { if (r[k] !== filters[k]) match = false; });
-          return match ? { ...r, ...updates } : r;
-        });
-        this._save(db);
-        return { error: null };
-      },
-      
-      async delete(table, filters) {
-        const db = this._load();
-        if (!db[table]) return { error: null };
-        db[table] = db[table].filter(r => {
-          let match = true;
-          Object.keys(filters).forEach(k => { if (r[k] !== filters[k]) match = false; });
-          return !match;
-        });
-        this._save(db);
-        return { error: null };
-      }
-    };
-
-    // ========================================================================
-    // UNIFIED DB ACCESSOR
-    // ========================================================================
-    const DB = {
-      async from(table) {
-        return {
-          select: async (cols) => {
-            if (IS_DEMO_MODE) return LocalDB.select(table);
-            const res = await supabaseClient.from(table).select(cols || '*');
-            return res;
-          },
-          insert: async (rows) => {
-            if (IS_DEMO_MODE) return LocalDB.insert(table, rows);
-            return supabaseClient.from(table).insert(rows);
-          },
-          update: async (updates) => {
-            const filters = {};
-            return {
-              eq: async (col, val) => {
-                filters[col] = val;
-                if (IS_DEMO_MODE) return LocalDB.update(table, updates, filters);
-                return supabaseClient.from(table).update(updates).eq(col, val);
-              }
-            };
-          },
-          delete: async () => {
-            return {
-              eq: async (col, val) => {
-                if (IS_DEMO_MODE) return LocalDB.delete(table, { [col]: val });
-                return supabaseClient.from(table).delete().eq(col, val);
-              }
-            };
-          },
-          order: async (col, opts) => {
-            if (IS_DEMO_MODE) {
-              const res = await LocalDB.select(table);
-              if (res.data) {
-                res.data.sort((a, b) => {
-                  const dir = opts?.ascending === false ? -1 : 1;
-                  return dir * String(a[col] || '').localeCompare(String(b[col] || ''));
-                });
-              }
-              return res;
-            }
-            return supabaseClient.from(table).select('*').order(col, opts);
-          },
-          single: async () => {
-            return { data: null, error: null };
-          }
-        };
-      }
-    };
 
     // ========================================================================
     // APPLICATION STATE
@@ -1184,137 +1020,6 @@ const SUPABASE_ANON_KEY = "your-anon-key-here";</pre>
     
     let profile30CurrentAngle = 'quantity';
     let cardCounter = 0, dtCounter = 0;
-
-    // ========================================================================
-    // SETUP SQL
-    // ========================================================================
-    const SETUP_SQL = `-- CNC 5000 Database Schema
--- Run this in Supabase SQL Editor
-
--- 1. CNC Cycle Times (Profiles)
-CREATE TABLE IF NOT EXISTS cnc_cycle_times (
-  id BIGSERIAL PRIMARY KEY,
-  profile TEXT NOT NULL,
-  description TEXT,
-  length TEXT,
-  cycle_seconds INTEGER DEFAULT 0,
-  feed_speeds TEXT,
-  tooling TEXT,
-  is_deleted BOOLEAN DEFAULT FALSE,
-  deleted_at TIMESTAMPTZ,
-  record_date DATE DEFAULT CURRENT_DATE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 2. Shifts
-CREATE TABLE IF NOT EXISTS shifts (
-  id BIGSERIAL PRIMARY KEY,
-  shift_date DATE NOT NULL,
-  shift_type TEXT NOT NULL DEFAULT 'Day',
-  team TEXT NOT NULL DEFAULT 'A',
-  epf_no TEXT,
-  operator_name TEXT,
-  planned_break_min NUMERIC DEFAULT 90,
-  was_planned BOOLEAN DEFAULT TRUE,
-  other_dept_used BOOLEAN DEFAULT FALSE,
-  other_dept_period TEXT,
-  other_notes TEXT,
-  supervisor_sign TEXT,
-  quality_sign TEXT,
-  is_deleted BOOLEAN DEFAULT FALSE,
-  deleted_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 3. Production Records
-CREATE TABLE IF NOT EXISTS production_records (
-  id BIGSERIAL PRIMARY KEY,
-  shift_id BIGINT REFERENCES shifts(id) ON DELETE CASCADE,
-  profile_code TEXT NOT NULL,
-  setup_min NUMERIC DEFAULT 0,
-  target INTEGER DEFAULT 0,
-  produced INTEGER DEFAULT 0,
-  rejected INTEGER DEFAULT 0,
-  reject_reason TEXT,
-  ideal_cycle_seconds INTEGER,
-  sort_order INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 4. Downtime Events
-CREATE TABLE IF NOT EXISTS downtime_events (
-  id BIGSERIAL PRIMARY KEY,
-  shift_id BIGINT REFERENCES shifts(id) ON DELETE CASCADE,
-  reason TEXT NOT NULL,
-  duration_min NUMERIC DEFAULT 0,
-  notes TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 5. CNC Tool Bits
-CREATE TABLE IF NOT EXISTS cnc_tool_bits (
-  id BIGSERIAL PRIMARY KEY,
-  category TEXT NOT NULL,
-  sub_type TEXT,
-  diameter TEXT NOT NULL,
-  description TEXT,
-  stock INTEGER DEFAULT 0,
-  location TEXT,
-  is_deleted BOOLEAN DEFAULT FALSE,
-  deleted_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Enable Row Level Security (RLS) - allow all for demo
-ALTER TABLE cnc_cycle_times ENABLE ROW LEVEL SECURITY;
-ALTER TABLE shifts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE production_records ENABLE ROW LEVEL SECURITY;
-ALTER TABLE downtime_events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE cnc_tool_bits ENABLE ROW LEVEL SECURITY;
-
--- Create permissive policies for all tables
-CREATE POLICY "Allow all access" ON cnc_cycle_times FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all access" ON shifts FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all access" ON production_records FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all access" ON downtime_events FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all access" ON cnc_tool_bits FOR ALL USING (true) WITH CHECK (true);
-
--- Insert component plant cycle time profile data
-INSERT INTO cnc_cycle_times (profile, description, length, cycle_seconds, feed_speeds, tooling) VALUES
-  ('AL 527', 'Float Plane Blade (Side 02)', '2437.4 mm', 82, '600', 'Single tool'),
-  ('AL 527', 'Float Pilane Blade (Side 02)', '2437.4 mm', 83, '600', 'Single tool'),
-  ('AL 554', 'Single Rectangle', '1160 mm', 52, '600', 'Single tool'),
-  ('AL 554', 'Three Rectangles', '1160 mm', 147, '600', 'Single tool'),
-  ('AL 554', 'Three Rectangles', '1788 mm', 152, '600', 'Single tool'),
-  ('AL 573', 'H-Bar-4 (4 Holes)', '140 mm', 34, '400', 'Single tool'),
-  ('AL 632', 'VB 70 15-1', '-', 43, '600', 'Single tool'),
-  ('AL 632', 'VB 70 15', '-', 139, '800', 'Two Tools'),
-  ('AL 633', 'VB-01', '-', 84, '600', 'Single tool'),
-  ('AL 633', 'VB 02', '-', 93, '600', 'Single tool'),
-  ('AL 633', 'VB-03', '-', 93, '600', 'Single tool'),
-  ('AL 684', 'Part 70127', '-', 4227, '400', 'Single tool'),
-  ('AL 684', 'Part 70128', '-', 125, '600, 400', 'Two Tools'),
-  ('AL 684', 'Part 70130', '-', 113, '600,400', 'Two Tools'),
-  ('AL 706', 'Single Long Rectangle', '1752 mm', 639, '200', 'Single tool'),
-  ('AL 774', 'Aalco (6 Holes)', '260 mm', 38, '600', 'Single tool'),
-  ('AL 774', 'Aalco (8 Holes)', '361 mm', 49, '600', 'Single tool'),
-  ('AL 778', 'H Bar-1', '200 mm', 41, '800', 'Single tool'),
-  ('AL 1242', 'Swage Handle', '1828.8 mm', 50, '600', 'Single tool'),
-  ('AL 554', 'Three Rectangles', '2296 mm', 103, 'Feed 60 (Test 600)', 'Single tool'),
-  ('AL 554', 'Three Rectangles (Slow)', '1708 mm', 546, '150', 'Single tool'),
-  ('AL 554', 'Three Rectangles', '2298 mm', 106, 'Feed 60 (Test 600)', 'Single tool'),
-  ('AL 1038', 'Long Variant 01', '1824.94 mm', 380, '500, 400 350', 'Single tool'),
-  ('AL 1038', 'Long Variant 02', '1520.14 mm', 386, '500, 300, 350', 'Single tool');
-
-INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, location) VALUES
-  ('Milling', 'Flat End Mill', '10.0 mm', 'Slotting & pocketing', 5, 'Rack A-01'),
-  ('Milling', 'Ball Nose', '8.0 mm', '3D contouring', 3, 'Rack A-02'),
-  ('Milling', 'Face Mill', '16.0 mm', 'Surface finishing', 1, 'Rack A-03'),
-  ('Drilling', 'Twist Drill', '8.0 mm', 'Through holes', 8, 'Rack B-01'),
-  ('Drilling', 'Center Drill', '5.0 mm', 'Pilot holes', 2, 'Rack B-02'),
-  ('Tapping', 'Spiral Tap', 'M8', 'Thread cutting', 4, 'Rack C-01'),
-  ('Tapping', 'Form Tap', 'M6', 'Thread forming', 1, 'Rack C-02'),
-  ('Chamfer', 'Chamfer Mill', '45°', 'Edge deburring', 6, 'Rack D-01');`;
 
     // ========================================================================
     // UTILITIES
@@ -1400,12 +1105,9 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
         }
         
         if (newProfiles.length > 0) {
-          if (IS_DEMO_MODE) {
-            await LocalDB.insert('cnc_cycle_times', newProfiles);
-          } else {
-            const { error } = await supabaseClient.from('cnc_cycle_times').insert(newProfiles);
-            if (error) throw error;
-          }
+          const { error } = await supabaseClient.from('cnc_cycle_times').insert(newProfiles);
+          if (error) throw error;
+          
           showToast(`Successfully imported ${newProfiles.length} profiles!`);
           fetchAllData();
         } else {
@@ -1671,7 +1373,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
         : "fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-0 opacity-100 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-slate-700";
       setTimeout(() => {
         toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3200);
+      }, 5000);
     }
 
     function showDbError(context, error) {
@@ -1691,9 +1393,6 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       if (status === 'Online') {
         if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
         if (badge) badge.className = 'flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 rounded-full text-[11px] font-semibold text-emerald-700 dark:text-emerald-400';
-      } else if (status === 'Demo') {
-        if (dot) dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
-        if (badge) badge.className = 'flex items-center space-x-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-full text-[11px] font-semibold text-amber-700 dark:text-amber-400';
       } else {
         if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
         if (badge) badge.className = 'flex items-center space-x-1.5 px-3 py-1 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/80 rounded-full text-[11px] font-semibold text-rose-700 dark:text-rose-400';
@@ -1768,18 +1467,11 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
     }
 
     // ========================================================================
-    // DATA FETCHING (Supabase or LocalDB)
+    // DATA FETCHING (Supabase)
     // ========================================================================
     async function fetchAllData() {
       try {
-        let data, error;
-        if (IS_DEMO_MODE) {
-          const res = await LocalDB.select('cnc_cycle_times');
-          data = res.data; error = res.error;
-        } else {
-          const res = await supabaseClient.from('cnc_cycle_times').select('*');
-          data = res.data; error = res.error;
-        }
+        const { data, error } = await supabaseClient.from('cnc_cycle_times').select('*');
         
         if (error) {
           console.error('Profile load error:', error.message || error);
@@ -1791,7 +1483,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
         records = (data || []).filter(r => !r.is_deleted);
         trashRecords = (data || []).filter(r => r.is_deleted);
         
-        updateSyncStatus(IS_DEMO_MODE ? 'Demo' : 'Online');
+        updateSyncStatus('Online');
         
         await fetchOeeData();
         applyFiltersAndRender();
@@ -1801,36 +1493,23 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       } catch (err) {
         console.error('fetchAllData error:', err);
         showToast('Data load failed: ' + (err.message || err), true);
+        updateSyncStatus('Offline');
       }
     }
 
     async function fetchOeeData() {
       try {
-        let shiftsData, prodData, downtimeData;
+        const [shiftsRes, prodRes, downtimeRes] = await Promise.all([
+          supabaseClient.from('shifts').select('*').order('shift_date', { ascending: false }),
+          supabaseClient.from('production_records').select('*'),
+          supabaseClient.from('downtime_events').select('*')
+        ]);
         
-        if (IS_DEMO_MODE) {
-          const [sR, pR, dR] = await Promise.all([
-            LocalDB.select('shifts'),
-            LocalDB.select('production_records'),
-            LocalDB.select('downtime_events')
-          ]);
-          shiftsData = sR.data; prodData = pR.data; downtimeData = dR.data;
-        } else {
-          const [shiftsRes, prodRes, downtimeRes] = await Promise.all([
-            supabaseClient.from('shifts').select('*').order('shift_date', { ascending: false }),
-            supabaseClient.from('production_records').select('*'),
-            supabaseClient.from('downtime_events').select('*')
-          ]);
-          shiftsData = shiftsRes.data || [];
-          prodData = prodRes.data || [];
-          downtimeData = downtimeRes.data || [];
-        }
-        
-        const allShifts = shiftsData || [];
+        const allShifts = shiftsRes.data || [];
         shifts = allShifts.filter(s => !s.is_deleted);
         trashShifts = allShifts.filter(s => s.is_deleted);
-        productionRecords = prodData || [];
-        downtimeEvents = downtimeData || [];
+        productionRecords = prodRes.data || [];
+        downtimeEvents = downtimeRes.data || [];
         
         renderShiftsTable();
         renderLatestShiftCard();
@@ -1845,14 +1524,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
 
     async function fetchToolsData() {
       try {
-        let data, error;
-        if (IS_DEMO_MODE) {
-          const res = await LocalDB.select('cnc_tool_bits');
-          data = res.data; error = res.error;
-        } else {
-          const res = await supabaseClient.from('cnc_tool_bits').select('*');
-          data = res.data; error = res.error;
-        }
+        const { data, error } = await supabaseClient.from('cnc_tool_bits').select('*');
         
         if (error) {
           console.error('Tool load error:', error.message || error);
@@ -2247,12 +1919,9 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       const item = records.find(r => r.id === id);
       if (!item) return;
       try {
-        if (IS_DEMO_MODE) {
-          await LocalDB.insert('cnc_cycle_times', [{ profile: `${item.profile || ''} (Copy)`, description: item.description, length: item.length, cycle_seconds: parseInt(item.cycle_seconds || 0, 10), feed_speeds: item.feed_speeds, tooling: item.tooling, is_deleted: false, record_date: todayISO() }]);
-        } else {
-          const { error } = await supabaseClient.from('cnc_cycle_times').insert([{ profile: `${item.profile || ''} (Copy)`, description: item.description, length: item.length, cycle_seconds: parseInt(item.cycle_seconds || 0, 10), feed_speeds: item.feed_speeds, tooling: item.tooling, is_deleted: false, record_date: todayISO() }]);
-          if (error) throw error;
-        }
+        const { error } = await supabaseClient.from('cnc_cycle_times').insert([{ profile: `${item.profile || ''} (Copy)`, description: item.description, length: item.length, cycle_seconds: parseInt(item.cycle_seconds || 0, 10), feed_speeds: item.feed_speeds, tooling: item.tooling, is_deleted: false, record_date: todayISO() }]);
+        if (error) throw error;
+        
         showToast(`Duplicated ${item.profile}!`);
         fetchAllData();
       } catch (error) {
@@ -2301,20 +1970,12 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       
       try {
         if (id) {
-          if (IS_DEMO_MODE) {
-            await LocalDB.update('cnc_cycle_times', payload, { id: parseInt(id) });
-          } else {
-            const { error } = await supabaseClient.from('cnc_cycle_times').update(payload).eq('id', id);
-            if (error) throw error;
-          }
+          const { error } = await supabaseClient.from('cnc_cycle_times').update(payload).eq('id', id);
+          if (error) throw error;
         } else {
           payload.record_date = todayISO();
-          if (IS_DEMO_MODE) {
-            await LocalDB.insert('cnc_cycle_times', [payload]);
-          } else {
-            const { error } = await supabaseClient.from('cnc_cycle_times').insert([payload]);
-            if (error) throw error;
-          }
+          const { error } = await supabaseClient.from('cnc_cycle_times').insert([payload]);
+          if (error) throw error;
         }
         closeFormModal();
         showToast("Profile saved!");
@@ -2327,11 +1988,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
     async function softDeleteRecord(id) {
       if (!confirm('Move to Recovery Vault?')) return;
       try {
-        if (IS_DEMO_MODE) {
-          await LocalDB.update('cnc_cycle_times', { is_deleted: true, deleted_at: new Date().toISOString() }, { id });
-        } else {
-          await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
-        }
+        await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
         fetchAllData();
       } catch (error) {
         showToast("Delete failed: " + (error.message || error), true);
@@ -2409,12 +2066,9 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       const t = toolsList.find(item => item.id === id);
       if (!t) return;
       try {
-        if (IS_DEMO_MODE) {
-          await LocalDB.insert('cnc_tool_bits', [{ category: t.category, sub_type: t.sub_type ? `${t.sub_type} (Copy)` : 'Copy', diameter: t.diameter, description: t.description, stock: t.stock, location: t.location, is_deleted: false }]);
-        } else {
-          const { error } = await supabaseClient.from('cnc_tool_bits').insert([{ category: t.category, sub_type: t.sub_type ? `${t.sub_type} (Copy)` : 'Copy', diameter: t.diameter, description: t.description, stock: t.stock, location: t.location, is_deleted: false }]);
-          if (error) throw error;
-        }
+        const { error } = await supabaseClient.from('cnc_tool_bits').insert([{ category: t.category, sub_type: t.sub_type ? `${t.sub_type} (Copy)` : 'Copy', diameter: t.diameter, description: t.description, stock: t.stock, location: t.location, is_deleted: false }]);
+        if (error) throw error;
+        
         showToast("Tool duplicated!");
         fetchToolsData();
       } catch (error) {
@@ -2463,19 +2117,11 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       
       try {
         if (id) {
-          if (IS_DEMO_MODE) {
-            await LocalDB.update('cnc_tool_bits', payload, { id: parseInt(id) });
-          } else {
-            const { error } = await supabaseClient.from('cnc_tool_bits').update(payload).eq('id', id);
-            if (error) throw error;
-          }
+          const { error } = await supabaseClient.from('cnc_tool_bits').update(payload).eq('id', id);
+          if (error) throw error;
         } else {
-          if (IS_DEMO_MODE) {
-            await LocalDB.insert('cnc_tool_bits', [payload]);
-          } else {
-            const { error } = await supabaseClient.from('cnc_tool_bits').insert([payload]);
-            if (error) throw error;
-          }
+          const { error } = await supabaseClient.from('cnc_tool_bits').insert([payload]);
+          if (error) throw error;
         }
         closeToolsFormModal();
         showToast("Tool saved!");
@@ -2488,11 +2134,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
     async function deleteTool(id) {
       if (!confirm('Move to Recovery Vault?')) return;
       try {
-        if (IS_DEMO_MODE) {
-          await LocalDB.update('cnc_tool_bits', { is_deleted: true, deleted_at: new Date().toISOString() }, { id });
-        } else {
-          await supabaseClient.from('cnc_tool_bits').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
-        }
+        await supabaseClient.from('cnc_tool_bits').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
         fetchToolsData();
       } catch (error) {
         showToast("Delete failed: " + (error.message || error), true);
@@ -2605,49 +2247,38 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
     }
 
     async function restoreRecord(id) {
-      if (IS_DEMO_MODE) await LocalDB.update('cnc_cycle_times', { is_deleted: false, deleted_at: null }, { id });
-      else await supabaseClient.from('cnc_cycle_times').update({ is_deleted: false, deleted_at: null }).eq('id', id);
+      await supabaseClient.from('cnc_cycle_times').update({ is_deleted: false, deleted_at: null }).eq('id', id);
       fetchAllData();
     }
     
     async function hardDeleteRecord(id) {
       if (!confirm('Permanently delete?')) return;
-      if (IS_DEMO_MODE) await LocalDB.delete('cnc_cycle_times', { id });
-      else await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
+      await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
       fetchAllData();
     }
     
     async function restoreTool(id) {
-      if (IS_DEMO_MODE) await LocalDB.update('cnc_tool_bits', { is_deleted: false, deleted_at: null }, { id });
-      else await supabaseClient.from('cnc_tool_bits').update({ is_deleted: false, deleted_at: null }).eq('id', id);
+      await supabaseClient.from('cnc_tool_bits').update({ is_deleted: false, deleted_at: null }).eq('id', id);
       fetchToolsData();
     }
     
     async function hardDeleteTool(id) {
       if (!confirm('Permanently delete?')) return;
-      if (IS_DEMO_MODE) await LocalDB.delete('cnc_tool_bits', { id });
-      else await supabaseClient.from('cnc_tool_bits').delete().eq('id', id);
+      await supabaseClient.from('cnc_tool_bits').delete().eq('id', id);
       fetchToolsData();
     }
     
     async function restoreShift(id) {
-      if (IS_DEMO_MODE) await LocalDB.update('shifts', { is_deleted: false, deleted_at: null }, { id });
-      else await supabaseClient.from('shifts').update({ is_deleted: false, deleted_at: null }).eq('id', id);
+      await supabaseClient.from('shifts').update({ is_deleted: false, deleted_at: null }).eq('id', id);
       await fetchOeeData();
       renderBinArchive();
     }
     
     async function hardDeleteShift(id) {
       if (!confirm('Permanently delete shift?')) return;
-      if (IS_DEMO_MODE) {
-        await LocalDB.delete('production_records', { shift_id: id });
-        await LocalDB.delete('downtime_events', { shift_id: id });
-        await LocalDB.delete('shifts', { id });
-      } else {
-        await supabaseClient.from('production_records').delete().eq('shift_id', id);
-        await supabaseClient.from('downtime_events').delete().eq('shift_id', id);
-        await supabaseClient.from('shifts').delete().eq('id', id);
-      }
+      await supabaseClient.from('production_records').delete().eq('shift_id', id);
+      await supabaseClient.from('downtime_events').delete().eq('shift_id', id);
+      await supabaseClient.from('shifts').delete().eq('id', id);
       await fetchOeeData();
       renderBinArchive();
     }
@@ -2874,26 +2505,15 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
         
         if (shiftId) {
           // Update existing shift
-          if (IS_DEMO_MODE) {
-            await LocalDB.update('shifts', shiftPayload, { id: shiftId });
-            await LocalDB.delete('production_records', { shift_id: shiftId });
-            await LocalDB.delete('downtime_events', { shift_id: shiftId });
-          } else {
-            const { error } = await supabaseClient.from('shifts').update(shiftPayload).eq('id', shiftId);
-            if (error) throw error;
-            await supabaseClient.from('production_records').delete().eq('shift_id', shiftId);
-            await supabaseClient.from('downtime_events').delete().eq('shift_id', shiftId);
-          }
+          const { error } = await supabaseClient.from('shifts').update(shiftPayload).eq('id', shiftId);
+          if (error) throw error;
+          await supabaseClient.from('production_records').delete().eq('shift_id', shiftId);
+          await supabaseClient.from('downtime_events').delete().eq('shift_id', shiftId);
         } else {
           // Insert new shift
-          if (IS_DEMO_MODE) {
-            const result = await LocalDB.insert('shifts', [shiftPayload]);
-            shiftId = result.data[0].id;
-          } else {
-            const { data, error } = await supabaseClient.from('shifts').insert([shiftPayload]).select('id').single();
-            if (error) throw error;
-            shiftId = data.id;
-          }
+          const { data, error } = await supabaseClient.from('shifts').insert([shiftPayload]).select('id').single();
+          if (error) throw error;
+          shiftId = data.id;
         }
         
         // Insert production records
@@ -2913,23 +2533,15 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
         });
         
         if (profilePayload.length) {
-          if (IS_DEMO_MODE) {
-            await LocalDB.insert('production_records', profilePayload);
-          } else {
-            const { error } = await supabaseClient.from('production_records').insert(profilePayload);
-            if (error) throw error;
-          }
+          const { error } = await supabaseClient.from('production_records').insert(profilePayload);
+          if (error) throw error;
         }
         
         // Insert downtime events
         if (downtimeRows.length) {
           const dtPayload = downtimeRows.map(d => ({ ...d, shift_id: shiftId }));
-          if (IS_DEMO_MODE) {
-            await LocalDB.insert('downtime_events', dtPayload);
-          } else {
-            const { error } = await supabaseClient.from('downtime_events').insert(dtPayload);
-            if (error) throw error;
-          }
+          const { error } = await supabaseClient.from('downtime_events').insert(dtPayload);
+          if (error) throw error;
         }
         
         showToast(id ? 'Shift updated!' : 'Shift saved!');
@@ -3015,11 +2627,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
     async function deleteShift(id) {
       if (!confirm('Move to Recovery Vault?')) return;
       try {
-        if (IS_DEMO_MODE) {
-          await LocalDB.update('shifts', { is_deleted: true, deleted_at: new Date().toISOString() }, { id });
-        } else {
-          await supabaseClient.from('shifts').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
-        }
+        await supabaseClient.from('shifts').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id);
         showToast('Shift moved to vault.');
         await fetchOeeData();
         renderBinArchive();
@@ -3258,22 +2866,6 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
     }
 
     // ========================================================================
-    // SETUP GUIDE
-    // ========================================================================
-    function showSetupGuide() {
-      document.getElementById('setupSQL').textContent = SETUP_SQL;
-      document.getElementById('modalSetupGuide').classList.remove('hidden');
-    }
-
-    function copySetupSQL() {
-      navigator.clipboard.writeText(SETUP_SQL).then(() => {
-        showToast('SQL copied to clipboard!');
-      }).catch(() => {
-        showToast('Copy failed - select and copy manually.', true);
-      });
-    }
-
-    // ========================================================================
     // BOOTSTRAP
     // ========================================================================
     async function bootstrapCnc5000() {
@@ -3286,60 +2878,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
         resetShiftLogForm();
         populatePlanningDropdown();
         
-        if (IS_DEMO_MODE) {
-          updateSyncStatus('Demo');
-          // Seed demo data if localStorage is empty
-          const db = LocalDB._load();
-          if (db.cnc_cycle_times.length === 0 && db.cnc_tool_bits.length === 0) {
-            // Insert component plant profile data extracted from PDF report
-            await LocalDB.insert('cnc_cycle_times', [
-              { profile: 'AL 527', description: 'Float Plane Blade (Side 02)', length: '2437.4 mm', cycle_seconds: 82, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 527', description: 'Float Pilane Blade (Side 02)', length: '2437.4 mm', cycle_seconds: 83, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 554', description: 'Single Rectangle', length: '1160 mm', cycle_seconds: 52, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 554', description: 'Three Rectangles', length: '1160 mm', cycle_seconds: 147, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 554', description: 'Three Rectangles', length: '1788 mm', cycle_seconds: 152, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 573', description: 'H-Bar-4 (4 Holes)', length: '140 mm', cycle_seconds: 34, feed_speeds: '400', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 632', description: 'VB 70 15-1', length: '-', cycle_seconds: 43, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 632', description: 'VB 70 15', length: '-', cycle_seconds: 139, feed_speeds: '800', tooling: 'Two Tools', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 633', description: 'VB-01', length: '-', cycle_seconds: 84, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 633', description: 'VB 02', length: '-', cycle_seconds: 93, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 633', description: 'VB-03', length: '-', cycle_seconds: 93, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 684', description: 'Part 70127', length: '-', cycle_seconds: 4227, feed_speeds: '400', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 684', description: 'Part 70128', length: '-', cycle_seconds: 125, feed_speeds: '600, 400', tooling: 'Two Tools', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 684', description: 'Part 70130', length: '-', cycle_seconds: 113, feed_speeds: '600,400', tooling: 'Two Tools', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 706', description: 'Single Long Rectangle', length: '1752 mm', cycle_seconds: 639, feed_speeds: '200', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 774', description: 'Aalco (6 Holes)', length: '260 mm', cycle_seconds: 38, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 774', description: 'Aalco (8 Holes)', length: '361 mm', cycle_seconds: 49, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 778', description: 'H Bar-1', length: '200 mm', cycle_seconds: 41, feed_speeds: '800', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 1242', description: 'Swage Handle', length: '1828.8 mm', cycle_seconds: 50, feed_speeds: '600', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 554', description: 'Three Rectangles', length: '2296 mm', cycle_seconds: 103, feed_speeds: 'Feed 60 (Test 600)', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 554', description: 'Three Rectangles (Slow)', length: '1708 mm', cycle_seconds: 546, feed_speeds: '150', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 554', description: 'Three Rectangles', length: '2298 mm', cycle_seconds: 106, feed_speeds: 'Feed 60 (Test 600)', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 1038', description: 'Long Variant 01', length: '1824.94 mm', cycle_seconds: 380, feed_speeds: '500, 400 350', tooling: 'Single tool', is_deleted: false, record_date: todayISO() },
-              { profile: 'AL 1038', description: 'Long Variant 02', length: '1520.14 mm', cycle_seconds: 386, feed_speeds: '500, 300, 350', tooling: 'Single tool', is_deleted: false, record_date: todayISO() }
-            ]);
-            await LocalDB.insert('cnc_tool_bits', [
-              { category: 'Milling', sub_type: 'Flat End Mill', diameter: '10.0 mm', description: 'Slotting & pocketing', stock: 5, location: 'Rack A-01', is_deleted: false },
-              { category: 'Milling', sub_type: 'Ball Nose', diameter: '8.0 mm', description: '3D contouring', stock: 3, location: 'Rack A-02', is_deleted: false },
-              { category: 'Milling', sub_type: 'Face Mill', diameter: '16.0 mm', description: 'Surface finishing', stock: 1, location: 'Rack A-03', is_deleted: false },
-              { category: 'Drilling', sub_type: 'Twist Drill', diameter: '8.0 mm', description: 'Through holes', stock: 8, location: 'Rack B-01', is_deleted: false },
-              { category: 'Drilling', sub_type: 'Center Drill', diameter: '5.0 mm', description: 'Pilot holes', stock: 2, location: 'Rack B-02', is_deleted: false },
-              { category: 'Tapping', sub_type: 'Spiral Tap', diameter: 'M8', description: 'Thread cutting', stock: 4, location: 'Rack C-01', is_deleted: false },
-              { category: 'Tapping', sub_type: 'Form Tap', diameter: 'M6', description: 'Thread forming', stock: 1, location: 'Rack C-02', is_deleted: false },
-              { category: 'Chamfer', sub_type: 'Chamfer Mill', diameter: '45°', description: 'Edge deburring', stock: 6, location: 'Rack D-01', is_deleted: false }
-            ]);
-          }
-          
-          showToast('Running in Demo Mode (localStorage). Click status badge for Supabase setup.', false);
-          
-          // Show setup guide after a brief delay
-          setTimeout(() => {
-            if (IS_DEMO_MODE && !localStorage.getItem('cnc5000_setup_dismissed')) {
-              showSetupGuide();
-              localStorage.setItem('cnc5000_setup_dismissed', '1');
-            }
-          }, 1500);
-        }
+        updateSyncStatus('Connecting...');
         
         await fetchAllData();
         await fetchToolsData();
@@ -3347,6 +2886,7 @@ INSERT INTO cnc_tool_bits (category, sub_type, diameter, description, stock, loc
       } catch (e) {
         console.error('Bootstrap error:', e);
         showToast('Init failed: ' + (e.message || e), true);
+        updateSyncStatus('Offline');
       }
     }
 
