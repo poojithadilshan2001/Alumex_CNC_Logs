@@ -333,8 +333,6 @@
             <div><label class="block font-bold text-slate-500 mb-1">Break Time (min)</label><input type="number" id="logPlannedBreak" value="90" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none font-bold focus:border-blue-500 transition-colors"></div>
           </div>
           
-          <datalist id="profileDataList"></datalist>
-          
           <div class="border-t border-slate-200 dark:border-slate-700 pt-4 space-y-3">
             <div class="flex justify-between items-center"><span class="text-xs font-black uppercase text-blue-600 dark:text-blue-400 tracking-wider">Profiles Produced</span><button type="button" onclick="addProfileCard()" class="text-blue-600 dark:text-blue-400 font-bold hover:underline bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg">+ Add Profile Slot</button></div>
             <div id="profileCardsContainer" class="space-y-3"></div>
@@ -823,14 +821,22 @@
       document.getElementById('modalForm').classList.remove('hidden');
     }
     function closeFormModal() { document.getElementById('modalForm').classList.add('hidden'); }
+    
     async function submitForm(e) {
       e.preventDefault(); const id = document.getElementById('formRowId').value, payload = { profile: document.getElementById('formProfile').value.trim().toUpperCase(), cycle_seconds: parseInt(document.getElementById('formCycleSeconds').value)||0, description: document.getElementById('formDescription').value.trim(), length: document.getElementById('formLength').value.trim(), feed_speeds: document.getElementById('formFeedSpeeds').value.trim(), tooling: document.getElementById('formTooling').value.trim(), is_deleted: false };
       try { if (id) await supabaseClient.from('cnc_cycle_times').update(payload).eq('id', id).select(); else { payload.record_date = todayISO(); await supabaseClient.from('cnc_cycle_times').insert([payload]).select(); } closeFormModal(); showToast("Saved Profile!"); fetchAllData(); } catch (err) { alert(err.message); }
     }
+    
     async function softDeleteRecord(id) { 
-        if (!confirm('Move profile to Vault?')) return; 
-        await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id); 
-        fetchAllData(); 
+        if (!confirm('Move profile to Vault?')) return;
+        try {
+            const { error } = await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id); 
+            if (error) throw error;
+            showToast("Profile moved to Vault");
+            await fetchAllData(); 
+        } catch (err) {
+            alert("Error deleting profile: " + err.message);
+        }
     }
 
     // --- CRUD TOOLS ---
@@ -852,8 +858,12 @@
     }
     async function deleteTool(id) { 
         if(!confirm('Move tool to Vault?')) return; 
-        await supabaseClient.from('cnc_tool_bits').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id); 
-        fetchToolsData(); 
+        try {
+            const { error } = await supabaseClient.from('cnc_tool_bits').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id); 
+            if (error) throw error;
+            showToast("Tool moved to Vault");
+            await fetchToolsData(); 
+        } catch (err) { alert(err.message); }
     }
     function toolsFilterByCategory(cat) { document.getElementById('filterCategorySelect').value = cat; applyToolsFiltersAndRender(); switchTab('tools'); }
 
@@ -934,8 +944,22 @@
         dbGood = '';
       }
 
+      // Replaced datalist with a proper <select> dropdown
+      let profileOptions = '<option value="">-- Select Profile --</option>';
+      let foundInRecords = false;
+      records.forEach(r => {
+          const selected = (p && p.profile_code.toUpperCase() === r.profile.toUpperCase()) ? 'selected' : '';
+          if (selected) foundInRecords = true;
+          profileOptions += `<option value="${r.profile}" ${selected}>${r.profile}</option>`;
+      });
+
+      // Safely preserve old records if a profile was hard deleted from master list
+      if (p && p.profile_code && !foundInRecords) {
+          profileOptions += `<option value="${p.profile_code}" selected>${p.profile_code} (Archived/Unknown)</option>`;
+      }
+
       d.innerHTML = `
-        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Profile Code</label><input type="text" list="profileDataList" oninput="window.autoFillCycleTime(this)" class="profCodeInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?p.profile_code:''}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Profile Code</label><select onchange="window.autoFillCycleTime(this)" class="profCodeInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors">${profileOptions}</select></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Cycle (s)</label><input type="number" class="profCycleInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-mono text-blue-600 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${pcy}"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Target</label><input type="number" oninput="window.calcLack(this)" class="profTargetInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?p.target:'0'}"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Good Pcs</label><input type="number" oninput="window.calcLack(this)" class="profGoodInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-emerald-600 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?dbGood:'0'}"></div>
@@ -969,7 +993,7 @@
         if (id) { await supabaseClient.from('shifts').update(sp).eq('id', id); await supabaseClient.from('production_records').delete().eq('shift_id', id); await supabaseClient.from('downtime_events').delete().eq('shift_id', id); } 
         else { const { data } = await supabaseClient.from('shifts').insert([sp]).select(); sid = data[0].id; }
 
-        const pNodes = document.querySelectorAll('#profileCardsContainer > div'), pp = [], cp = [], up = [];
+        const pNodes = document.querySelectorAll('#profileCardsContainer > div'), pp = [];
         pNodes.forEach(el => {
           const c = el.querySelector('.profCodeInput').value.trim().toUpperCase(), 
                 cy = parseInt(el.querySelector('.profCycleInput').value)||0, 
@@ -980,18 +1004,12 @@
           
           const total_produced = gd + rj; 
 
+          // Removed the link here - logging shifts will no longer mutate main CNC Cycle Times
           if (c) {
             pp.push({ shift_id: sid, profile_code: c, ideal_cycle_seconds: cy, setup_min: 0, target: tg, produced: total_produced, rejected: rj, reject_reason: rr });
-            if (cy > 0) {
-                const ex = records.find(r => r.profile.toUpperCase() === c);
-                if (!ex && !cp.some(x => x.profile === c)) cp.push({ profile: c, cycle_seconds: cy, description: 'Auto-added from daily shift log', record_date: todayISO(), is_deleted: false });
-                else if (ex && ex.cycle_seconds !== cy) up.push(supabaseClient.from('cnc_cycle_times').update({ cycle_seconds: cy }).eq('id', ex.id));
-            }
           }
         });
         
-        if (cp.length > 0) await supabaseClient.from('cnc_cycle_times').insert(cp);
-        if (up.length > 0) await Promise.all(up);
         if (pp.length > 0) await supabaseClient.from('production_records').insert(pp);
 
         const dNodes = document.querySelectorAll('#downtimeCardsContainer > div'), dp = [];
@@ -1017,16 +1035,21 @@
     
     async function deleteShiftRecord(id) { 
         if (!confirm('Move Shift to Vault?')) return; 
-        await supabaseClient.from('shifts').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id); 
-        fetchOeeData(); 
+        try {
+            const { error } = await supabaseClient.from('shifts').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id); 
+            if(error) throw error;
+            showToast("Shift moved to Vault");
+            fetchOeeData(); 
+        } catch(err) { alert(err.message); }
     }
 
     // --- PRODUCTION PLANNER ---
     function populatePlanningDropdown() {
-      const sel = document.getElementById('planProfileSelect'), dlist = document.getElementById('profileDataList'); 
-      let opt = '<option value="">-- Choose Profile --</option>', dl = '';
-      records.forEach(r => { opt += `<option value="${r.id}">${r.profile} (${r.cycle_seconds}s)</option>`; dl += `<option value="${r.profile}">Cycle: ${r.cycle_seconds}s</option>`; });
-      if (sel) sel.innerHTML = opt; if (dlist) dlist.innerHTML = dl;
+      // Removed the datalist update, only updates select now
+      const sel = document.getElementById('planProfileSelect'); 
+      let opt = '<option value="">-- Choose Profile --</option>';
+      records.forEach(r => { opt += `<option value="${r.id}">${r.profile} (${r.cycle_seconds}s)</option>`; });
+      if (sel) sel.innerHTML = opt;
     }
     function addProfileToPlanningCart() {
       const id = document.getElementById('planProfileSelect').value; if (!id) return alert('Select profile');
