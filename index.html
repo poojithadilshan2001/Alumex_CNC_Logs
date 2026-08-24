@@ -657,10 +657,24 @@
     }
 
     async function fetchOeeData() {
-      const [sh, pr, dt] = await Promise.all([ supabaseClient.from('shifts').select('*').order('shift_date', { ascending: false }), supabaseClient.from('production_records').select('*'), supabaseClient.from('downtime_events').select('*') ]);
-      shifts = (sh.data || []).filter(s => !s.is_deleted); trashShifts = (sh.data || []).filter(s => s.is_deleted);
-      productionRecords = pr.data || []; downtimeEvents = dt.data || [];
-      renderShiftsTable(); renderLatestShiftCard(); renderReportPreview(); render30DayProfileAnalytics(); renderOeeTelemetryChart();
+      const [sh, pr, dt] = await Promise.all([ 
+        supabaseClient.from('shifts').select('*').order('shift_date', { ascending: false }), 
+        supabaseClient.from('production_records').select('*'), 
+        supabaseClient.from('downtime_events').select('*') 
+      ]);
+      
+      shifts = (sh.data || []).filter(s => !s.is_deleted); 
+      trashShifts = (sh.data || []).filter(s => s.is_deleted);
+      
+      const activeShiftIds = new Set(shifts.map(s => s.id));
+      productionRecords = (pr.data || []).filter(p => activeShiftIds.has(p.shift_id));
+      downtimeEvents = (dt.data || []).filter(d => activeShiftIds.has(d.shift_id));
+      
+      renderShiftsTable(); 
+      renderLatestShiftCard(); 
+      renderReportPreview(); 
+      render30DayProfileAnalytics(); 
+      renderOeeTelemetryChart();
     }
 
     async function fetchToolsData() {
@@ -1184,26 +1198,48 @@
         </div>`).join('') : '<p class="text-xs text-slate-500 italic px-1">Vault Empty.</p>';
     }
 
-    async function restoreProfile(id) { await supabaseClient.from('cnc_cycle_times').update({is_deleted: false, deleted_at: null}).eq('id', id); fetchAllData(); showToast("Profile Restored."); }
-    async function restoreTool(id) { await supabaseClient.from('cnc_tool_bits').update({is_deleted: false, deleted_at: null}).eq('id', id); fetchToolsData(); showToast("Tool Restored."); }
-    async function restoreShift(id) { await supabaseClient.from('shifts').update({is_deleted: false, deleted_at: null}).eq('id', id); fetchOeeData(); showToast("Shift Restored."); }
+    async function restoreProfile(id) { 
+        await supabaseClient.from('cnc_cycle_times').update({is_deleted: false, deleted_at: null}).eq('id', id); 
+        await fetchAllData(); 
+        renderBinArchive();
+        showToast("Profile Restored."); 
+    }
+
+    async function restoreTool(id) { 
+        await supabaseClient.from('cnc_tool_bits').update({is_deleted: false, deleted_at: null}).eq('id', id); 
+        await fetchToolsData(); 
+        renderBinArchive();
+        showToast("Tool Restored."); 
+    }
+
+    async function restoreShift(id) { 
+        await supabaseClient.from('shifts').update({is_deleted: false, deleted_at: null}).eq('id', id); 
+        await fetchOeeData(); 
+        renderBinArchive();
+        showToast("Shift Restored."); 
+    }
 
     async function hardDeleteProfile(id) {
         if(!confirm("Are you sure you want to PERMANENTLY delete this profile? This cannot be undone.")) return;
         await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
-        fetchAllData();
+        await fetchAllData();
+        renderBinArchive();
         showToast("Profile permanently deleted from database.");
     }
+
     async function hardDeleteTool(id) {
         if(!confirm("Are you sure you want to PERMANENTLY delete this tool? This cannot be undone.")) return;
         await supabaseClient.from('cnc_tool_bits').delete().eq('id', id);
-        fetchToolsData();
+        await fetchToolsData();
+        renderBinArchive();
         showToast("Tool permanently deleted from database.");
     }
+
     async function hardDeleteShift(id) {
         if(!confirm("Are you sure you want to PERMANENTLY delete this shift log? This cannot be undone.")) return;
         await supabaseClient.from('shifts').delete().eq('id', id);
-        fetchOeeData();
+        await fetchOeeData();
+        renderBinArchive();
         showToast("Shift permanently deleted from database.");
     }
 
