@@ -473,12 +473,12 @@
     <!-- 8. RECOVERY VAULT -->
     <section id="view-trash" class="hidden space-y-6">
       <div class="bg-gradient-to-r from-amber-600/90 to-rose-700/90 text-white p-6 rounded-3xl shadow-sm flex justify-between items-center">
-        <div><span class="text-[10px] font-black uppercase tracking-widest text-amber-200">CENTRAL RECOVERY VAULT</span><h3 class="text-lg font-black mt-0.5">Recycle &amp; Disposal Bin Archive</h3></div>
+        <div><span class="text-[10px] font-black uppercase tracking-widest text-amber-200">CENTRAL RECOVERY VAULT</span><h3 class="text-lg font-black mt-0.5">Recycle &amp; Disposal Bin Archive</h3><p class="text-xs text-amber-100 mt-1 opacity-80">Items are automatically permanently deleted after 30 days.</p></div>
       </div>
       <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-        <div><h4 class="text-xs font-black uppercase tracking-wider mb-2 border-b border-slate-100 dark:border-slate-700 pb-2">Profiles</h4><div id="trashProfilesTableBody" class="space-y-2"></div></div>
-        <div><h4 class="text-xs font-black uppercase tracking-wider mb-2 border-b border-slate-100 dark:border-slate-700 pb-2">Tools</h4><div id="trashToolsTableBody" class="space-y-2"></div></div>
-        <div><h4 class="text-xs font-black uppercase tracking-wider mb-2 border-b border-slate-100 dark:border-slate-700 pb-2">Shifts</h4><div id="trashShiftsTableBody" class="space-y-2"></div></div>
+        <div><h4 class="text-xs font-black uppercase tracking-wider mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">Profiles</h4><div id="trashProfilesTableBody" class="space-y-2"></div></div>
+        <div><h4 class="text-xs font-black uppercase tracking-wider mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">Tools</h4><div id="trashToolsTableBody" class="space-y-2"></div></div>
+        <div><h4 class="text-xs font-black uppercase tracking-wider mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">Shifts</h4><div id="trashShiftsTableBody" class="space-y-2"></div></div>
       </div>
     </section>
 
@@ -571,8 +571,6 @@
       }, 5000);
     }
 
-    // ENHANCED: switchTab function perfectly replicating the modern, clean UI state in your screenshot
-    // Also handling local storage persistence!
     function switchTab(tabId) {
       localStorage.setItem('activeCncTab', tabId); // Saves the active tab!
       const navTiles = ['dashboard', 'logs', 'production', 'oee', 'tools', 'toolsreq', 'reports', 'trash'];
@@ -584,11 +582,9 @@
         const badge = document.getElementById(`navBadge-${t}`);
         
         if (t === tabId) {
-          // ACTIVE STATE: White background (or slate in dark), Blue Border, Blue Text, Subtle glow & zoom
           if(btn) btn.className = "group p-3 sm:p-4 rounded-2xl transition-all duration-300 text-left flex flex-col justify-between shadow-md bg-blue-50/50 dark:bg-slate-800 border-2 border-blue-500 text-blue-700 dark:text-blue-400 ring-4 ring-blue-500/10 transform scale-[1.03]";
           if (badge) badge.className = "text-[9px] font-black font-mono uppercase px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 tracking-wider";
         } else {
-          // INACTIVE STATE: Standard grey
           if(btn) btn.className = "group p-3 sm:p-4 rounded-2xl border transition-all duration-300 text-left flex flex-col justify-between shadow-sm bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-400 dark:hover:border-slate-500 hover:shadow-md";
           if (badge) badge.className = "text-[9px] font-bold font-mono uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-400 tracking-wider transition-colors group-hover:bg-slate-200 dark:group-hover:bg-slate-600";
         }
@@ -611,7 +607,6 @@
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
       document.querySelectorAll('.themeIcon').forEach(el => el.innerText = isDark ? '☀' : '🌙');
       
-      // Re-trigger active tab to refresh nav styling for dark mode correctly if needed
       const currentTab = localStorage.getItem('activeCncTab') || 'dashboard';
       switchTab(currentTab);
       renderMasterDashboard();
@@ -657,7 +652,6 @@
       populatePlanningDropdown();
       profilesLoaded = true;
       
-      // Auto-load last viewed tab or default to dashboard
       const activeTab = localStorage.getItem('activeCncTab') || 'dashboard';
       switchTab(activeTab);
     }
@@ -672,7 +666,9 @@
     async function fetchToolsData() {
       const { data } = await supabaseClient.from('cnc_tool_bits').select('*');
       toolsList = (data || []).filter(t => !t.is_deleted); toolsTrash = (data || []).filter(t => t.is_deleted);
-      toolsLoaded = true; applyToolsFiltersAndRender(); renderMasterDashboard(); renderBinArchive();
+      toolsLoaded = true; applyToolsFiltersAndRender(); renderMasterDashboard(); 
+      // Safe call, the actual bin render will handle expirations
+      renderBinArchive();
     }
 
     // --- CORE LOGIC ---
@@ -680,8 +676,6 @@
       const prods = productionRecords.filter(p => p.shift_id === shift.id);
       const dts = downtimeEvents.filter(d => d.shift_id === shift.id);
       
-      // In our updated logic, DB 'produced' = Total Cycles. 
-      // Good = Total - Rejects
       const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
       const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
       const good = Math.max(0, produced - rejected);
@@ -796,7 +790,11 @@
       e.preventDefault(); const id = document.getElementById('formRowId').value, payload = { profile: document.getElementById('formProfile').value.trim().toUpperCase(), cycle_seconds: parseInt(document.getElementById('formCycleSeconds').value)||0, description: document.getElementById('formDescription').value.trim(), length: document.getElementById('formLength').value.trim(), feed_speeds: document.getElementById('formFeedSpeeds').value.trim(), tooling: document.getElementById('formTooling').value.trim(), is_deleted: false };
       try { if (id) await supabaseClient.from('cnc_cycle_times').update(payload).eq('id', id).select(); else { payload.record_date = todayISO(); await supabaseClient.from('cnc_cycle_times').insert([payload]).select(); } closeFormModal(); showToast("Saved Profile!"); fetchAllData(); } catch (err) { alert(err.message); }
     }
-    async function softDeleteRecord(id) { if (!confirm('Move profile to Vault?')) return; await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true }).eq('id', id); fetchAllData(); }
+    async function softDeleteRecord(id) { 
+        if (!confirm('Move profile to Vault?')) return; 
+        await supabaseClient.from('cnc_cycle_times').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id); 
+        fetchAllData(); 
+    }
 
     // --- CRUD TOOLS ---
     function applyToolsFiltersAndRender() {
@@ -815,7 +813,11 @@
       e.preventDefault(); const id = document.getElementById('toolsFormId').value, payload = { category: document.getElementById('toolsFormCategory').value, sub_type: document.getElementById('toolsFormSubType').value.trim(), diameter: document.getElementById('toolsFormDiameter').value.trim(), description: document.getElementById('toolsFormDescription').value.trim(), location: document.getElementById('toolsFormLocation').value.trim(), stock: parseInt(document.getElementById('toolsFormStock').value)||0, is_deleted: false };
       try { if (id) await supabaseClient.from('cnc_tool_bits').update(payload).eq('id', id).select(); else await supabaseClient.from('cnc_tool_bits').insert([payload]).select(); closeToolsFormModal(); showToast("Saved Tool!"); fetchToolsData(); } catch (err) { alert(err.message); }
     }
-    async function deleteTool(id) { if(!confirm('Move tool to Vault?')) return; await supabaseClient.from('cnc_tool_bits').update({ is_deleted: true }).eq('id', id); fetchToolsData(); }
+    async function deleteTool(id) { 
+        if(!confirm('Move tool to Vault?')) return; 
+        await supabaseClient.from('cnc_tool_bits').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id); 
+        fetchToolsData(); 
+    }
     function toolsFilterByCategory(cat) { document.getElementById('filterCategorySelect').value = cat; applyToolsFiltersAndRender(); switchTab('tools'); }
 
     // --- SHIFTS & OEE ---
@@ -864,7 +866,6 @@
       document.getElementById('modalViewShift').classList.remove('hidden');
     }
 
-    // Dynamic UI Calculator for "Lack"
     window.calcLack = function(inputElement) {
         const card = inputElement.closest('.prof-card-container');
         if (!card) return;
@@ -872,7 +873,6 @@
         const good = parseInt(card.querySelector('.profGoodInput').value) || 0;
         const scrap = parseInt(card.querySelector('.profRejectedInput').value) || 0;
         
-        // Total Produced = Good Parts + Scrap Parts
         const totalProduced = good + scrap; 
         const lack = target - totalProduced;
         
@@ -977,7 +977,12 @@
       if (dts.length > 0) dts.forEach(d => addDowntimeCard(d));
       switchOeeSubTab('addlog');
     }
-    async function deleteShiftRecord(id) { if (!confirm('Move Shift to Vault?')) return; await supabaseClient.from('shifts').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id); fetchOeeData(); }
+    
+    async function deleteShiftRecord(id) { 
+        if (!confirm('Move Shift to Vault?')) return; 
+        await supabaseClient.from('shifts').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', id); 
+        fetchOeeData(); 
+    }
 
     // --- PRODUCTION PLANNER ---
     function populatePlanningDropdown() {
@@ -1094,16 +1099,95 @@
     function exportToolsToExcel() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(toolsList), "Tools"); XLSX.writeFile(wb, "CNC_Tools.xlsx"); }
     function generateToolsInventoryPDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text("Tools Inventory", 14, 15); doc.autoTable({ head: [['Category', 'Dia', 'Stock', 'Loc']], body: toolsDisplayed.map(t => [t.category, t.diameter, t.stock, t.location||'']), startY: 20 }); doc.save("Inventory.pdf"); }
 
-    // --- RECOVERY VAULT ---
-    function renderBinArchive() {
+    // --- RECOVERY VAULT (MANUAL DELETE + 30 DAY AUTO-CLEANUP) ---
+    async function renderBinArchive() {
+      // 1. Auto Cleanup Process: Check for records older than 30 days
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - 30);
+      const cutoffIso = cutoffDate.toISOString();
+
+      // Find expired records
+      const expiredProfiles = trashRecords.filter(r => r.deleted_at && r.deleted_at < cutoffIso);
+      const expiredTools = toolsTrash.filter(t => t.deleted_at && t.deleted_at < cutoffIso);
+      const expiredShifts = trashShifts.filter(s => s.deleted_at && s.deleted_at < cutoffIso);
+
+      // Perform actual Database hard delete for expired items
+      if (expiredProfiles.length) { 
+        await supabaseClient.from('cnc_cycle_times').delete().in('id', expiredProfiles.map(x=>x.id)); 
+        trashRecords = trashRecords.filter(r => !expiredProfiles.includes(r)); 
+      }
+      if (expiredTools.length) { 
+        await supabaseClient.from('cnc_tool_bits').delete().in('id', expiredTools.map(x=>x.id)); 
+        toolsTrash = toolsTrash.filter(t => !expiredTools.includes(t)); 
+      }
+      if (expiredShifts.length) { 
+        await supabaseClient.from('shifts').delete().in('id', expiredShifts.map(x=>x.id)); 
+        trashShifts = trashShifts.filter(s => !expiredShifts.includes(s)); 
+      }
+
+      // 2. Render UI
       const pT = document.getElementById('trashProfilesTableBody'), tT = document.getElementById('trashToolsTableBody'), sT = document.getElementById('trashShiftsTableBody');
-      if(pT) pT.innerHTML = trashRecords.length ? trashRecords.map(r => `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600"><span><b class="text-blue-600 dark:text-blue-400 text-sm">${r.profile}</b></span><button onclick="restoreProfile('${r.id}')" class="text-emerald-600 font-bold px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 transition">Restore</button></div>`).join('') : '<p class="text-xs text-slate-500 italic">Vault Empty.</p>';
-      if(tT) tT.innerHTML = toolsTrash.length ? toolsTrash.map(t => `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600"><span><b class="text-slate-800 dark:text-slate-200">${t.category}</b> - ${t.diameter}</span><button onclick="restoreTool('${t.id}')" class="text-emerald-600 font-bold px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 transition">Restore</button></div>`).join('') : '<p class="text-xs text-slate-500 italic">Vault Empty.</p>';
-      if(sT) sT.innerHTML = trashShifts.length ? trashShifts.map(s => `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600"><span><b class="text-slate-800 dark:text-slate-200">${s.shift_date}</b> (${s.shift_type})</span><button onclick="restoreShift('${s.id}')" class="text-emerald-600 font-bold px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 transition">Restore</button></div>`).join('') : '<p class="text-xs text-slate-500 italic">Vault Empty.</p>';
+      
+      if(pT) pT.innerHTML = trashRecords.length ? trashRecords.map(r => `
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600 transition hover:border-slate-300 dark:hover:border-slate-500 shadow-sm">
+            <div>
+                <b class="text-blue-600 dark:text-blue-400 text-sm">${r.profile}</b> 
+                <span class="text-[10px] text-slate-400 font-mono ml-2">Del: ${r.deleted_at ? r.deleted_at.slice(0,10) : 'Unknown'}</span>
+            </div>
+            <div class="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                <button onclick="restoreProfile('${r.id}')" class="flex-1 sm:flex-none text-emerald-600 font-bold px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition">Restore</button>
+                <button onclick="hardDeleteProfile('${r.id}')" class="flex-1 sm:flex-none text-rose-600 font-bold px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition shadow-sm border border-rose-100 dark:border-rose-900">Delete Forever</button>
+            </div>
+        </div>`).join('') : '<p class="text-xs text-slate-500 italic px-1">Vault Empty.</p>';
+      
+      if(tT) tT.innerHTML = toolsTrash.length ? toolsTrash.map(t => `
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600 transition hover:border-slate-300 dark:hover:border-slate-500 shadow-sm">
+            <div>
+                <b class="text-slate-800 dark:text-slate-200 text-sm">${t.category}</b> - ${t.diameter}
+                <span class="text-[10px] text-slate-400 font-mono ml-2">Del: ${t.deleted_at ? t.deleted_at.slice(0,10) : 'Unknown'}</span>
+            </div>
+            <div class="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                <button onclick="restoreTool('${t.id}')" class="flex-1 sm:flex-none text-emerald-600 font-bold px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition">Restore</button>
+                <button onclick="hardDeleteTool('${t.id}')" class="flex-1 sm:flex-none text-rose-600 font-bold px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition shadow-sm border border-rose-100 dark:border-rose-900">Delete Forever</button>
+            </div>
+        </div>`).join('') : '<p class="text-xs text-slate-500 italic px-1">Vault Empty.</p>';
+      
+      if(sT) sT.innerHTML = trashShifts.length ? trashShifts.map(s => `
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600 transition hover:border-slate-300 dark:hover:border-slate-500 shadow-sm">
+            <div>
+                <b class="text-slate-800 dark:text-slate-200 text-sm">${s.shift_date}</b> (${s.shift_type})
+                <span class="text-[10px] text-slate-400 font-mono ml-2">Del: ${s.deleted_at ? s.deleted_at.slice(0,10) : 'Unknown'}</span>
+            </div>
+            <div class="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                <button onclick="restoreShift('${s.id}')" class="flex-1 sm:flex-none text-emerald-600 font-bold px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition">Restore</button>
+                <button onclick="hardDeleteShift('${s.id}')" class="flex-1 sm:flex-none text-rose-600 font-bold px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition shadow-sm border border-rose-100 dark:border-rose-900">Delete Forever</button>
+            </div>
+        </div>`).join('') : '<p class="text-xs text-slate-500 italic px-1">Vault Empty.</p>';
     }
-    async function restoreProfile(id) { await supabaseClient.from('cnc_cycle_times').update({is_deleted: false}).eq('id', id); fetchAllData(); showToast("Restored!"); }
-    async function restoreTool(id) { await supabaseClient.from('cnc_tool_bits').update({is_deleted: false}).eq('id', id); fetchToolsData(); showToast("Restored!"); }
-    async function restoreShift(id) { await supabaseClient.from('shifts').update({is_deleted: false, deleted_at: null}).eq('id', id); fetchOeeData(); showToast("Restored!"); }
+
+    async function restoreProfile(id) { await supabaseClient.from('cnc_cycle_times').update({is_deleted: false, deleted_at: null}).eq('id', id); fetchAllData(); showToast("Profile Restored."); }
+    async function restoreTool(id) { await supabaseClient.from('cnc_tool_bits').update({is_deleted: false, deleted_at: null}).eq('id', id); fetchToolsData(); showToast("Tool Restored."); }
+    async function restoreShift(id) { await supabaseClient.from('shifts').update({is_deleted: false, deleted_at: null}).eq('id', id); fetchOeeData(); showToast("Shift Restored."); }
+
+    // Explicit manual Permanent Delete functions
+    async function hardDeleteProfile(id) {
+        if(!confirm("Are you sure you want to PERMANENTLY delete this profile? This cannot be undone.")) return;
+        await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
+        fetchAllData();
+        showToast("Profile permanently deleted from database.");
+    }
+    async function hardDeleteTool(id) {
+        if(!confirm("Are you sure you want to PERMANENTLY delete this tool? This cannot be undone.")) return;
+        await supabaseClient.from('cnc_tool_bits').delete().eq('id', id);
+        fetchToolsData();
+        showToast("Tool permanently deleted from database.");
+    }
+    async function hardDeleteShift(id) {
+        if(!confirm("Are you sure you want to PERMANENTLY delete this shift log? This cannot be undone.")) return;
+        await supabaseClient.from('shifts').delete().eq('id', id);
+        fetchOeeData();
+        showToast("Shift permanently deleted from database.");
+    }
 
     // --- BOOTSTRAP ---
     document.addEventListener('DOMContentLoaded', () => { document.getElementById('memoDate').value = todayISO(); loadRecipients(); resetShiftLogForm(); fetchAllData(); fetchToolsData(); });
