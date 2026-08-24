@@ -572,7 +572,7 @@
     }
 
     function switchTab(tabId) {
-      localStorage.setItem('activeCncTab', tabId); // Saves the active tab!
+      localStorage.setItem('activeCncTab', tabId); 
       const navTiles = ['dashboard', 'logs', 'production', 'oee', 'tools', 'toolsreq', 'reports', 'trash'];
       
       navTiles.forEach(t => {
@@ -665,9 +665,14 @@
 
     async function fetchToolsData() {
       const { data } = await supabaseClient.from('cnc_tool_bits').select('*');
-      toolsList = (data || []).filter(t => !t.is_deleted); toolsTrash = (data || []).filter(t => t.is_deleted);
-      toolsLoaded = true; applyToolsFiltersAndRender(); renderMasterDashboard(); 
-      // Safe call, the actual bin render will handle expirations
+      toolsList = (data || []).filter(t => !t.is_deleted); 
+      toolsTrash = (data || []).filter(t => t.is_deleted);
+      toolsLoaded = true; 
+      
+      // Update tables and summary UI cards across all tabs instantly
+      applyToolsFiltersAndRender(); 
+      refreshToolsDashboard(); 
+      renderMasterDashboard(); 
       renderBinArchive();
     }
 
@@ -707,7 +712,9 @@
         document.getElementById('dashOeeAvg').innerText = fmtPct(avgOee);
         document.getElementById('dashProducedToday').innerText = `${oeeRes[0].good} pcs`;
       }
-      renderDashboardCharts(); render30DayProfileAnalytics(); refreshToolsDashboard();
+      renderDashboardCharts(); render30DayProfileAnalytics(); 
+      // Safe double-trigger to ensure the UI is fully synchronized
+      refreshToolsDashboard(); 
     }
 
     // --- CHARTS ---
@@ -764,7 +771,23 @@
       if (ctx30) chartProfile30Inst = new Chart(ctx30.getContext('2d'), { type: 'bar', data: { labels: chartLabels.length?chartLabels:['No Data'], datasets: [{ data: chartData.length?chartData:[0], backgroundColor: chartColor, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales:{x:{ticks:{color:document.documentElement.classList.contains('dark')?'#cbd5e1':'#475569'},grid:{display:false}}, y:{ticks:{color:document.documentElement.classList.contains('dark')?'#cbd5e1':'#475569'},grid:{color:document.documentElement.classList.contains('dark')?'#334155':'#e2e8f0'},beginAtZero:true}} } });
     }
     function setProfile30Angle(a) { profile30CurrentAngle = a; ['quantity', 'shifts', 'rejects'].forEach(x => { document.getElementById(`btnAngle-${x}`).className = x===a?"px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold":"px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold"; }); render30DayProfileAnalytics(); }
-    function refreshToolsDashboard() { const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 }; toolsList.forEach(t => { counts[normalizeToolCategory(t.category)] += (parseInt(t.stock) || 0); }); document.getElementById('catCount-Milling').innerText = `${counts.Milling} pcs`; document.getElementById('catCount-Drilling').innerText = `${counts.Drilling} pcs`; document.getElementById('catCount-Tapping').innerText = `${counts.Tapping} pcs`; document.getElementById('catCount-Chamfer').innerText = `${counts.Chamfer} pcs`; }
+
+    // DEDICATED REFRESH FUNCTION FOR TOOLS DASHBOARD UI
+    function refreshToolsDashboard() { 
+        const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 }; 
+        toolsList.forEach(t => { 
+            counts[normalizeToolCategory(t.category)] += (parseInt(t.stock) || 0); 
+        }); 
+        const m = document.getElementById('catCount-Milling');
+        const d = document.getElementById('catCount-Drilling');
+        const t = document.getElementById('catCount-Tapping');
+        const c = document.getElementById('catCount-Chamfer');
+        
+        if(m) m.innerText = `${counts.Milling} pcs`; 
+        if(d) d.innerText = `${counts.Drilling} pcs`; 
+        if(t) t.innerText = `${counts.Tapping} pcs`; 
+        if(c) c.innerText = `${counts.Chamfer} pcs`; 
+    }
 
     // --- CRUD PROFILES ---
     function applyFiltersAndRender() {
@@ -1101,17 +1124,14 @@
 
     // --- RECOVERY VAULT (MANUAL DELETE + 30 DAY AUTO-CLEANUP) ---
     async function renderBinArchive() {
-      // 1. Auto Cleanup Process: Check for records older than 30 days
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - 30);
       const cutoffIso = cutoffDate.toISOString();
 
-      // Find expired records
       const expiredProfiles = trashRecords.filter(r => r.deleted_at && r.deleted_at < cutoffIso);
       const expiredTools = toolsTrash.filter(t => t.deleted_at && t.deleted_at < cutoffIso);
       const expiredShifts = trashShifts.filter(s => s.deleted_at && s.deleted_at < cutoffIso);
 
-      // Perform actual Database hard delete for expired items
       if (expiredProfiles.length) { 
         await supabaseClient.from('cnc_cycle_times').delete().in('id', expiredProfiles.map(x=>x.id)); 
         trashRecords = trashRecords.filter(r => !expiredProfiles.includes(r)); 
@@ -1125,7 +1145,6 @@
         trashShifts = trashShifts.filter(s => !expiredShifts.includes(s)); 
       }
 
-      // 2. Render UI
       const pT = document.getElementById('trashProfilesTableBody'), tT = document.getElementById('trashToolsTableBody'), sT = document.getElementById('trashShiftsTableBody');
       
       if(pT) pT.innerHTML = trashRecords.length ? trashRecords.map(r => `
@@ -1169,7 +1188,6 @@
     async function restoreTool(id) { await supabaseClient.from('cnc_tool_bits').update({is_deleted: false, deleted_at: null}).eq('id', id); fetchToolsData(); showToast("Tool Restored."); }
     async function restoreShift(id) { await supabaseClient.from('shifts').update({is_deleted: false, deleted_at: null}).eq('id', id); fetchOeeData(); showToast("Shift Restored."); }
 
-    // Explicit manual Permanent Delete functions
     async function hardDeleteProfile(id) {
         if(!confirm("Are you sure you want to PERMANENTLY delete this profile? This cannot be undone.")) return;
         await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
