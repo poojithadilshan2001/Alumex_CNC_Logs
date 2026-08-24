@@ -114,7 +114,7 @@
           <p id="dashApqSummary" class="text-[11px] text-slate-500 mt-1">A: - | P: - | Q: -</p>
         </div>
         <div onclick="switchTab('oee')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-indigo-500 transition group">
-          <div class="flex justify-between items-start"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Latest Output</span><span class="text-indigo-600 text-xs font-black group-hover:translate-x-1 transition-transform">→</span></div>
+          <div class="flex justify-between items-start"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Latest Output (Good)</span><span class="text-indigo-600 text-xs font-black group-hover:translate-x-1 transition-transform">→</span></div>
           <p id="dashProducedToday" class="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-1">0 pcs</p>
           <p id="dashScrapSummary" class="text-[11px] text-slate-500 mt-1">Good: 0 | Rej: 0</p>
         </div>
@@ -141,7 +141,7 @@
         <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-2xl">
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-50 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
-              <tr><th class="p-3">#</th><th class="p-3">Profile Code</th><th class="p-3 text-right">Produced (Pcs)</th><th class="p-3 text-right text-emerald-600">Good (Pcs)</th><th class="p-3 text-right text-rose-600">Scrap (Pcs)</th><th class="p-3 text-right">Shift Runs</th><th class="p-3 text-right">Avg Pcs / Shift</th><th class="p-3 text-right">Scrap Rate</th></tr>
+              <tr><th class="p-3">#</th><th class="p-3">Profile Code</th><th class="p-3 text-right">Produced (Total)</th><th class="p-3 text-right text-emerald-600">Good (Pcs)</th><th class="p-3 text-right text-rose-600">Scrap (Pcs)</th><th class="p-3 text-right">Shift Runs</th><th class="p-3 text-right">Avg Pcs / Shift</th><th class="p-3 text-right">Scrap Rate</th></tr>
             </thead>
             <tbody id="profile30TableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium"><tr><td colspan="8" class="p-6 text-center text-slate-400">Loading 30-day production history...</td></tr></tbody>
           </table>
@@ -236,16 +236,36 @@
 
     <!-- 4. SHIFT LOGS & OEE -->
     <section id="view-oee" class="hidden space-y-6">
-      <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-6 rounded-3xl shadow-sm space-y-4">
+      
+      <!-- UPDATED COMPREHENSIVE OEE THEORY SECTION -->
+      <div class="bg-gradient-to-br from-blue-900 via-slate-800 to-slate-900 text-white p-6 rounded-3xl shadow-sm space-y-5">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-white/10 pb-4">
-          <div><span class="text-[10px] font-black uppercase text-blue-300 tracking-widest">OPERATIONAL STANDARDS</span><h3 class="text-lg font-black mt-0.5">OEE Calculation Framework</h3></div>
-          <span class="bg-blue-950/70 border border-blue-400/30 px-3 py-1 rounded-xl text-xs font-bold">12-Hour Operational Shift Base</span>
+          <div>
+            <span class="text-[10px] font-black uppercase text-blue-400 tracking-widest">OPERATIONAL STANDARDS</span>
+            <h3 class="text-xl font-black mt-1">OEE Master Framework</h3>
+            <p class="text-xs text-slate-300 mt-1">Overall Equipment Effectiveness (OEE) identifies the percentage of manufacturing time that is truly productive.</p>
+          </div>
+          <div class="text-right">
+            <span class="bg-blue-950/70 border border-blue-400/30 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-200 block shadow-md">World-Class Target: 85%</span>
+          </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm"><span class="text-emerald-400 font-black uppercase text-[10px]">OEE Formula</span><p class="font-mono font-bold text-white">OEE = A × P × Q</p></div>
-          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm"><span class="text-blue-300 font-black uppercase text-[10px]">Availability (A)</span><p class="font-mono font-bold text-white">Operating / Planned Min</p></div>
-          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm"><span class="text-amber-300 font-black uppercase text-[10px]">Performance (P)</span><p class="font-mono font-bold text-white">Ideal Time / Operating Min</p></div>
-          <div class="bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-sm"><span class="text-purple-300 font-black uppercase text-[10px]">Quality (Q)</span><p class="font-mono font-bold text-white">Good Parts / Total Parts</p></div>
+          <div class="bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm flex flex-col justify-between shadow-lg">
+            <div><span class="text-emerald-400 font-black uppercase text-[10px] tracking-wider">The Ultimate Metric</span><p class="font-mono font-bold text-white text-sm mt-1">OEE = A × P × Q</p></div>
+            <p class="text-[10px] text-slate-400 mt-3 leading-relaxed">A standard metric for TPM (Total Productive Maintenance). Takes into account all losses to show true plant productivity.</p>
+          </div>
+          <div class="bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm flex flex-col justify-between shadow-lg">
+            <div><span class="text-blue-300 font-black uppercase text-[10px] tracking-wider">Availability (A)</span><p class="font-mono font-bold text-white mt-1">Operating / Planned Min</p></div>
+            <p class="text-[10px] text-slate-400 mt-3 leading-relaxed">Measures <b>Downtime Loss</b>. Accounts for machine breakdowns, tooling changes, and adjustments relative to planned 12h shifts.</p>
+          </div>
+          <div class="bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm flex flex-col justify-between shadow-lg">
+            <div><span class="text-amber-300 font-black uppercase text-[10px] tracking-wider">Performance (P)</span><p class="font-mono font-bold text-white mt-1">(Total Parts × Cycle) / Operating</p></div>
+            <p class="text-[10px] text-slate-400 mt-3 leading-relaxed">Measures <b>Speed Loss</b>. Accounts for minor stops and reduced speed operations against the theoretical cycle times.</p>
+          </div>
+          <div class="bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm flex flex-col justify-between shadow-lg">
+            <div><span class="text-purple-300 font-black uppercase text-[10px] tracking-wider">Quality (Q)</span><p class="font-mono font-bold text-white mt-1">Good Parts / Total Parts</p></div>
+            <p class="text-[10px] text-slate-400 mt-3 leading-relaxed">Measures <b>Quality Loss</b>. Accounts for rejected profiles (scrap) and pieces requiring rework during the shift.</p>
+          </div>
         </div>
       </div>
 
@@ -310,7 +330,7 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-100/75 dark:bg-slate-700/50 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
-              <tr><th class="p-3.5">Date</th><th class="p-3.5">Shift</th><th class="p-3.5">Team</th><th class="p-3.5 text-right">Produced</th><th class="p-3.5 text-right">Good</th><th class="p-3.5 text-right">Reject</th><th class="p-3.5 text-right">Downtime</th><th class="p-3.5 text-right">OEE</th><th class="p-3.5 text-center">Actions</th></tr>
+              <tr><th class="p-3.5">Date</th><th class="p-3.5">Shift</th><th class="p-3.5">Team</th><th class="p-3.5 text-right">Total Run</th><th class="p-3.5 text-right">Good</th><th class="p-3.5 text-right">Reject</th><th class="p-3.5 text-right">Downtime</th><th class="p-3.5 text-right">OEE</th><th class="p-3.5 text-center">Actions</th></tr>
             </thead>
             <tbody id="shiftsTableBody" class="divide-y divide-slate-200 dark:divide-slate-700"></tbody>
           </table>
@@ -451,7 +471,7 @@
   </div>
 
   <div id="modalViewShift" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-4 border border-slate-700">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-4 border border-slate-700">
       <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-3"><div><span class="text-[10px] font-black uppercase text-indigo-600">SHIFT INSPECTOR</span><h3 id="viewShiftTitle" class="text-lg font-black mt-0.5">-</h3></div><button type="button" onclick="document.getElementById('modalViewShift').classList.add('hidden')" class="text-xl font-bold">×</button></div>
       <div id="viewShiftBody" class="space-y-3 text-xs max-h-[60vh] overflow-y-auto pr-2"></div>
       <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end"><button type="button" onclick="document.getElementById('modalViewShift').classList.add('hidden')" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-bold">Close</button></div>
@@ -589,16 +609,32 @@
 
     // --- CORE LOGIC ---
     function calculateShiftOee(shift) {
-      const prods = productionRecords.filter(p => p.shift_id === shift.id), dts = downtimeEvents.filter(d => d.shift_id === shift.id);
-      const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0), rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
-      const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0), plannedMin = Math.max(0, 720 - (parseInt(shift.planned_break_min)||90));
+      const prods = productionRecords.filter(p => p.shift_id === shift.id);
+      const dts = downtimeEvents.filter(d => d.shift_id === shift.id);
+      
+      // In our updated logic, DB 'produced' = Total Cycles. 
+      // Good = Total - Rejects
+      const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
+      const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
+      const good = Math.max(0, produced - rejected);
+
+      const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
+      const plannedMin = Math.max(0, 720 - (parseInt(shift.planned_break_min) || 90));
       const operatingMin = Math.max(0, plannedMin - downtimeMin);
+      
       let idealMin = 0;
       prods.forEach(p => {
         let cycleSec = p.ideal_cycle_seconds || (records.find(r => r.profile.toUpperCase() === (p.profile_code||'').toUpperCase())?.cycle_seconds || 0);
+        // We use Total Produced parts to calculate ideal operating time (machine had to run cycle for rejects too)
         idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
       });
-      return { produced, rejected, good: Math.max(0, produced - rejected), downtimeMin, availability: plannedMin > 0 ? (operatingMin / plannedMin) : 0, performance: operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0, quality: produced > 0 ? (Math.max(0, produced - rejected) / produced) : 0, oee: (plannedMin > 0 ? (operatingMin / plannedMin) : 0) * (operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0) * (produced > 0 ? (Math.max(0, produced - rejected) / produced) : 0) };
+      
+      const availability = plannedMin > 0 ? (operatingMin / plannedMin) : 0;
+      const performance = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0; // Clamped at 150% max to prevent charting errors
+      const quality = produced > 0 ? (good / produced) : 0;
+      const oee = availability * performance * quality;
+      
+      return { produced, rejected, good, downtimeMin, availability, performance, quality, oee };
     }
 
     function renderMasterDashboard() {
@@ -608,7 +644,7 @@
       if (shifts.length > 0) {
         const oeeRes = shifts.map(calculateShiftOee), avgOee = oeeRes.reduce((s, r) => s + r.oee, 0) / oeeRes.length;
         document.getElementById('dashOeeAvg').innerText = fmtPct(avgOee);
-        document.getElementById('dashProducedToday').innerText = `${oeeRes[0].produced} pcs`;
+        document.getElementById('dashProducedToday').innerText = `${oeeRes[0].good} pcs`;
       }
       renderDashboardCharts(); render30DayProfileAnalytics(); refreshToolsDashboard();
     }
@@ -717,36 +753,99 @@
 
     // --- SHIFTS & OEE ---
     function switchOeeSubTab(sub) { ['latest', 'addlog', 'alllogs', 'oeeanalysis'].forEach(s => { document.getElementById(`oeeSub-${s}`)?.classList.add('hidden'); document.getElementById(`oeeSubBtn-${s}`)?.classList.remove('bg-blue-600', 'text-white'); }); document.getElementById(`oeeSub-${sub}`)?.classList.remove('hidden'); document.getElementById(`oeeSubBtn-${sub}`)?.classList.add('bg-blue-600', 'text-white'); if(sub==='alllogs')renderShiftsTable(); if(sub==='latest')renderLatestShiftCard(); }
+    
     function renderLatestShiftCard() {
       const c = document.getElementById('latestLogCard'); if(!c) return;
       if(shifts.length===0){ c.innerHTML='<p class="text-center text-slate-500">No shifts</p>'; return; }
       const s = shifts[0], r = calculateShiftOee(s);
-      c.innerHTML = `<div class="flex justify-between items-center mb-4"><div><span class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">LATEST LOG</span><h3 class="text-xl font-black">${s.shift_date} - ${s.shift_type}</h3></div><button onclick="editShiftRecord('${s.id}')" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl font-bold text-xs">Edit</button></div><div class="grid grid-cols-3 gap-3 text-center mb-4"><div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-200 dark:border-slate-600"><span class="text-xs font-bold text-slate-500">PRODUCED</span><p class="text-2xl font-black">${r.produced}</p></div><div class="bg-emerald-50 dark:bg-emerald-900/30 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800"><span class="text-xs font-bold text-emerald-600">GOOD</span><p class="text-2xl font-black text-emerald-600">${r.good}</p></div><div class="bg-rose-50 dark:bg-rose-900/30 p-3 rounded-xl border border-rose-200 dark:border-rose-800"><span class="text-xs font-bold text-rose-600">SCRAP</span><p class="text-2xl font-black text-rose-600">${r.rejected}</p></div></div><div class="grid grid-cols-4 gap-3 text-center"><div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-xl"><span class="text-[10px] font-bold text-blue-500">AVAILABILITY</span><p class="text-lg font-black text-blue-600">${fmtPct(r.availability)}</p></div><div class="bg-amber-50 dark:bg-amber-900/30 p-2 rounded-xl"><span class="text-[10px] font-bold text-amber-500">PERFORMANCE</span><p class="text-lg font-black text-amber-600">${fmtPct(r.performance)}</p></div><div class="bg-purple-50 dark:bg-purple-900/30 p-2 rounded-xl"><span class="text-[10px] font-bold text-purple-500">QUALITY</span><p class="text-lg font-black text-purple-600">${fmtPct(r.quality)}</p></div><div class="bg-emerald-600 p-2 rounded-xl text-white"><span class="text-[10px] font-bold text-emerald-200">OEE SCORE</span><p class="text-lg font-black">${fmtPct(r.oee)}</p></div></div>`;
+      c.innerHTML = `<div class="flex justify-between items-center mb-4"><div><span class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">LATEST LOG</span><h3 class="text-xl font-black">${s.shift_date} - ${s.shift_type}</h3></div><button onclick="editShiftRecord('${s.id}')" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl font-bold text-xs">Edit</button></div><div class="grid grid-cols-3 gap-3 text-center mb-4"><div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-200 dark:border-slate-600"><span class="text-xs font-bold text-slate-500">TOTAL PRODUCED</span><p class="text-2xl font-black">${r.produced}</p></div><div class="bg-emerald-50 dark:bg-emerald-900/30 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800"><span class="text-xs font-bold text-emerald-600">GOOD</span><p class="text-2xl font-black text-emerald-600">${r.good}</p></div><div class="bg-rose-50 dark:bg-rose-900/30 p-3 rounded-xl border border-rose-200 dark:border-rose-800"><span class="text-xs font-bold text-rose-600">SCRAP</span><p class="text-2xl font-black text-rose-600">${r.rejected}</p></div></div><div class="grid grid-cols-4 gap-3 text-center"><div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-xl"><span class="text-[10px] font-bold text-blue-500">AVAILABILITY</span><p class="text-lg font-black text-blue-600">${fmtPct(r.availability)}</p></div><div class="bg-amber-50 dark:bg-amber-900/30 p-2 rounded-xl"><span class="text-[10px] font-bold text-amber-500">PERFORMANCE</span><p class="text-lg font-black text-amber-600">${fmtPct(r.performance)}</p></div><div class="bg-purple-50 dark:bg-purple-900/30 p-2 rounded-xl"><span class="text-[10px] font-bold text-purple-500">QUALITY</span><p class="text-lg font-black text-purple-600">${fmtPct(r.quality)}</p></div><div class="bg-emerald-600 p-2 rounded-xl text-white"><span class="text-[10px] font-bold text-emerald-200">OEE SCORE</span><p class="text-lg font-black">${fmtPct(r.oee)}</p></div></div>`;
     }
+    
     function renderShiftsTable() {
       const tbody = document.getElementById('shiftsTableBody'); if (!tbody) return;
       tbody.innerHTML = shifts.length ? shifts.map(s => { const r = calculateShiftOee(s); return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 border-b border-slate-100 dark:border-slate-700/50"><td class="p-3.5 font-bold">${s.shift_date}</td><td class="p-3.5">${s.shift_type}</td><td class="p-3.5">Team ${s.team}</td><td class="p-3.5 text-right font-mono font-bold">${r.produced}</td><td class="p-3.5 text-right font-mono text-emerald-600">${r.good}</td><td class="p-3.5 text-right font-mono text-rose-600">${r.rejected}</td><td class="p-3.5 text-right font-mono">${r.downtimeMin}m</td><td class="p-3.5 text-right font-mono font-bold ${r.oee>=0.85?'text-emerald-600':(r.oee>=0.6?'text-amber-600':'text-rose-600')}">${fmtPct(r.oee)}</td><td class="p-3.5 text-center space-x-2"><button onclick="viewShiftDetails('${s.id}')" class="text-blue-600 font-bold hover:underline">View</button><button onclick="editShiftRecord('${s.id}')" class="text-amber-600 font-bold hover:underline">Edit</button><button onclick="deleteShiftRecord('${s.id}')" class="text-rose-600 font-bold hover:underline">Delete</button></td></tr>`; }).join('') : `<tr><td colspan="9" class="text-center p-6 text-slate-500">No records</td></tr>`;
     }
+    
     function viewShiftDetails(id) {
       const s = shifts.find(item => item.id === id); if (!s) return;
       const r = calculateShiftOee(s), prods = productionRecords.filter(p => p.shift_id === id);
       document.getElementById('viewShiftTitle').innerText = `${s.shift_date} — ${s.shift_type} (Team ${s.team})`;
-      document.getElementById('viewShiftBody').innerHTML = `<div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl mb-2 border border-slate-200 dark:border-slate-600"><div><span class="text-slate-400 font-bold">Operator:</span> <b>${s.operator_name || 'N/A'}</b></div><div><span class="text-slate-400 font-bold">EPF:</span> <b>${s.epf_no || '-'}</b></div><div><span class="text-slate-400 font-bold">Downtime:</span> <b class="text-rose-600 font-mono">${r.downtimeMin} min</b></div><div><span class="text-slate-400 font-bold">OEE Score:</span> <b class="text-blue-600 font-mono">${fmtPct(r.oee)}</b></div></div><table class="w-full text-left text-xs border border-slate-200 dark:border-slate-600 rounded-xl overflow-hidden block"><thead class="bg-slate-100 dark:bg-slate-700/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-200 dark:border-slate-600"><tr><th class="p-2">Profile</th><th class="p-2">Cycle</th><th class="p-2 text-right">Target</th><th class="p-2 text-right">Produced</th><th class="p-2 text-right">Reject</th></tr></thead><tbody class="divide-y divide-slate-100 dark:divide-slate-600 w-full table">${prods.map(p => `<tr><td class="p-2 font-bold">${p.profile_code}</td><td class="p-2 font-mono text-slate-500">${p.ideal_cycle_seconds || '- '}s</td><td class="p-2 text-right font-mono">${p.target}</td><td class="p-2 text-right font-mono text-blue-600 font-bold">${p.produced}</td><td class="p-2 text-right font-mono text-rose-600">${p.rejected}</td></tr>`).join('')}</tbody></table>`;
+      document.getElementById('viewShiftBody').innerHTML = `
+      <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-2xl mb-2 border border-slate-200 dark:border-slate-600"><div><span class="text-slate-400 font-bold">Operator:</span> <b>${s.operator_name || 'N/A'}</b></div><div><span class="text-slate-400 font-bold">EPF:</span> <b>${s.epf_no || '-'}</b></div><div><span class="text-slate-400 font-bold">Downtime:</span> <b class="text-rose-600 font-mono">${r.downtimeMin} min</b></div><div><span class="text-slate-400 font-bold">OEE Score:</span> <b class="text-blue-600 font-mono">${fmtPct(r.oee)}</b></div></div>
+      <table class="w-full text-left text-xs border border-slate-200 dark:border-slate-600 rounded-xl overflow-hidden block">
+        <thead class="bg-slate-100 dark:bg-slate-700/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-200 dark:border-slate-600">
+          <tr><th class="p-2">Profile</th><th class="p-2">Cycle</th><th class="p-2 text-right">Target</th><th class="p-2 text-right">Good</th><th class="p-2 text-right">Reject</th><th class="p-2 text-right">Lack</th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-600 w-full table">
+          ${prods.map(p => {
+             const tot = parseInt(p.produced)||0; const rej = parseInt(p.rejected)||0; const g = tot - rej; const t = parseInt(p.target)||0;
+             return `<tr><td class="p-2 font-bold">${p.profile_code}</td><td class="p-2 font-mono text-slate-500">${p.ideal_cycle_seconds || '- '}s</td><td class="p-2 text-right font-mono">${t}</td><td class="p-2 text-right font-mono text-emerald-600 font-bold">${g}</td><td class="p-2 text-right font-mono text-rose-600">${rej}</td><td class="p-2 text-right font-mono text-amber-600 font-bold">${t - tot}</td></tr>`
+          }).join('')}
+        </tbody>
+      </table>`;
       document.getElementById('modalViewShift').classList.remove('hidden');
     }
+
+    // Dynamic UI Calculator for "Lack"
+    window.calcLack = function(inputElement) {
+        const card = inputElement.closest('.prof-card-container');
+        if (!card) return;
+        const target = parseInt(card.querySelector('.profTargetInput').value) || 0;
+        const good = parseInt(card.querySelector('.profGoodInput').value) || 0;
+        const scrap = parseInt(card.querySelector('.profRejectedInput').value) || 0;
+        
+        // Total Produced = Good Parts + Scrap Parts
+        const totalProduced = good + scrap; 
+        const lack = target - totalProduced;
+        
+        const lackInput = card.querySelector('.profLackInput');
+        if (lackInput) lackInput.value = lack;
+    };
+
     function addProfileCard(p=null) {
-      cardCounter++; const d = document.createElement('div'); d.className="p-3 border border-slate-200 dark:border-slate-600 rounded-2xl bg-white dark:bg-slate-700/30 grid grid-cols-2 lg:grid-cols-7 gap-2 items-end text-xs shadow-sm"; d.id=`profCard-${cardCounter}`;
+      cardCounter++; 
+      const d = document.createElement('div'); 
+      d.className="prof-card-container p-3 border border-slate-200 dark:border-slate-600 rounded-2xl bg-white dark:bg-slate-700/30 grid grid-cols-2 lg:grid-cols-8 gap-2 items-end text-xs shadow-sm"; 
+      d.id=`profCard-${cardCounter}`;
+      
       let pcy = p?.ideal_cycle_seconds || (p?.profile_code ? records.find(x=>x.profile.toUpperCase()===p.profile_code.toUpperCase())?.cycle_seconds : '');
-      d.innerHTML = `<div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Profile Code</label><input type="text" list="profileDataList" oninput="window.autoFillCycleTime(this)" class="profCodeInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold bg-slate-50 dark:bg-slate-800 outline-none" value="${p?p.profile_code:''}"></div><div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Cycle (s)</label><input type="number" class="profCycleInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-mono text-blue-600 font-bold bg-slate-50 dark:bg-slate-800 outline-none" value="${pcy}"></div><div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Setup (min)</label><input type="number" class="profSetupInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-800 outline-none" value="${p?.setup_min!==undefined?p.setup_min:'0'}"></div><div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Target</label><input type="number" class="profTargetInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-800 outline-none" value="${p?p.target:'0'}"></div><div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Produced</label><input type="number" class="profProducedInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-blue-600 bg-slate-50 dark:bg-slate-800 outline-none" value="${p?p.produced:'0'}"></div><div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Rejected</label><input type="number" class="profRejectedInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-rose-600 bg-slate-50 dark:bg-slate-800 outline-none" value="${p?p.rejected:'0'}"></div><div class="col-span-2 lg:col-span-1"><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Reject Reason</label><div class="flex gap-1"><input type="text" class="profRejectReasonInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-800 outline-none" value="${p?.reject_reason||''}"><button type="button" onclick="document.getElementById('profCard-${cardCounter}').remove()" class="text-rose-500 font-bold px-1.5 text-base">×</button></div></div>`;
+      
+      // Calculate backwards-compatible "Good" if editing an old record
+      let dbGood = '0';
+      if(p) {
+        let tot = parseInt(p.produced) || 0;
+        let rej = parseInt(p.rejected) || 0;
+        dbGood = Math.max(0, tot - rej).toString();
+      } else {
+        dbGood = '';
+      }
+
+      d.innerHTML = `
+        <div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Profile Code</label><input type="text" list="profileDataList" oninput="window.autoFillCycleTime(this)" class="profCodeInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold bg-slate-50 dark:bg-slate-800 outline-none" value="${p?p.profile_code:''}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Cycle (s)</label><input type="number" class="profCycleInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-mono text-blue-600 font-bold bg-slate-50 dark:bg-slate-800 outline-none" value="${pcy}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Target</label><input type="number" oninput="window.calcLack(this)" class="profTargetInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-800 outline-none" value="${p?p.target:'0'}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Good Pcs</label><input type="number" oninput="window.calcLack(this)" class="profGoodInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-emerald-600 bg-slate-50 dark:bg-slate-800 outline-none" value="${p?dbGood:'0'}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Scrap</label><input type="number" oninput="window.calcLack(this)" class="profRejectedInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-rose-600 bg-slate-50 dark:bg-slate-800 outline-none" value="${p?p.rejected:'0'}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Lack</label><input type="number" readonly class="profLackInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-amber-600 bg-slate-200 dark:bg-slate-900 outline-none cursor-not-allowed" value="0"></div>
+        <div class="col-span-2"><label class="block text-[10px] font-bold text-slate-400 mb-0.5">Reject Reason</label><div class="flex gap-1"><input type="text" class="profRejectReasonInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-800 outline-none" value="${p?.reject_reason||''}"><button type="button" onclick="document.getElementById('profCard-${cardCounter}').remove()" class="text-rose-500 font-bold px-1.5 text-base">×</button></div></div>
+      `;
       document.getElementById('profileCardsContainer').appendChild(d);
+      
       if(p?.profile_code && !pcy){ const i=d.querySelector('.profCodeInput'); if(i) window.autoFillCycleTime(i); }
+      
+      // Force initial Lack calculation
+      const targetInput = d.querySelector('.profTargetInput');
+      if (targetInput) window.calcLack(targetInput);
     }
+    
     window.autoFillCycleTime = function(input) { const c = input.value.trim().toUpperCase(), r = records.find(x => x.profile.toUpperCase() === c), ci = input.closest('div').parentElement.querySelector('.profCycleInput'); if (r && ci) ci.value = r.cycle_seconds; };
+    
     function addDowntimeCard(p=null) {
       dtCounter++; const d = document.createElement('div'); d.className="p-2 border border-slate-200 dark:border-slate-600 rounded-xl flex flex-wrap gap-2 bg-white dark:bg-slate-800"; d.id=`dtCard-${dtCounter}`;
       d.innerHTML = `<select class="dtReasonSelect border border-slate-300 dark:border-slate-600 rounded-lg p-2 bg-slate-50 dark:bg-slate-700 outline-none">${['Breakdown','Setup','Tool Change','Material Waiting','Power Outage','Other'].map(r=>`<option value="${r}" ${p?.reason===r?'selected':''}>${r}</option>`).join('')}</select><input type="number" class="dtDurationInput border border-slate-300 dark:border-slate-600 rounded-lg p-2 w-24 font-bold bg-slate-50 dark:bg-slate-700 outline-none" placeholder="Min" value="${p?p.duration_min:'15'}"><button type="button" onclick="document.getElementById('dtCard-${dtCounter}').remove()" class="text-rose-500 font-bold px-2">×</button>`;
       document.getElementById('downtimeCardsContainer').appendChild(d);
     }
+    
     function resetShiftLogForm() { document.getElementById('shiftLogForm').reset(); document.getElementById('shiftFormId').value=''; document.getElementById('shiftLogEditingBadge').classList.add('hidden'); document.getElementById('shiftLogFormTitle').innerText='Shift Production Slip'; document.getElementById('profileCardsContainer').innerHTML=''; document.getElementById('downtimeCardsContainer').innerHTML=''; document.getElementById('logDate').value=todayISO(); addProfileCard(); addProfileCard(); }
     
     async function submitShiftLog(e) {
@@ -759,9 +858,18 @@
 
         const pNodes = document.querySelectorAll('#profileCardsContainer > div'), pp = [], cp = [], up = [];
         pNodes.forEach(el => {
-          const c = el.querySelector('.profCodeInput').value.trim().toUpperCase(), cy = parseInt(el.querySelector('.profCycleInput').value)||0, sm = parseInt(el.querySelector('.profSetupInput').value)||0, tg = parseInt(el.querySelector('.profTargetInput').value)||0, pr = parseInt(el.querySelector('.profProducedInput').value)||0, rj = parseInt(el.querySelector('.profRejectedInput').value)||0, rr = el.querySelector('.profRejectReasonInput').value.trim();
+          const c = el.querySelector('.profCodeInput').value.trim().toUpperCase(), 
+                cy = parseInt(el.querySelector('.profCycleInput').value)||0, 
+                tg = parseInt(el.querySelector('.profTargetInput').value)||0, 
+                gd = parseInt(el.querySelector('.profGoodInput').value)||0, 
+                rj = parseInt(el.querySelector('.profRejectedInput').value)||0, 
+                rr = el.querySelector('.profRejectReasonInput').value.trim();
+          
+          // Total cycles completed = Good Parts + Scrapped Parts
+          const total_produced = gd + rj; 
+
           if (c) {
-            pp.push({ shift_id: sid, profile_code: c, ideal_cycle_seconds: cy, setup_min: sm, target: tg, produced: pr, rejected: rj, reject_reason: rr });
+            pp.push({ shift_id: sid, profile_code: c, ideal_cycle_seconds: cy, setup_min: 0, target: tg, produced: total_produced, rejected: rj, reject_reason: rr });
             if (cy > 0) {
                 const ex = records.find(r => r.profile.toUpperCase() === c);
                 // INSTANT SYNC NEW PROFILE TO DATABASE
