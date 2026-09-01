@@ -307,7 +307,7 @@
           </div>
           <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 flex flex-col justify-between shadow-lg">
             <div><span class="text-blue-300 font-black uppercase text-[10px] tracking-wider">Availability (A)</span><p class="font-mono font-bold text-white mt-1.5 border-l-2 border-blue-500 pl-2">Op Min / Planned Min</p></div>
-            <p class="text-[10px] text-slate-400 mt-4 leading-relaxed border-t border-slate-700 pt-3">Measures <b>Downtime Loss</b>. Breakdowns &amp; tooling changes relative to 12h shifts.</p>
+            <p class="text-[10px] text-slate-400 mt-4 leading-relaxed border-t border-slate-700 pt-3">Measures <b>Downtime Loss</b>. Breakdowns &amp; tooling changes relative to planned time.</p>
           </div>
           <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 flex flex-col justify-between shadow-lg">
             <div><span class="text-amber-400 font-black uppercase text-[10px] tracking-wider">Performance (P)</span><p class="font-mono font-bold text-white mt-1.5 border-l-2 border-amber-500 pl-2">(Tot Pcs × Cycle) / Op Min</p></div>
@@ -338,12 +338,43 @@
             <span id="shiftLogEditingBadge" class="hidden text-[10px] font-bold uppercase bg-amber-100 text-amber-700 px-3 py-1 rounded-full ring-1 ring-amber-400/50">Editing mode</span>
           </div>
           <input type="hidden" id="shiftFormId">
-          <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 text-xs">
+          
+          <!-- GENERAL DETAILS -->
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
             <div><label class="block font-bold text-slate-500 mb-1">Date *</label><input type="date" id="logDate" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none font-bold focus:border-blue-500 transition-colors"></div>
             <div><label class="block font-bold text-slate-500 mb-1">Shift *</label><select id="logShiftType" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-bold outline-none focus:border-blue-500 transition-colors"><option value="Day">Day</option><option value="Night">Night</option></select></div>
             <div><label class="block font-bold text-slate-500 mb-1">Team *</label><select id="logTeam" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-bold outline-none focus:border-blue-500 transition-colors"><option value="A">Team A</option><option value="B">Team B</option></select></div>
             <div><label class="block font-bold text-slate-500 mb-1">EPF No.</label><input type="text" id="logEpf" placeholder="EPF No." class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none focus:border-blue-500 transition-colors"></div>
-            <div><label class="block font-bold text-slate-500 mb-1">Break Time (min)</label><input type="number" id="logPlannedBreak" value="90" min="0" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none font-bold focus:border-blue-500 transition-colors"></div>
+          </div>
+
+          <!-- TIME CONFIGURATION & OEE TIME BASE -->
+          <div class="bg-blue-50/50 dark:bg-slate-900/40 p-4 rounded-2xl border border-blue-100 dark:border-slate-700/60 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-black uppercase text-blue-600 dark:text-blue-400 tracking-wider">⏱ Shift Time &amp; OEE Base Setup</span>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 italic">Auto-calculates, or edit directly</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">Shift Length (min)</label>
+                <input type="number" id="logShiftLength" value="720" min="0" oninput="onShiftTimeInputsChanged()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-bold outline-none focus:border-blue-500">
+                <span class="text-[10px] text-slate-400 mt-0.5 block">e.g. 720m (12h)</span>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-600 dark:text-slate-300 mb-1">Planned Break (min)</label>
+                <input type="number" id="logPlannedBreak" value="90" min="0" oninput="onShiftTimeInputsChanged()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-bold outline-none focus:border-blue-500">
+                <span class="text-[10px] text-slate-400 mt-0.5 block">Meal / Teas</span>
+              </div>
+              <div>
+                <label class="block font-bold text-blue-600 dark:text-blue-400 mb-1">Planned Time (min)</label>
+                <input type="number" id="logPlannedTime" value="630" min="0" oninput="onPlannedTimeManuallyChanged()" class="w-full bg-white dark:bg-slate-800 border-2 border-blue-400 dark:border-blue-500/80 rounded-xl p-2.5 font-bold text-blue-700 dark:text-blue-300 outline-none focus:border-blue-600 shadow-sm">
+                <span class="text-[10px] text-blue-500 dark:text-blue-400 mt-0.5 block font-semibold">Planned Operating</span>
+              </div>
+              <div>
+                <label class="block font-bold text-emerald-600 dark:text-emerald-400 mb-1">Operating Time (min)</label>
+                <input type="number" id="logOperatingTime" value="630" min="0" class="w-full bg-white dark:bg-slate-800 border-2 border-emerald-400 dark:border-emerald-500/80 rounded-xl p-2.5 font-bold text-emerald-700 dark:text-emerald-300 outline-none focus:border-emerald-600 shadow-sm">
+                <span class="text-[10px] text-emerald-500 dark:text-emerald-400 mt-0.5 block font-semibold">Planned - Downtime</span>
+              </div>
+            </div>
           </div>
           
           <div class="border-t border-slate-200 dark:border-slate-700 pt-4 space-y-3">
@@ -380,7 +411,7 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-50 dark:bg-slate-900/40 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
-              <tr><th class="p-3.5">Date</th><th class="p-3.5">Shift</th><th class="p-3.5">Team</th><th class="p-3.5 text-right">Total Run</th><th class="p-3.5 text-right">Good</th><th class="p-3.5 text-right">Reject</th><th class="p-3.5 text-right">Downtime</th><th class="p-3.5 text-right">OEE</th><th class="p-3.5 text-center">Actions</th></tr>
+              <tr><th class="p-3.5">Date</th><th class="p-3.5">Shift</th><th class="p-3.5">Team</th><th class="p-3.5 text-right">Planned (m)</th><th class="p-3.5 text-right">Op Time (m)</th><th class="p-3.5 text-right">Total Run</th><th class="p-3.5 text-right">Good</th><th class="p-3.5 text-right">Reject</th><th class="p-3.5 text-right">Downtime</th><th class="p-3.5 text-right">OEE</th><th class="p-3.5 text-center">Actions</th></tr>
             </thead>
             <tbody id="shiftsTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50"></tbody>
           </table>
@@ -857,7 +888,39 @@
       populateRestockDropdown();
     }
 
-    // --- CORE LOGIC ---
+    // --- REAL-TIME SHIFT TIME DYNAMICS ---
+    function getFormDowntimeMinutes() {
+      const dNodes = document.querySelectorAll('#downtimeCardsContainer > div');
+      let total = 0;
+      dNodes.forEach(el => {
+        total += Math.max(0, parseInt(el.querySelector('.dtDurationInput')?.value) || 0);
+      });
+      return total;
+    }
+
+    function onShiftTimeInputsChanged() {
+      const length = Math.max(0, parseInt(document.getElementById('logShiftLength').value) || 0);
+      const breakMin = Math.max(0, parseInt(document.getElementById('logPlannedBreak').value) || 0);
+      const plannedTime = Math.max(0, length - breakMin);
+      
+      document.getElementById('logPlannedTime').value = plannedTime;
+      const totalDowntime = getFormDowntimeMinutes();
+      document.getElementById('logOperatingTime').value = Math.max(0, plannedTime - totalDowntime);
+    }
+
+    function onPlannedTimeManuallyChanged() {
+      const plannedTime = Math.max(0, parseInt(document.getElementById('logPlannedTime').value) || 0);
+      const totalDowntime = getFormDowntimeMinutes();
+      document.getElementById('logOperatingTime').value = Math.max(0, plannedTime - totalDowntime);
+    }
+
+    function recalcOperatingTime() {
+      const plannedTime = Math.max(0, parseInt(document.getElementById('logPlannedTime').value) || 0);
+      const totalDowntime = getFormDowntimeMinutes();
+      document.getElementById('logOperatingTime').value = Math.max(0, plannedTime - totalDowntime);
+    }
+
+    // --- CORE OEE LOGIC ---
     function calculateShiftOee(shift) {
       const prods = productionRecords.filter(p => p.shift_id === shift.id);
       const dts = downtimeEvents.filter(d => d.shift_id === shift.id);
@@ -868,8 +931,11 @@
 
       const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
       const shiftLengthMin = parseInt(shift.shift_length_min) || 720;
-      const plannedMin = Math.max(0, shiftLengthMin - (parseInt(shift.planned_break_min) || 90));
-      const operatingMin = Math.max(0, plannedMin - downtimeMin);
+      const plannedBreakMin = parseInt(shift.planned_break_min) || 90;
+      
+      // Use stored planned_time_min and operating_time_min if available, otherwise compute standard defaults
+      const plannedMin = shift.planned_time_min != null ? Math.max(0, parseInt(shift.planned_time_min)) : Math.max(0, shiftLengthMin - plannedBreakMin);
+      const operatingMin = shift.operating_time_min != null ? Math.max(0, parseInt(shift.operating_time_min)) : Math.max(0, plannedMin - downtimeMin);
       
       let idealMin = 0;
       prods.forEach(p => {
@@ -882,7 +948,7 @@
       const quality = produced > 0 ? (good / produced) : 0;
       const oee = availability * performance * quality;
       
-      return { produced, rejected, good, downtimeMin, availability, performance, quality, oee };
+      return { produced, rejected, good, downtimeMin, plannedMin, operatingMin, availability, performance, quality, oee };
     }
 
     function renderMasterDashboard() {
@@ -1083,12 +1149,43 @@
       const c = document.getElementById('latestLogCard'); if(!c) return;
       if(shifts.length===0){ c.innerHTML='<p class="text-center text-slate-500">No shifts</p>'; return; }
       const s = shifts[0], r = calculateShiftOee(s);
-      c.innerHTML = `<div class="flex justify-between items-center mb-4"><div><span class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">LATEST LOG</span><h3 class="text-xl font-black">${s.shift_date} - ${s.shift_type}</h3></div><button onclick="editShiftRecord('${s.id}')" class="bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm">Edit Log</button></div><div class="grid grid-cols-3 gap-4 text-center mb-6"><div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700"><span class="text-xs font-bold text-slate-500 tracking-wider">TOTAL PRODUCED</span><p class="text-3xl font-black mt-1">${r.produced}</p></div><div class="bg-emerald-50 dark:bg-emerald-900/30 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-800"><span class="text-xs font-bold text-emerald-600 tracking-wider">GOOD</span><p class="text-3xl font-black text-emerald-600 mt-1">${r.good}</p></div><div class="bg-rose-50 dark:bg-rose-900/30 p-4 rounded-2xl border border-rose-200 dark:border-rose-800"><span class="text-xs font-bold text-rose-600 tracking-wider">SCRAP</span><p class="text-3xl font-black text-rose-600 mt-1">${r.rejected}</p></div></div><div class="grid grid-cols-4 gap-4 text-center"><div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-2xl"><span class="text-[10px] font-bold text-blue-500 tracking-wider">AVAILABILITY</span><p class="text-xl font-black text-blue-600 mt-1">${fmtPct(r.availability)}</p></div><div class="bg-amber-50 dark:bg-amber-900/30 p-3 rounded-2xl"><span class="text-[10px] font-bold text-amber-500 tracking-wider">PERFORMANCE</span><p class="text-xl font-black text-amber-600 mt-1">${fmtPct(r.performance)}</p></div><div class="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-2xl"><span class="text-[10px] font-bold text-purple-500 tracking-wider">QUALITY</span><p class="text-xl font-black text-purple-600 mt-1">${fmtPct(r.quality)}</p></div><div class="bg-emerald-600 p-3 rounded-2xl text-white shadow-lg"><span class="text-[10px] font-bold text-emerald-200 tracking-wider">OEE SCORE</span><p class="text-xl font-black mt-1">${fmtPct(r.oee)}</p></div></div>`;
+      c.innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+          <div><span class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">LATEST LOG</span><h3 class="text-xl font-black">${s.shift_date} - ${s.shift_type}</h3></div>
+          <button onclick="editShiftRecord('${s.id}')" class="bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm">Edit Log</button>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center mb-4">
+          <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700"><span class="text-[10px] font-bold text-slate-500 tracking-wider">PLANNED TIME</span><p class="text-xl font-black mt-1 text-slate-700 dark:text-slate-200">${r.plannedMin} min</p></div>
+          <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700"><span class="text-[10px] font-bold text-slate-500 tracking-wider">OPERATING TIME</span><p class="text-xl font-black mt-1 text-blue-600">${r.operatingMin} min</p></div>
+          <div class="bg-emerald-50 dark:bg-emerald-900/30 p-3 rounded-2xl border border-emerald-200 dark:border-emerald-800"><span class="text-[10px] font-bold text-emerald-600 tracking-wider">GOOD PARTS</span><p class="text-xl font-black text-emerald-600 mt-1">${r.good}</p></div>
+          <div class="bg-rose-50 dark:bg-rose-900/30 p-3 rounded-2xl border border-rose-200 dark:border-rose-800"><span class="text-[10px] font-bold text-rose-600 tracking-wider">SCRAP PARTS</span><p class="text-xl font-black text-rose-600 mt-1">${r.rejected}</p></div>
+        </div>
+        <div class="grid grid-cols-4 gap-4 text-center">
+          <div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-2xl"><span class="text-[10px] font-bold text-blue-500 tracking-wider">AVAILABILITY</span><p class="text-xl font-black text-blue-600 mt-1">${fmtPct(r.availability)}</p></div>
+          <div class="bg-amber-50 dark:bg-amber-900/30 p-3 rounded-2xl"><span class="text-[10px] font-bold text-amber-500 tracking-wider">PERFORMANCE</span><p class="text-xl font-black text-amber-600 mt-1">${fmtPct(r.performance)}</p></div>
+          <div class="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-2xl"><span class="text-[10px] font-bold text-purple-500 tracking-wider">QUALITY</span><p class="text-xl font-black text-purple-600 mt-1">${fmtPct(r.quality)}</p></div>
+          <div class="bg-emerald-600 p-3 rounded-2xl text-white shadow-lg"><span class="text-[10px] font-bold text-emerald-200 tracking-wider">OEE SCORE</span><p class="text-xl font-black mt-1">${fmtPct(r.oee)}</p></div>
+        </div>`;
     }
     
     function renderShiftsTable() {
       const tbody = document.getElementById('shiftsTableBody'); if (!tbody) return;
-      tbody.innerHTML = shifts.length ? shifts.map(s => { const r = calculateShiftOee(s); return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 border-b border-slate-100 dark:border-slate-700/50"><td class="p-3.5 font-bold">${s.shift_date}</td><td class="p-3.5">${s.shift_type}</td><td class="p-3.5">Team ${s.team}</td><td class="p-3.5 text-right font-mono font-bold">${r.produced}</td><td class="p-3.5 text-right font-mono text-emerald-600">${r.good}</td><td class="p-3.5 text-right font-mono text-rose-600">${r.rejected}</td><td class="p-3.5 text-right font-mono">${r.downtimeMin}m</td><td class="p-3.5 text-right font-mono font-black ${r.oee>=0.85?'text-emerald-600':(r.oee>=0.6?'text-amber-600':'text-rose-600')}">${fmtPct(r.oee)}</td><td class="p-3.5 text-center space-x-2"><button onclick="viewShiftDetails('${s.id}')" class="text-blue-600 font-bold hover:underline">View</button><button onclick="editShiftRecord('${s.id}')" class="text-amber-600 font-bold hover:underline">Edit</button><button onclick="deleteShiftRecord('${s.id}')" class="text-rose-600 font-bold hover:underline">Delete</button></td></tr>`; }).join('') : `<tr><td colspan="9" class="text-center p-6 text-slate-500">No records</td></tr>`;
+      tbody.innerHTML = shifts.length ? shifts.map(s => { 
+        const r = calculateShiftOee(s); 
+        return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 border-b border-slate-100 dark:border-slate-700/50">
+          <td class="p-3.5 font-bold">${s.shift_date}</td>
+          <td class="p-3.5">${s.shift_type}</td>
+          <td class="p-3.5">Team ${s.team}</td>
+          <td class="p-3.5 text-right font-mono">${r.plannedMin}m</td>
+          <td class="p-3.5 text-right font-mono">${r.operatingMin}m</td>
+          <td class="p-3.5 text-right font-mono font-bold">${r.produced}</td>
+          <td class="p-3.5 text-right font-mono text-emerald-600">${r.good}</td>
+          <td class="p-3.5 text-right font-mono text-rose-600">${r.rejected}</td>
+          <td class="p-3.5 text-right font-mono">${r.downtimeMin}m</td>
+          <td class="p-3.5 text-right font-mono font-black ${r.oee>=0.85?'text-emerald-600':(r.oee>=0.6?'text-amber-600':'text-rose-600')}">${fmtPct(r.oee)}</td>
+          <td class="p-3.5 text-center space-x-2"><button onclick="viewShiftDetails('${s.id}')" class="text-blue-600 font-bold hover:underline">View</button><button onclick="editShiftRecord('${s.id}')" class="text-amber-600 font-bold hover:underline">Edit</button><button onclick="deleteShiftRecord('${s.id}')" class="text-rose-600 font-bold hover:underline">Delete</button></td>
+        </tr>`; 
+      }).join('') : `<tr><td colspan="11" class="text-center p-6 text-slate-500">No records</td></tr>`;
     }
 
     function viewShiftDetails(id) {
@@ -1101,9 +1198,9 @@
       
       let html = `
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 text-center">
-          <div><span class="text-slate-400">Produced</span><p class="font-bold text-sm text-blue-600">${r.produced}</p></div>
-          <div><span class="text-slate-400">Good</span><p class="font-bold text-sm text-emerald-600">${r.good}</p></div>
-          <div><span class="text-slate-400">Scrap</span><p class="font-bold text-sm text-rose-600">${r.rejected}</p></div>
+          <div><span class="text-slate-400">Planned Time</span><p class="font-bold text-sm text-slate-700 dark:text-slate-200">${r.plannedMin} min</p></div>
+          <div><span class="text-slate-400">Operating Time</span><p class="font-bold text-sm text-blue-600">${r.operatingMin} min</p></div>
+          <div><span class="text-slate-400">Good / Scrap</span><p class="font-bold text-sm text-emerald-600">${r.good} <span class="text-rose-600 font-normal">/ ${r.rejected}</span></p></div>
           <div><span class="text-slate-400">OEE Score</span><p class="font-black text-sm text-emerald-600">${fmtPct(r.oee)}</p></div>
         </div>
         <div class="pt-2">
@@ -1184,23 +1281,46 @@
     
     function addDowntimeCard(p=null) {
       dtCounter++; const d = document.createElement('div'); d.className="p-3 border border-slate-200 dark:border-slate-600 rounded-xl flex flex-wrap items-center gap-2 bg-white dark:bg-slate-800 shadow-sm"; d.id=`dtCard-${dtCounter}`;
-      d.innerHTML = `<select class="dtReasonSelect border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors">${['Breakdown','Setup','Tool Change','Material Waiting','Power Outage','Other'].map(r=>`<option value="${r}" ${p?.reason===r?'selected':''}>${r}</option>`).join('')}</select><input type="number" min="0" class="dtDurationInput border border-slate-300 dark:border-slate-600 rounded-xl p-2 w-24 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" placeholder="Min" value="${p?p.duration_min:'15'}"><button type="button" onclick="document.getElementById('dtCard-${dtCounter}').remove()" class="text-rose-500 font-bold px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-rose-900/30 transition">×</button>`;
+      d.innerHTML = `<select class="dtReasonSelect border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors">${['Breakdown','Setup','Tool Change','Material Waiting','Power Outage','Other'].map(r=>`<option value="${r}" ${p?.reason===r?'selected':''}>${r}</option>`).join('')}</select><input type="number" min="0" oninput="recalcOperatingTime()" class="dtDurationInput border border-slate-300 dark:border-slate-600 rounded-xl p-2 w-24 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" placeholder="Min" value="${p?p.duration_min:'15'}"><button type="button" onclick="document.getElementById('dtCard-${dtCounter}').remove(); recalcOperatingTime();" class="text-rose-500 font-bold px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-rose-900/30 transition">×</button>`;
       document.getElementById('downtimeCardsContainer').appendChild(d);
+      recalcOperatingTime();
     }
     
-    function resetShiftLogForm() { document.getElementById('shiftLogForm').reset(); document.getElementById('shiftFormId').value=''; document.getElementById('shiftLogEditingBadge').classList.add('hidden'); document.getElementById('shiftLogFormTitle').innerText='Shift Production Slip'; document.getElementById('profileCardsContainer').innerHTML=''; document.getElementById('downtimeCardsContainer').innerHTML=''; document.getElementById('logDate').value=todayISO(); addProfileCard(); addProfileCard(); }
+    function resetShiftLogForm() { 
+      document.getElementById('shiftLogForm').reset(); 
+      document.getElementById('shiftFormId').value=''; 
+      document.getElementById('shiftLogEditingBadge').classList.add('hidden'); 
+      document.getElementById('shiftLogFormTitle').innerText='Shift Production Slip'; 
+      document.getElementById('profileCardsContainer').innerHTML=''; 
+      document.getElementById('downtimeCardsContainer').innerHTML=''; 
+      document.getElementById('logDate').value=todayISO(); 
+      document.getElementById('logShiftLength').value = '720';
+      document.getElementById('logPlannedBreak').value = '90';
+      document.getElementById('logPlannedTime').value = '630';
+      document.getElementById('logOperatingTime').value = '630';
+      addProfileCard(); 
+      addProfileCard(); 
+    }
     
     async function submitShiftLog(e) {
       e.preventDefault(); 
       const id = document.getElementById('shiftFormId').value;
       
+      const shiftLength = Math.max(0, parseInt(document.getElementById('logShiftLength').value) || 720);
+      const plannedBreak = Math.max(0, parseInt(document.getElementById('logPlannedBreak').value) || 90);
+      const plannedTime = Math.max(0, parseInt(document.getElementById('logPlannedTime').value) || (shiftLength - plannedBreak));
+      const operatingTime = Math.max(0, parseInt(document.getElementById('logOperatingTime').value) || plannedTime);
+
       const sp = { 
         shift_date: document.getElementById('logDate').value, 
         shift_type: document.getElementById('logShiftType').value, 
         team: document.getElementById('logTeam').value, 
         epf_no: document.getElementById('logEpf').value.trim(), 
         operator_name: document.getElementById('logOperator').value.trim(), 
-        planned_break_min: Math.max(0, parseInt(document.getElementById('logPlannedBreak').value)||90), 
+        shift_length_min: shiftLength,
+        planned_break_min: plannedBreak, 
+        planned_time_min: plannedTime,
+        operating_time_min: operatingTime,
         was_planned: document.getElementById('logWasPlanned').value==='yes', 
         other_dept_used: document.getElementById('logOtherDept').value==='yes', 
         other_dept_period: document.getElementById('logOtherDeptPeriod').value.trim(), 
@@ -1295,12 +1415,40 @@
 
     function editShiftRecord(id) {
       const s = shifts.find(x => x.id.toString() === id.toString()); if (!s) return;
-      document.getElementById('shiftFormId').value = s.id; document.getElementById('logDate').value = s.shift_date; document.getElementById('logShiftType').value = s.shift_type; document.getElementById('logTeam').value = s.team; document.getElementById('logEpf').value = s.epf_no||''; document.getElementById('logOperator').value = s.operator_name||''; document.getElementById('logPlannedBreak').value = s.planned_break_min||90; document.getElementById('logWasPlanned').value = s.was_planned===false?'no':'yes'; document.getElementById('logOtherDept').value = s.other_dept_used===true?'yes':'no'; document.getElementById('logOtherDeptPeriod').value = s.other_dept_period||''; document.getElementById('logOtherNotes').value = s.other_notes||''; document.getElementById('logSupervisorSign').value = s.supervisor_sign||''; document.getElementById('logQualitySign').value = s.quality_sign||'';
-      document.getElementById('shiftLogFormTitle').innerText = `Edit Shift Record`; document.getElementById('shiftLogEditingBadge').classList.remove('hidden');
-      document.getElementById('profileCardsContainer').innerHTML = ''; document.getElementById('downtimeCardsContainer').innerHTML = '';
+      document.getElementById('shiftFormId').value = s.id; 
+      document.getElementById('logDate').value = s.shift_date; 
+      document.getElementById('logShiftType').value = s.shift_type; 
+      document.getElementById('logTeam').value = s.team; 
+      document.getElementById('logEpf').value = s.epf_no||''; 
+      document.getElementById('logOperator').value = s.operator_name||''; 
+      
+      const sLen = s.shift_length_min || 720;
+      const pBrk = s.planned_break_min || 90;
+      const pTime = s.planned_time_min != null ? s.planned_time_min : (sLen - pBrk);
+      const opTime = s.operating_time_min != null ? s.operating_time_min : pTime;
+
+      document.getElementById('logShiftLength').value = sLen;
+      document.getElementById('logPlannedBreak').value = pBrk;
+      document.getElementById('logPlannedTime').value = pTime;
+      document.getElementById('logOperatingTime').value = opTime;
+
+      document.getElementById('logWasPlanned').value = s.was_planned===false?'no':'yes'; 
+      document.getElementById('logOtherDept').value = s.other_dept_used===true?'yes':'no'; 
+      document.getElementById('logOtherDeptPeriod').value = s.other_dept_period||''; 
+      document.getElementById('logOtherNotes').value = s.other_notes||''; 
+      document.getElementById('logSupervisorSign').value = s.supervisor_sign||''; 
+      document.getElementById('logQualitySign').value = s.quality_sign||'';
+      
+      document.getElementById('shiftLogFormTitle').innerText = `Edit Shift Record`; 
+      document.getElementById('shiftLogEditingBadge').classList.remove('hidden');
+      
+      document.getElementById('profileCardsContainer').innerHTML = ''; 
+      document.getElementById('downtimeCardsContainer').innerHTML = ''; 
+      
       const prods = productionRecords.filter(p => p.shift_id === s.id), dts = downtimeEvents.filter(d => d.shift_id === s.id);
       if (prods.length > 0) prods.forEach(p => addProfileCard(p)); else addProfileCard();
       if (dts.length > 0) dts.forEach(d => addDowntimeCard(d));
+      
       switchOeeSubTab('addlog');
     }
     
@@ -1466,7 +1614,7 @@
           endDateStr = document.getElementById('repEndDate').value;
           if (!startDateStr || !endDateStr) return null;
       } else {
-          startDateStr = '1970-01-01'; // All time
+          startDateStr = '1970-01-01';
       }
 
       const filteredShifts = shifts.filter(s => s.shift_date >= startDateStr && s.shift_date <= endDateStr);
@@ -1482,25 +1630,7 @@
       const data = getFilteredReportData();
       if (!data) return;
 
-      const oeeResults = data.fShifts.map(s => {
-          const prods = data.fProds.filter(p => p.shift_id === s.id);
-          const dts = data.fDowns.filter(d => d.shift_id === s.id);
-          const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
-          const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
-          const good = Math.max(0, produced - rejected);
-          const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
-          const plannedMin = Math.max(0, (parseInt(s.shift_length_min) || 720) - (parseInt(s.planned_break_min) || 90));
-          const operatingMin = Math.max(0, plannedMin - downtimeMin);
-          let idealMin = 0;
-          prods.forEach(p => {
-              let cycleSec = p.ideal_cycle_seconds || (records.find(r => r.profile.toUpperCase() === (p.profile_code||'').toUpperCase())?.cycle_seconds || 0);
-              idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
-          });
-          const a = plannedMin > 0 ? (operatingMin / plannedMin) : 0;
-          const p_rate = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0; 
-          const q = produced > 0 ? (good / produced) : 0;
-          return { produced, rejected, good, downtimeMin, oee: a * p_rate * q };
-      });
+      const oeeResults = data.fShifts.map(s => calculateShiftOee(s));
 
       const tp = oeeResults.reduce((s, r)=>s+r.produced,0);
       const tr = oeeResults.reduce((s, r)=>s+r.rejected,0);
@@ -1514,26 +1644,7 @@
       // Render Preview Chart
       const ch = [...data.fShifts].sort((a,b) => a.shift_date.localeCompare(b.shift_date));
       const lbls = ch.map(s => s.shift_date.slice(5) + (s.shift_type==='Night'?'(N)':'(D)'));
-      
-      const chartOeeRes = ch.map(s => {
-          const prods = data.fProds.filter(p => p.shift_id === s.id);
-          const dts = data.fDowns.filter(d => d.shift_id === s.id);
-          const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
-          const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
-          const good = Math.max(0, produced - rejected);
-          const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
-          const plannedMin = Math.max(0, (parseInt(s.shift_length_min) || 720) - (parseInt(s.planned_break_min) || 90));
-          const operatingMin = Math.max(0, plannedMin - downtimeMin);
-          let idealMin = 0;
-          prods.forEach(p => {
-              let cycleSec = p.ideal_cycle_seconds || (records.find(r => r.profile.toUpperCase() === (p.profile_code||'').toUpperCase())?.cycle_seconds || 0);
-              idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
-          });
-          const a = plannedMin > 0 ? (operatingMin / plannedMin) : 0;
-          const p_rate = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0; 
-          const q = produced > 0 ? (good / produced) : 0;
-          return { oee: a * p_rate * q };
-      });
+      const chartOeeRes = ch.map(s => calculateShiftOee(s));
 
       if (chartReportPreviewInst) chartReportPreviewInst.destroy();
       const cv = document.getElementById('chartReportPreviewCanvas');
@@ -1565,7 +1676,6 @@
           });
       }
 
-      // Summary preview table
       const dm = {}; data.fDowns.forEach(d => { dm[d.reason] = (dm[d.reason]||0) + (parseInt(d.duration_min)||0); }); 
       const da = Object.entries(dm).map(([r,m])=>({r,m})).sort((a,b)=>b.m-a.m);
       const pm = {}; data.fProds.forEach(p => { pm[p.profile_code] = pm[p.profile_code]||{p:0, r:0}; pm[p.profile_code].p+=parseInt(p.produced)||0; pm[p.profile_code].r+=parseInt(p.rejected)||0; }); 
@@ -1610,7 +1720,6 @@
       
       let cy = 0;
       
-      // BRANDING BANNER
       doc.setFillColor(30, 64, 175); 
       doc.rect(0, 0, 210, 20, 'F'); 
       doc.setTextColor(255, 255, 255); 
@@ -1622,7 +1731,6 @@
       doc.setFont("helvetica", "normal"); 
       doc.text("ENGINEERING OPERATIONS & OEE INTELLIGENCE", 196, 13, { align: 'right' });
 
-      // DOCUMENT INFO
       cy = 32;
       doc.setTextColor(15, 23, 42); 
       doc.setFontSize(15); 
@@ -1637,36 +1745,16 @@
       doc.text(`Generated On: ${todayISO()}`, 196, cy, { align: 'right' });
       cy += 10;
 
-      // Calculate Metrics
-      const oeeResults = data.fShifts.map(s => {
-          const prods = data.fProds.filter(p => p.shift_id === s.id);
-          const dts = data.fDowns.filter(d => d.shift_id === s.id);
-          const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
-          const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
-          const good = Math.max(0, produced - rejected);
-          const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
-          const plannedMin = Math.max(0, (parseInt(s.shift_length_min) || 720) - (parseInt(s.planned_break_min) || 90));
-          const operatingMin = Math.max(0, plannedMin - downtimeMin);
-          let idealMin = 0;
-          prods.forEach(p => {
-              let cycleSec = p.ideal_cycle_seconds || (records.find(r => r.profile.toUpperCase() === (p.profile_code||'').toUpperCase())?.cycle_seconds || 0);
-              idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
-          });
-          const a = plannedMin > 0 ? (operatingMin / plannedMin) : 0;
-          const p_rate = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0; 
-          const q = produced > 0 ? (good / produced) : 0;
-          return { produced, rejected, good, downtimeMin, a, p_rate, q, oee: a * p_rate * q };
-      });
+      const oeeResults = data.fShifts.map(s => calculateShiftOee(s));
       const totalShifts = data.fShifts.length;
       const totalProduced = oeeResults.reduce((sum, r) => sum + r.produced, 0);
       const totalRejects = oeeResults.reduce((sum, r) => sum + r.rejected, 0);
       const totalDowntimeMin = oeeResults.reduce((sum, r) => sum + r.downtimeMin, 0);
       const avgOee = oeeResults.reduce((sum, r) => sum + r.oee, 0) / totalShifts;
-      const avgA = oeeResults.reduce((sum, r) => sum + r.a, 0) / totalShifts;
-      const avgP = oeeResults.reduce((sum, r) => sum + r.p_rate, 0) / totalShifts;
-      const avgQ = oeeResults.reduce((sum, r) => sum + r.q, 0) / totalShifts;
+      const avgA = oeeResults.reduce((sum, r) => sum + r.availability, 0) / totalShifts;
+      const avgP = oeeResults.reduce((sum, r) => sum + r.performance, 0) / totalShifts;
+      const avgQ = oeeResults.reduce((sum, r) => sum + r.quality, 0) / totalShifts;
 
-      // 1. EXECUTIVE SUMMARY
       if (chkSum) {
           doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.text("1. Executive Summary & Composite OEE", 14, cy); cy += 5;
           doc.autoTable({ 
@@ -1690,7 +1778,6 @@
           cy = doc.lastAutoTable.finalY + 10;
       }
 
-      // 2. CHARTS (OEE Trend)
       if (chkChart && chartReportPreviewInst) {
           if (cy > 190) { doc.addPage(); cy = 20; }
           doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.setTextColor(15, 23, 42); doc.text("2. Overall Equipment Effectiveness (OEE) Telemetry Graph", 14, cy); cy += 5;
@@ -1701,7 +1788,6 @@
           } catch(e) { console.warn("Chart injection error", e); cy += 5; }
       }
 
-      // 3. YIELD ANALYSIS
       if (chkYield) {
           if (cy > 230) { doc.addPage(); cy = 20; }
           const pMap = {}; 
@@ -1724,7 +1810,6 @@
           cy = doc.lastAutoTable.finalY + 10;
       }
 
-      // 4. DOWNTIME BREAKDOWN
       if (chkDown) {
           if (cy > 230) { doc.addPage(); cy = 20; }
           const dtMap = {}; 
@@ -1742,27 +1827,25 @@
           cy = doc.lastAutoTable.finalY + 10;
       }
 
-      // 5. SHIFT LOGS
       if (chkLogs) {
           if (cy > 230) { doc.addPage(); cy = 20; }
           const shiftRows = data.fShifts.map((s, idx) => { 
               const r = oeeResults[idx]; 
-              return [s.shift_date, s.shift_type, s.team, r.produced, r.good, r.rejected, `${r.downtimeMin}m`, fmtPct(r.oee)]; 
+              return [s.shift_date, s.shift_type, s.team, `${r.plannedMin}m`, `${r.operatingMin}m`, r.produced, r.good, r.rejected, `${r.downtimeMin}m`, fmtPct(r.oee)]; 
           });
           
           doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.text("5. Detailed Shift Runs", 14, cy); cy += 5;
           doc.autoTable({ 
-              head: [['Date', 'Shift', 'Team', 'Produced', 'Good', 'Scrap', 'Downtime', 'OEE']], 
+              head: [['Date', 'Shift', 'Team', 'Planned', 'Op Time', 'Produced', 'Good', 'Scrap', 'Downtime', 'OEE']], 
               body: shiftRows, 
               startY: cy, 
               theme: 'grid', 
               headStyles: { fillColor: [15, 23, 42] }, 
-              columnStyles: { 7: { fontStyle: 'bold' } } 
+              columnStyles: { 9: { fontStyle: 'bold' } } 
           });
           cy = doc.lastAutoTable.finalY + 14;
       }
 
-      // SIGNATURE BLOCK
       if (cy > 245) { doc.addPage(); cy = 30; }
       doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.5); doc.line(14, cy, 196, cy); cy += 12;
       
@@ -1792,7 +1875,7 @@
       const wb = XLSX.utils.book_new();
       const sr = data.fShifts.map(s => { 
         const r = calculateShiftOee(s); 
-        return { Date: s.shift_date, Shift: s.shift_type, Team: s.team, Produced: r.produced, Good: r.good, Reject: r.rejected, Downtime: r.downtimeMin, OEE: fmtPct(r.oee) }; 
+        return { Date: s.shift_date, Shift: s.shift_type, Team: s.team, Planned_Min: r.plannedMin, Operating_Min: r.operatingMin, Produced: r.produced, Good: r.good, Reject: r.rejected, Downtime: r.downtimeMin, OEE: fmtPct(r.oee) }; 
       }); 
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sr), "Shift_Logs");
       
