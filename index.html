@@ -544,9 +544,15 @@
     let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null, chartProfile30Inst = null, chartOeeTelemetryInst = null;
     let profile30CurrentAngle = 'quantity', cardCounter = 0, dtCounter = 0, toastTimeout;
 
+    // --- FIX 1: TIMEZONE BUG ---
     const fmtPct = v => (v == null || isNaN(v)) ? '-' : (v * 100).toFixed(1) + '%';
     const fmtDateISO = d => (!d ? '' : ((d instanceof Date) ? d : new Date(d)).toISOString().slice(0, 10));
-    const todayISO = () => fmtDateISO(new Date());
+    const todayISO = () => {
+      const d = new Date();
+      const offset = d.getTimezoneOffset() * 60000;
+      return new Date(d.getTime() - offset).toISOString().slice(0, 10);
+    };
+    
     function formatDuration(sec) { if (!sec || isNaN(sec)) return '0s'; const s = parseInt(sec, 10), m = Math.floor(s / 60), r = s % 60; return m > 0 ? `${m}m ${r}s` : `${r}s`; }
     function normalizeToolCategory(cat) { const c = (cat || '').toLowerCase(); if (c.includes('drill')) return 'Drilling'; if (c.includes('tap')) return 'Tapping'; if (c.includes('chamfer')) return 'Chamfer'; return 'Milling'; }
 
@@ -600,6 +606,7 @@
       if (tabId === 'trash') renderBinArchive();
     }
 
+    // --- FIX 5: DOUBLE RENDER BUG ---
     function toggleDarkMode() {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
@@ -607,7 +614,6 @@
       
       const currentTab = localStorage.getItem('activeCncTab') || 'dashboard';
       switchTab(currentTab);
-      renderMasterDashboard();
     }
     
     // --- INIT ---
@@ -640,18 +646,23 @@
     }
 
     // --- DATA FETCHING ---
+    // --- FIX 3: RACE CONDITION ---
     async function fetchAllData() {
       const { data, error } = await supabaseClient.from('cnc_cycle_times').select('*');
       document.getElementById('syncStatus').innerText = error ? 'Offline' : 'Online';
       records = (data || []).filter(r => !r.is_deleted);
       trashRecords = (data || []).filter(r => r.is_deleted);
-      await fetchOeeData();
+      profilesLoaded = true; // Set to true before fetchOeeData is called
+      
+      await fetchOeeData(); 
+      
       applyFiltersAndRender();
       populatePlanningDropdown();
-      profilesLoaded = true;
       
       const activeTab = localStorage.getItem('activeCncTab') || 'dashboard';
       switchTab(activeTab);
+      
+      cleanUpExpiredTrash(); // Cleanup trash in background
     }
 
     async function fetchOeeData() {
@@ -681,7 +692,6 @@
       toolsTrash = (data || []).filter(t => t.is_deleted);
       toolsLoaded = true; 
       
-      // Update tables and summary UI cards across all tabs instantly
       applyToolsFiltersAndRender(); 
       refreshToolsDashboard(); 
       renderMasterDashboard(); 
@@ -725,7 +735,6 @@
         document.getElementById('dashProducedToday').innerText = `${oeeRes[0].good} pcs`;
       }
       renderDashboardCharts(); render30DayProfileAnalytics(); 
-      // Safe double-trigger to ensure the UI is fully synchronized
       refreshToolsDashboard(); 
     }
 
@@ -784,7 +793,6 @@
     }
     function setProfile30Angle(a) { profile30CurrentAngle = a; ['quantity', 'shifts', 'rejects'].forEach(x => { document.getElementById(`btnAngle-${x}`).className = x===a?"px-3 py-1.5 rounded-xl transition bg-blue-600 text-white shadow-sm font-bold":"px-3 py-1.5 rounded-xl transition text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold"; }); render30DayProfileAnalytics(); }
 
-    // DEDICATED REFRESH FUNCTION FOR TOOLS DASHBOARD UI
     function refreshToolsDashboard() { 
         const counts = { Milling: 0, Drilling: 0, Tapping: 0, Chamfer: 0 }; 
         toolsList.forEach(t => { 
@@ -944,7 +952,6 @@
         dbGood = '';
       }
 
-      // Replaced datalist with a proper <select> dropdown
       let profileOptions = '<option value="">-- Select Profile --</option>';
       let foundInRecords = false;
       records.forEach(r => {
@@ -953,7 +960,6 @@
           profileOptions += `<option value="${r.profile}" ${selected}>${r.profile}</option>`;
       });
 
-      // Safely preserve old records if a profile was hard deleted from master list
       if (p && p.profile_code && !foundInRecords) {
           profileOptions += `<option value="${p.profile_code}" selected>${p.profile_code} (Archived/Unknown)</option>`;
       }
@@ -985,14 +991,31 @@
     
     function resetShiftLogForm() { document.getElementById('shiftLogForm').reset(); document.getElementById('shiftFormId').value=''; document.getElementById('shiftLogEditingBadge').classList.add('hidden'); document.getElementById('shiftLogFormTitle').innerText='Shift Production Slip'; document.getElementById('profileCardsContainer').innerHTML=''; document.getElementById('downtimeCardsContainer').innerHTML=''; document.getElementById('logDate').value=todayISO(); addProfileCard(); addProfileCard(); }
     
+    // --- FIX 2: SAFE UPDATE / PREVENT DATA LOSS ---
     async function submitShiftLog(e) {
-      e.preventDefault(); const id = document.getElementById('shiftFormId').value;
-      const sp = { shift_date: document.getElementById('logDate').value, shift_type: document.getElementById('logShiftType').value, team: document.getElementById('logTeam').value, epf_no: document.getElementById('logEpf').value.trim(), operator_name: document.getElementById('logOperator').value.trim(), planned_break_min: parseInt(document.getElementById('logPlannedBreak').value)||90, was_planned: document.getElementById('logWasPlanned').value==='yes', other_dept_used: document.getElementById('logOtherDept').value==='yes', other_dept_period: document.getElementById('logOtherDeptPeriod').value.trim(), other_notes: document.getElementById('logOtherNotes').value.trim(), supervisor_sign: document.getElementById('logSupervisorSign').value.trim(), quality_sign: document.getElementById('logQualitySign').value.trim(), is_deleted: false };
+      e.preventDefault(); 
+      const id = document.getElementById('shiftFormId').value;
+      
+      const sp = { 
+        shift_date: document.getElementById('logDate').value, 
+        shift_type: document.getElementById('logShiftType').value, 
+        team: document.getElementById('logTeam').value, 
+        epf_no: document.getElementById('logEpf').value.trim(), 
+        operator_name: document.getElementById('logOperator').value.trim(), 
+        planned_break_min: parseInt(document.getElementById('logPlannedBreak').value)||90, 
+        was_planned: document.getElementById('logWasPlanned').value==='yes', 
+        other_dept_used: document.getElementById('logOtherDept').value==='yes', 
+        other_dept_period: document.getElementById('logOtherDeptPeriod').value.trim(), 
+        other_notes: document.getElementById('logOtherNotes').value.trim(), 
+        supervisor_sign: document.getElementById('logSupervisorSign').value.trim(), 
+        quality_sign: document.getElementById('logQualitySign').value.trim(), 
+        is_deleted: false 
+      };
+      
       try {
         let sid = id;
-        if (id) { await supabaseClient.from('shifts').update(sp).eq('id', id); await supabaseClient.from('production_records').delete().eq('shift_id', id); await supabaseClient.from('downtime_events').delete().eq('shift_id', id); } 
-        else { const { data } = await supabaseClient.from('shifts').insert([sp]).select(); sid = data[0].id; }
-
+        
+        // Extract all data from UI first
         const pNodes = document.querySelectorAll('#profileCardsContainer > div'), pp = [];
         pNodes.forEach(el => {
           const c = el.querySelector('.profCodeInput').value.trim().toUpperCase(), 
@@ -1003,23 +1026,48 @@
                 rr = el.querySelector('.profRejectReasonInput').value.trim();
           
           const total_produced = gd + rj; 
-
-          // Removed the link here - logging shifts will no longer mutate main CNC Cycle Times
           if (c) {
-            pp.push({ shift_id: sid, profile_code: c, ideal_cycle_seconds: cy, setup_min: 0, target: tg, produced: total_produced, rejected: rj, reject_reason: rr });
+            pp.push({ profile_code: c, ideal_cycle_seconds: cy, setup_min: 0, target: tg, produced: total_produced, rejected: rj, reject_reason: rr });
           }
         });
         
-        if (pp.length > 0) await supabaseClient.from('production_records').insert(pp);
-
         const dNodes = document.querySelectorAll('#downtimeCardsContainer > div'), dp = [];
-        dNodes.forEach(el => { const r = el.querySelector('.dtReasonSelect').value, m = parseInt(el.querySelector('.dtDurationInput').value)||0; if (m > 0) dp.push({ shift_id: sid, reason: r, duration_min: m }); });
-        if (dp.length > 0) await supabaseClient.from('downtime_events').insert(dp);
+        dNodes.forEach(el => { const r = el.querySelector('.dtReasonSelect').value, m = parseInt(el.querySelector('.dtDurationInput').value)||0; if (m > 0) dp.push({ reason: r, duration_min: m }); });
+        
+        // Save to Database safely
+        if (id) { 
+          const { error: shiftErr } = await supabaseClient.from('shifts').update(sp).eq('id', id); 
+          if(shiftErr) throw shiftErr;
+          
+          // Delete old related records ONLY after Shift updates correctly
+          await supabaseClient.from('production_records').delete().eq('shift_id', id); 
+          await supabaseClient.from('downtime_events').delete().eq('shift_id', id); 
+        } 
+        else { 
+          const { data, error: insertErr } = await supabaseClient.from('shifts').insert([sp]).select(); 
+          if(insertErr) throw insertErr;
+          sid = data[0].id; 
+        }
 
-        showToast("Shift Saved Successfully!"); resetShiftLogForm();
+        if (pp.length > 0) {
+          const ppWithIds = pp.map(p => ({ ...p, shift_id: sid }));
+          const { error: pErr } = await supabaseClient.from('production_records').insert(ppWithIds);
+          if (pErr) throw pErr;
+        }
+        
+        if (dp.length > 0) {
+          const dpWithIds = dp.map(d => ({ ...d, shift_id: sid }));
+          const { error: dErr } = await supabaseClient.from('downtime_events').insert(dpWithIds);
+          if (dErr) throw dErr;
+        }
+
+        showToast("Shift Saved Successfully!"); 
+        resetShiftLogForm();
         await fetchAllData(); 
         switchOeeSubTab('alllogs');
-      } catch (err) { alert("Backend Error: " + err.message); }
+      } catch (err) { 
+        alert("Error saving shift: " + err.message); 
+      }
     }
 
     function editShiftRecord(id) {
@@ -1045,7 +1093,6 @@
 
     // --- PRODUCTION PLANNER ---
     function populatePlanningDropdown() {
-      // Removed the datalist update, only updates select now
       const sel = document.getElementById('planProfileSelect'); 
       let opt = '<option value="">-- Choose Profile --</option>';
       records.forEach(r => { opt += `<option value="${r.id}">${r.profile} (${r.cycle_seconds}s)</option>`; });
@@ -1059,13 +1106,29 @@
     }
     function clearPlanningCart() { planningCart = []; renderPlanningCart(); }
     function removeCartItem(idx) { planningCart.splice(idx, 1); renderPlanningCart(); }
+    
+    // --- FIX 7: PLANNER ESTIMATED SHIFTS REAL-WORLD OEE ---
     function renderPlanningCart() {
       const c = document.getElementById('planningCartList'); if (!c) return;
+      
+      let avgOee = 0.75; // Default 75% OEE
+      if (shifts.length > 0) {
+        const oeeRes = shifts.map(calculateShiftOee);
+        avgOee = oeeRes.reduce((s, r) => s + r.oee, 0) / oeeRes.length;
+        if(avgOee === 0) avgOee = 0.75;
+      }
+
       if (!planningCart.length) { c.innerHTML = '<p class="text-xs text-slate-400 italic">No profiles in queue.</p>'; document.getElementById('calcTotalQty').innerText='0 pcs'; document.getElementById('calcTheorTime').innerText='0h 0m'; document.getElementById('calcShiftRequirement').innerText='0.0'; return; }
       let tQ = 0, tS = 0;
       c.innerHTML = planningCart.map((x, i) => { const s = (x.cycle_seconds + x.handling_seconds) * x.qty; tQ += x.qty; tS += s; return `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600"><div><b class="text-blue-600 dark:text-blue-400 text-sm">${x.profile}</b><span class="ml-3 text-slate-500 font-bold">Qty: ${x.qty}</span></div><div class="flex gap-3 items-center"><span class="font-mono font-bold">${formatDuration(s)}</span><button onclick="removeCartItem(${i})" class="text-rose-500 font-bold px-2 py-1 rounded bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition">×</button></div></div>`; }).join('');
-      document.getElementById('calcTotalQty').innerText = `${tQ} pcs`; document.getElementById('calcTheorTime').innerText = `${Math.floor(tS/3600)}h ${Math.floor((tS%3600)/60)}m`; document.getElementById('calcShiftRequirement').innerText = (tS / (10.5*3600)).toFixed(1);
+      document.getElementById('calcTotalQty').innerText = `${tQ} pcs`; 
+      document.getElementById('calcTheorTime').innerText = `${Math.floor(tS/3600)}h ${Math.floor((tS%3600)/60)}m`; 
+      
+      // Calculate shifts considering actual OEE
+      const requiredShifts = (tS / (10.5*3600)) / avgOee;
+      document.getElementById('calcShiftRequirement').innerText = requiredShifts.toFixed(1);
     }
+
     function generateJobSheetPDF() {
       if (!planningCart.length) return alert("Queue empty!");
       const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.setFont("helvetica", "bold"); doc.text("CNC 5000 - Production Traveler Sheet", 14, 15);
@@ -1078,6 +1141,8 @@
       const c = document.getElementById('requisitionItemsContainer'); if (!c) return;
       c.innerHTML = toolsNoticeList.length ? toolsNoticeList.map((t, i) => `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600"><div><b class="text-slate-800 dark:text-slate-100 text-sm">${t.category} - ${t.diameter}</b><p class="text-[10px] text-slate-500 mt-0.5">Stock: <span class="text-rose-500 font-bold">${t.stock}</span></p></div><div class="flex items-center gap-3"><label class="text-[10px] font-bold text-slate-500 tracking-wider">REQ QTY:</label><input type="number" min="1" value="${t.req_qty}" onchange="toolsNoticeList[${i}].req_qty=parseInt(this.value)||1" class="w-16 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-center font-bold outline-none focus:border-cyan-500"><button onclick="toolsNoticeList.splice(${i},1); renderToolsNoticeList();" class="text-rose-500 font-bold px-2 py-1 rounded bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition ml-2">×</button></div></div>`).join('') : '<p class="text-xs text-slate-400 italic">No tools selected.</p>';
     }
+
+    // --- FIX 6: MEMO PDF SIGNATURE OVERFLOW ---
     function generateFormalSupervisorLetterPDF() {
       if (!toolsNoticeList.length) return alert("Load tools first!");
       const recs = memoRecipients.filter(r => r.selected); if (!recs.length) return alert("Select recipient!");
@@ -1095,7 +1160,13 @@
       doc.setFontSize(10); doc.text("Dear Sir/Madam,", 14, cy); cy += 7; doc.text("Please find below the requested list of CNC machine tools that have fallen below the safe operating threshold. Expedited restocking is requested.", 14, cy, {maxWidth: 180}); cy += 12;
       doc.autoTable({ head: [['#', 'Tool Category', 'Size / Diameter', 'Current Stock', 'Order Qty']], body: toolsNoticeList.map((t, i) => [i+1, t.category, t.diameter, `${t.stock} pcs`, `${t.req_qty} pcs`]), startY: cy, theme: 'grid', headStyles: { fillColor: [37, 99, 235], halign: 'center' }, columnStyles: { 0: { halign: 'center', cellWidth: 15 }, 3: { halign: 'center', textColor: [225, 29, 72], fontStyle: 'bold' }, 4: { halign: 'center', fontStyle: 'bold' } } });
       
-      const fy = doc.lastAutoTable.finalY || cy;
+      let fy = doc.lastAutoTable.finalY || cy;
+      
+      if (fy > 230) {
+        doc.addPage();
+        fy = 20;
+      }
+      
       doc.text("Prepared & Verified By:", 14, fy + 25); doc.line(14, fy + 45, 70, fy + 45); 
       doc.setFont("helvetica", "bold"); doc.text(n, 14, fy + 52); doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.text(role, 14, fy + 57); 
       doc.save(`Restock_Memo_${d}.pdf`); showToast("Memo Exported to PDF.");
@@ -1159,29 +1230,40 @@
     function exportToolsToExcel() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(toolsList), "Tools"); XLSX.writeFile(wb, "CNC_Tools.xlsx"); }
     function generateToolsInventoryPDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text("Tools Inventory", 14, 15); doc.autoTable({ head: [['Category', 'Dia', 'Stock', 'Loc']], body: toolsDisplayed.map(t => [t.category, t.diameter, t.stock, t.location||'']), startY: 20 }); doc.save("Inventory.pdf"); }
 
-    // --- RECOVERY VAULT (MANUAL DELETE + 30 DAY AUTO-CLEANUP) ---
-    async function renderBinArchive() {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - 30);
-      const cutoffIso = cutoffDate.toISOString();
+    // --- FIX 4: BACKGROUND TRASH CLEANUP ---
+    async function cleanUpExpiredTrash() {
+      try {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - 30);
+        const cutoffIso = cutoffDate.toISOString();
 
-      const expiredProfiles = trashRecords.filter(r => r.deleted_at && r.deleted_at < cutoffIso);
-      const expiredTools = toolsTrash.filter(t => t.deleted_at && t.deleted_at < cutoffIso);
-      const expiredShifts = trashShifts.filter(s => s.deleted_at && s.deleted_at < cutoffIso);
+        const expiredProfiles = trashRecords.filter(r => r.deleted_at && r.deleted_at < cutoffIso);
+        const expiredTools = toolsTrash.filter(t => t.deleted_at && t.deleted_at < cutoffIso);
+        const expiredShifts = trashShifts.filter(s => s.deleted_at && s.deleted_at < cutoffIso);
 
-      if (expiredProfiles.length) { 
-        await supabaseClient.from('cnc_cycle_times').delete().in('id', expiredProfiles.map(x=>x.id)); 
-        trashRecords = trashRecords.filter(r => !expiredProfiles.includes(r)); 
+        if (expiredProfiles.length) { 
+            await supabaseClient.from('cnc_cycle_times').delete().in('id', expiredProfiles.map(x=>x.id)); 
+            trashRecords = trashRecords.filter(r => !expiredProfiles.includes(r)); 
+        }
+        if (expiredTools.length) { 
+            await supabaseClient.from('cnc_tool_bits').delete().in('id', expiredTools.map(x=>x.id)); 
+            toolsTrash = toolsTrash.filter(t => !expiredTools.includes(t)); 
+        }
+        if (expiredShifts.length) { 
+            await supabaseClient.from('shifts').delete().in('id', expiredShifts.map(x=>x.id)); 
+            trashShifts = trashShifts.filter(s => !expiredShifts.includes(s)); 
+        }
+        
+        // Refresh vault UI if active
+        if(document.getElementById('view-trash') && !document.getElementById('view-trash').classList.contains('hidden')){
+            renderBinArchive();
+        }
+      } catch (err) {
+        console.error("Vault cleanup failed:", err);
       }
-      if (expiredTools.length) { 
-        await supabaseClient.from('cnc_tool_bits').delete().in('id', expiredTools.map(x=>x.id)); 
-        toolsTrash = toolsTrash.filter(t => !expiredTools.includes(t)); 
-      }
-      if (expiredShifts.length) { 
-        await supabaseClient.from('shifts').delete().in('id', expiredShifts.map(x=>x.id)); 
-        trashShifts = trashShifts.filter(s => !expiredShifts.includes(s)); 
-      }
+    }
 
+    function renderBinArchive() {
       const pT = document.getElementById('trashProfilesTableBody'), tT = document.getElementById('trashToolsTableBody'), sT = document.getElementById('trashShiftsTableBody');
       
       if(pT) pT.innerHTML = trashRecords.length ? trashRecords.map(r => `
