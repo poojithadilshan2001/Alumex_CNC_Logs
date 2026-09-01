@@ -152,7 +152,7 @@
         <div onclick="switchTab('tools')" class="cursor-pointer bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:border-cyan-500 transition group">
           <div class="flex justify-between items-start"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Tools Units</span><span class="text-cyan-600 text-xs font-black group-hover:translate-x-1 transition-transform">→</span></div>
           <p id="dashToolsStock" class="text-3xl font-black text-cyan-600 dark:text-cyan-400 mt-1">0 pcs</p>
-          <p id="dashLowStockSummary" class="text-[11px] text-rose-500 font-bold mt-1">0 low stock</p>
+          <p id="dashLowStockSummary" class="text-[11px] text-rose-500 font-bold mt-1">0 critical stock</p>
         </div>
       </div>
 
@@ -441,12 +441,23 @@
           </div>
         </div>
       </div>
+
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm space-y-4 border border-slate-200 dark:border-slate-700">
         <div class="flex justify-between items-center">
           <h4 class="text-xs font-black uppercase tracking-wider">Selected Tools</h4>
-          <button onclick="autoPopulateLowStock()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm">+ Load Low Stock</button>
+          <button onclick="autoPopulateLowStock()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm">+ Load Critical Stock (≤ 3)</button>
         </div>
-        <div id="requisitionItemsContainer" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+        
+        <!-- NEW MANUAL ADDITION UI -->
+        <div class="flex items-center gap-2 mt-3 pb-3 border-b border-slate-100 dark:border-slate-700">
+           <select id="manualRestockSelect" class="flex-grow bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-cyan-500">
+               <option value="">-- Manually Add Tool to Requisition --</option>
+           </select>
+           <button onclick="addManualToolToRestock()" class="bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">Add</button>
+        </div>
+
+        <div id="requisitionItemsContainer" class="space-y-2 max-h-64 overflow-y-auto pr-1 mt-3"></div>
+        
         <div class="pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-end">
           <button onclick="generateFormalSupervisorLetterPDF()" class="bg-rose-600 hover:bg-rose-700 text-white font-black px-6 py-3 rounded-xl text-xs shadow-md transition">Export PDF Letter</button>
         </div>
@@ -530,7 +541,6 @@
     </div>
   </div>
 
-  <!-- DATALIST FOR PROFILES -->
   <datalist id="profileDatalist"></datalist>
 
   <script>
@@ -546,11 +556,9 @@
     let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null, chartProfile30Inst = null, chartOeeTelemetryInst = null;
     let profile30CurrentAngle = 'quantity', cardCounter = 0, dtCounter = 0, toastTimeout;
 
-    // --- UTILS & FIXES ---
-    // 1. XSS Escaping
+    // --- UTILS & SECURITY ---
     const esc = str => (str || '').toString().replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag]));
 
-    // 2. Timezone Fixes
     const fmtPct = v => (v == null || isNaN(v)) ? '-' : (v * 100).toFixed(1) + '%';
     const fmtDateISO = d => {
         if (!d) return '';
@@ -565,7 +573,6 @@
     function formatDuration(sec) { if (!sec || isNaN(sec)) return '0s'; const s = parseInt(sec, 10), m = Math.floor(s / 60), r = s % 60; return m > 0 ? `${m}m ${r}s` : `${r}s`; }
     function normalizeToolCategory(cat) { const c = (cat || '').toLowerCase(); if (c.includes('drill')) return 'Drilling'; if (c.includes('tap')) return 'Tapping'; if (c.includes('chamfer')) return 'Chamfer'; return 'Milling'; }
 
-    // 3. Modal Overflow Fixes
     function openModal(id) {
         document.getElementById(id).classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
@@ -574,11 +581,13 @@
         document.getElementById(id).classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
     }
+    
     function openFormModal(id = null) {
       document.getElementById('recordForm').reset(); document.getElementById('formRowId').value = '';
       if (id) { const t = records.find(x => x.id === id); if(t){ document.getElementById('formRowId').value = t.id; document.getElementById('formProfile').value = t.profile; document.getElementById('formCycleSeconds').value = t.cycle_seconds; document.getElementById('formDescription').value = t.description||''; document.getElementById('formLength').value = t.length||''; document.getElementById('formFeedSpeeds').value = t.feed_speeds||''; document.getElementById('formTooling').value = t.tooling||''; } }
       openModal('modalForm');
     }
+
     function openToolsFormModal(id = null) {
       document.getElementById('toolsToolForm').reset(); document.getElementById('toolsFormId').value = '';
       if (id) { const t = toolsList.find(x => x.id === id); if(t){ document.getElementById('toolsFormId').value = t.id; document.getElementById('toolsFormCategory').value = t.category; document.getElementById('toolsFormSubType').value = t.sub_type||''; document.getElementById('toolsFormDiameter').value = t.diameter; document.getElementById('toolsFormDescription').value = t.description||''; document.getElementById('toolsFormStock').value = t.stock; document.getElementById('toolsFormLocation').value = t.location||''; } }
@@ -589,13 +598,10 @@
       const toast = document.getElementById('toastNotification');
       document.getElementById('toastMessage').innerText = msg;
       document.getElementById('toastIcon').innerText = isError ? "⚠" : "✓";
-      
       toast.classList.remove('bg-rose-600', 'border-rose-500', 'bg-emerald-600', 'border-emerald-500', 'translate-y-20', 'opacity-0');
       if (isError) toast.classList.add('bg-rose-600', 'border-rose-500');
       else toast.classList.add('bg-emerald-600', 'border-emerald-500');
-      
       toast.classList.add('translate-y-0', 'opacity-100');
-
       if (toastTimeout) clearTimeout(toastTimeout);
       toastTimeout = setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
@@ -642,7 +648,6 @@
       switchTab(currentTab);
     }
     
-    // --- INIT ---
     (function initApp() { 
       if (localStorage.getItem('theme') === 'dark') { 
          document.documentElement.classList.add('dark'); 
@@ -716,6 +721,18 @@
       renderOeeTelemetryChart();
     }
 
+    function populateRestockDropdown() {
+        const sel = document.getElementById('manualRestockSelect');
+        if(!sel) return;
+        let opt = '<option value="">-- Manually Add Tool to Requisition --</option>';
+        // Sort tools alphabetically by category and diameter for easier finding
+        const sortedTools = [...toolsList].sort((a,b) => (a.category + a.diameter).localeCompare(b.category + b.diameter));
+        sortedTools.forEach(t => {
+            opt += `<option value="${t.id}">${esc(t.category)} - ${esc(t.diameter)} (Stock: ${t.stock})</option>`;
+        });
+        sel.innerHTML = opt;
+    }
+
     async function fetchToolsData() {
       const { data } = await supabaseClient.from('cnc_tool_bits').select('*');
       toolsList = (data || []).filter(t => !t.is_deleted); 
@@ -726,6 +743,7 @@
       refreshToolsDashboard(); 
       renderMasterDashboard(); 
       renderBinArchive();
+      populateRestockDropdown();
     }
 
     // --- CORE LOGIC ---
@@ -738,8 +756,6 @@
       const good = Math.max(0, produced - rejected);
 
       const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
-      
-      // FIX 6: Configurable Shift Length, fallback to 720 (12 hours)
       const shiftLengthMin = parseInt(shift.shift_length_min) || 720;
       const plannedMin = Math.max(0, shiftLengthMin - (parseInt(shift.planned_break_min) || 90));
       const operatingMin = Math.max(0, plannedMin - downtimeMin);
@@ -758,14 +774,14 @@
       return { produced, rejected, good, downtimeMin, availability, performance, quality, oee };
     }
 
-    // FIX 4: Update Dashboard Stats
     function renderMasterDashboard() {
       if (!profilesLoaded || !toolsLoaded) return;
       document.getElementById('dashTotalProfiles').innerText = records.length;
       
-      const lowStockCount = toolsList.filter(t => (parseInt(t.stock) || 0) < 2).length;
+      // FIX: Changed to <= 3
+      const lowStockCount = toolsList.filter(t => (parseInt(t.stock) || 0) <= 3).length;
       document.getElementById('dashToolsStock').innerText = `${toolsList.reduce((acc, t) => acc + (parseInt(t.stock) || 0), 0)} pcs`;
-      document.getElementById('dashLowStockSummary').innerText = `${lowStockCount} low stock`;
+      document.getElementById('dashLowStockSummary').innerText = `${lowStockCount} critical stock`;
 
       if (records.length > 0) {
           const maxCycle = Math.max(...records.map(r => r.cycle_seconds || 0));
@@ -778,7 +794,6 @@
         const avgA = oeeRes.reduce((s, r) => s + r.availability, 0) / oeeRes.length;
         const avgP = oeeRes.reduce((s, r) => s + r.performance, 0) / oeeRes.length;
         const avgQ = oeeRes.reduce((s, r) => s + r.quality, 0) / oeeRes.length;
-        
         const totGood = oeeRes.reduce((s, r) => s + r.good, 0);
         const totRej = oeeRes.reduce((s, r) => s + r.rejected, 0);
 
@@ -817,7 +832,6 @@
       if (ctxTools) chartDashToolsInst = new Chart(ctxTools.getContext('2d'), { type: 'doughnut', data: { labels: ['Milling', 'Drilling', 'Tapping', 'Chamfer'], datasets: [{ data: [counts.Milling, counts.Drilling, counts.Tapping, counts.Chamfer], backgroundColor: ['#0284c7', '#0ea5e9', '#10b981', '#8b5cf6'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels:{color:tc} } }, cutout: '70%' } });
     }
 
-    // FIX 5: Sort by Date AND Shift Type to avoid line jumps
     function renderOeeTelemetryChart() {
       const isDark = document.documentElement.classList.contains('dark'), tc = isDark ? '#cbd5e1' : '#475569', gc = isDark ? '#334155' : '#e2e8f0';
       const ch = [...shifts].sort((a,b) => {
@@ -862,7 +876,6 @@
         const d = document.getElementById('catCount-Drilling');
         const t = document.getElementById('catCount-Tapping');
         const c = document.getElementById('catCount-Chamfer');
-        
         if(m) m.innerText = `${counts.Milling} pcs`; 
         if(d) d.innerText = `${counts.Drilling} pcs`; 
         if(t) t.innerText = `${counts.Tapping} pcs`; 
@@ -907,8 +920,13 @@
       const q = (document.getElementById('toolSearchInput')?.value || '').toLowerCase(), cat = document.getElementById('filterCategorySelect')?.value || 'ALL';
       toolsDisplayed = toolsList.filter(t => ((t.diameter||'').toLowerCase().includes(q) || (t.sub_type||'').toLowerCase().includes(q)) && (cat === 'ALL' || normalizeToolCategory(t.category) === cat));
       const tbody = document.getElementById('inventoryTableBody'); if (!tbody) return;
-      tbody.innerHTML = toolsDisplayed.length ? toolsDisplayed.map((t, i) => `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700/50"><td class="p-3.5 font-bold">${esc(t.category)}</td><td class="p-3.5">${esc(t.sub_type)||'-'}</td><td class="p-3.5 font-mono">${esc(t.diameter)}</td><td class="p-3.5 font-mono text-center font-bold ${t.stock < 2 ? 'text-rose-600' : 'text-blue-600'}">${t.stock}</td><td class="p-3.5 text-center space-x-2"><button onclick="openToolsFormModal('${t.id}')" class="text-amber-600 font-bold hover:underline">Edit</button><button onclick="deleteTool('${t.id}')" class="text-rose-600 font-bold hover:underline">Delete</button></td></tr>`).join('') : `<tr><td colspan="5" class="text-center p-6 text-slate-500">No tools</td></tr>`;
+      tbody.innerHTML = toolsDisplayed.length ? toolsDisplayed.map((t, i) => {
+          // FIX: Limit changed to <= 3
+          const isCritical = parseInt(t.stock) <= 3;
+          return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700/50"><td class="p-3.5 font-bold">${esc(t.category)}</td><td class="p-3.5">${esc(t.sub_type)||'-'}</td><td class="p-3.5 font-mono">${esc(t.diameter)}</td><td class="p-3.5 font-mono text-center font-bold ${isCritical ? 'text-rose-600' : 'text-blue-600'}">${t.stock}</td><td class="p-3.5 text-center space-x-2"><button onclick="openToolsFormModal('${t.id}')" class="text-amber-600 font-bold hover:underline">Edit</button><button onclick="deleteTool('${t.id}')" class="text-rose-600 font-bold hover:underline">Delete</button></td></tr>`;
+      }).join('') : `<tr><td colspan="5" class="text-center p-6 text-slate-500">No tools</td></tr>`;
     }
+    
     async function submitToolForm(e) {
       e.preventDefault(); const id = document.getElementById('toolsFormId').value, payload = { category: document.getElementById('toolsFormCategory').value, sub_type: document.getElementById('toolsFormSubType').value.trim(), diameter: document.getElementById('toolsFormDiameter').value.trim(), description: document.getElementById('toolsFormDescription').value.trim(), location: document.getElementById('toolsFormLocation').value.trim(), stock: parseInt(document.getElementById('toolsFormStock').value)||0, is_deleted: false };
       try { if (id) await supabaseClient.from('cnc_tool_bits').update(payload).eq('id', id).select(); else await supabaseClient.from('cnc_tool_bits').insert([payload]).select(); closeModal('toolsModalForm'); showToast("Saved Tool!"); fetchToolsData(); } catch (err) { alert(err.message); }
@@ -1055,7 +1073,6 @@
         const dNodes = document.querySelectorAll('#downtimeCardsContainer > div'), dp = [];
         dNodes.forEach(el => { const r = el.querySelector('.dtReasonSelect').value, m = parseInt(el.querySelector('.dtDurationInput').value)||0; if (m > 0) dp.push({ reason: r, duration_min: m }); });
         
-        // FIX: Data Loss safety orchestration
         if (id) { 
           const { error: shiftErr } = await supabaseClient.from('shifts').update(sp).eq('id', id); 
           if(shiftErr) throw shiftErr;
@@ -1156,10 +1173,60 @@
     }
 
     // --- RESTOCK MEMO ---
-    function autoPopulateLowStock() { toolsNoticeList = toolsList.filter(t => (parseInt(t.stock) || 0) < 2).map(t => ({...t, req_qty: 5})); renderToolsNoticeList(); showToast("Loaded low stock tools."); }
+    
+    // FIX: Auto-load limits changed to <= 3 and avoids duplicating manual entries
+    function autoPopulateLowStock() { 
+        const criticalTools = toolsList.filter(t => (parseInt(t.stock) || 0) <= 3);
+        criticalTools.forEach(t => {
+            if(!toolsNoticeList.some(x => x.id === t.id)) {
+                toolsNoticeList.push({...t, req_qty: 5});
+            }
+        });
+        renderToolsNoticeList(); 
+        showToast("Loaded critical stock tools (≤ 3)."); 
+    }
+
+    // FIX: Manual Tool Addition Function
+    function addManualToolToRestock() {
+        const id = document.getElementById('manualRestockSelect').value;
+        if (!id) return alert("Please select a tool first.");
+        
+        const tool = toolsList.find(x => x.id === id);
+        if (!tool) return;
+        
+        if (toolsNoticeList.some(x => x.id === id)) {
+            return showToast("Tool is already in the Requisition List.", true);
+        }
+        
+        toolsNoticeList.push({...tool, req_qty: 5});
+        renderToolsNoticeList();
+        
+        // Reset dropdown to default after adding
+        document.getElementById('manualRestockSelect').value = '';
+        showToast(`${tool.category} added to requisition.`);
+    }
+
+    // FIX: Styling update in restock list (Highlighting critical ones)
     function renderToolsNoticeList() {
       const c = document.getElementById('requisitionItemsContainer'); if (!c) return;
-      c.innerHTML = toolsNoticeList.length ? toolsNoticeList.map((t, i) => `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600"><div><b class="text-slate-800 dark:text-slate-100 text-sm">${esc(t.category)} - ${esc(t.diameter)}</b><p class="text-[10px] text-slate-500 mt-0.5">Stock: <span class="text-rose-500 font-bold">${t.stock}</span></p></div><div class="flex items-center gap-3"><label class="text-[10px] font-bold text-slate-500 tracking-wider">REQ QTY:</label><input type="number" min="1" value="${t.req_qty}" onchange="toolsNoticeList[${i}].req_qty=parseInt(this.value)||1" class="w-16 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-center font-bold outline-none focus:border-cyan-500"><button onclick="toolsNoticeList.splice(${i},1); renderToolsNoticeList();" class="text-rose-500 font-bold px-2 py-1 rounded bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition ml-2">×</button></div></div>`).join('') : '<p class="text-xs text-slate-400 italic">No tools selected.</p>';
+      c.innerHTML = toolsNoticeList.length ? toolsNoticeList.map((t, i) => {
+          const isCritical = (parseInt(t.stock) || 0) <= 3;
+          return `
+          <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border ${isCritical ? 'border-rose-200 dark:border-rose-800' : 'border-slate-200 dark:border-slate-600'} transition hover:border-slate-300">
+              <div>
+                  <b class="text-slate-800 dark:text-slate-100 text-sm">${esc(t.category)} - ${esc(t.diameter)}</b>
+                  <p class="text-[10px] text-slate-500 mt-0.5">Stock: 
+                      <span class="${isCritical ? 'text-rose-500' : 'text-emerald-500'} font-bold">${t.stock}</span>
+                      ${isCritical ? '<span class="ml-1.5 bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded uppercase font-black text-[9px]">Critical</span>' : ''}
+                  </p>
+              </div>
+              <div class="flex items-center gap-3">
+                  <label class="text-[10px] font-bold text-slate-500 tracking-wider">REQ QTY:</label>
+                  <input type="number" min="1" value="${t.req_qty}" onchange="toolsNoticeList[${i}].req_qty=parseInt(this.value)||1" class="w-16 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-center font-bold outline-none focus:border-cyan-500 transition">
+                  <button onclick="toolsNoticeList.splice(${i},1); renderToolsNoticeList();" class="text-rose-500 font-bold px-2 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition shadow-sm ml-2">×</button>
+              </div>
+          </div>`;
+      }).join('') : '<p class="text-xs text-slate-400 italic px-2">No tools selected.</p>';
     }
 
     function generateFormalSupervisorLetterPDF() {
@@ -1174,9 +1241,9 @@
       let cy = 52; recs.forEach(r => { doc.setFont("helvetica", "normal"); doc.text(`${r.name} (${r.role})`, 40, cy); cy += 6; }); cy += 2; 
       doc.setFont("helvetica", "bold"); doc.text("FROM:", 14, cy); doc.setFont("helvetica", "normal"); doc.text(n, 40, cy); cy += 7;
       doc.setFont("helvetica", "bold"); doc.text("DATE:", 14, cy); doc.setFont("helvetica", "normal"); doc.text(d, 40, cy); cy += 7;
-      doc.setFont("helvetica", "bold"); doc.text("SUBJECT:", 14, cy); doc.setFont("helvetica", "normal"); doc.text("Urgent Requisition Notice for Low-Stock CNC Tools", 40, cy); cy += 15;
+      doc.setFont("helvetica", "bold"); doc.text("SUBJECT:", 14, cy); doc.setFont("helvetica", "normal"); doc.text("Requisition Notice for CNC Tooling Operations", 40, cy); cy += 15;
       
-      doc.setFontSize(10); doc.text("Dear Sir/Madam,", 14, cy); cy += 7; doc.text("Please find below the requested list of CNC machine tools that have fallen below the safe operating threshold. Expedited restocking is requested.", 14, cy, {maxWidth: 180}); cy += 12;
+      doc.setFontSize(10); doc.text("Dear Sir/Madam,", 14, cy); cy += 7; doc.text("Please find below the requested list of CNC machine tools for restocking. Items marked with critically low stock (≤ 3) require expedited attention.", 14, cy, {maxWidth: 180}); cy += 12;
       doc.autoTable({ head: [['#', 'Tool Category', 'Size / Diameter', 'Current Stock', 'Order Qty']], body: toolsNoticeList.map((t, i) => [i+1, t.category, t.diameter, `${t.stock} pcs`, `${t.req_qty} pcs`]), startY: cy, theme: 'grid', headStyles: { fillColor: [37, 99, 235], halign: 'center' }, columnStyles: { 0: { halign: 'center', cellWidth: 15 }, 3: { halign: 'center', textColor: [225, 29, 72], fontStyle: 'bold' }, 4: { halign: 'center', fontStyle: 'bold' } } });
       
       let fy = doc.lastAutoTable.finalY || cy;
