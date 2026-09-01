@@ -29,6 +29,20 @@
     ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Custom Checkbox Styling for Report Builder */
+    .report-checkbox:checked + div {
+        border-color: #2563eb;
+        background-color: #eff6ff;
+    }
+    .dark .report-checkbox:checked + div {
+        border-color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.12);
+    }
+    .report-checkbox:checked + div .check-icon {
+        opacity: 1;
+        transform: scale(1);
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen font-sans antialiased transition-colors duration-300">
@@ -282,24 +296,24 @@
           <div class="flex flex-col gap-1.5 text-right bg-slate-800/50 p-3 rounded-2xl border border-slate-700">
              <div class="flex items-center justify-end gap-2 text-xs"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-bold text-slate-300">World-Class: 85%+</span></div>
              <div class="flex items-center justify-end gap-2 text-xs"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="font-bold text-slate-300">Typical: ~60%</span></div>
-             <div class="flex items-center justify-end gap-2 text-xs"><span class="w-2 h-2 rounded-full bg-rose-500"></span><span class="font-bold text-slate-300">Low: < 40%</span></div>
+             <div class="flex items-center justify-end gap-2 text-xs"><span class="w-2 h-2 rounded-full bg-rose-500"></span><span class="font-bold text-slate-300">Low: &lt; 40%</span></div>
           </div>
         </div>
         
         <div class="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-          <div class="bg-slate-800/80 p-4.5 rounded-2xl border border-slate-700 flex flex-col justify-between shadow-lg p-4">
+          <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 flex flex-col justify-between shadow-lg">
             <div><span class="text-white font-black uppercase text-[10px] tracking-wider">The Ultimate Metric</span><p class="font-mono font-bold text-emerald-400 text-base mt-1.5">OEE = A × P × Q</p></div>
             <p class="text-[10px] text-slate-400 mt-4 leading-relaxed border-t border-slate-700 pt-3">TPM standard. Takes into account all losses to show true plant productivity.</p>
           </div>
-          <div class="bg-slate-800/80 p-4.5 rounded-2xl border border-slate-700 flex flex-col justify-between shadow-lg p-4">
+          <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 flex flex-col justify-between shadow-lg">
             <div><span class="text-blue-300 font-black uppercase text-[10px] tracking-wider">Availability (A)</span><p class="font-mono font-bold text-white mt-1.5 border-l-2 border-blue-500 pl-2">Op Min / Planned Min</p></div>
-            <p class="text-[10px] text-slate-400 mt-4 leading-relaxed border-t border-slate-700 pt-3">Measures <b>Downtime Loss</b>. Breakdowns & tooling changes relative to 12h shifts.</p>
+            <p class="text-[10px] text-slate-400 mt-4 leading-relaxed border-t border-slate-700 pt-3">Measures <b>Downtime Loss</b>. Breakdowns &amp; tooling changes relative to 12h shifts.</p>
           </div>
-          <div class="bg-slate-800/80 p-4.5 rounded-2xl border border-slate-700 flex flex-col justify-between shadow-lg p-4">
+          <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 flex flex-col justify-between shadow-lg">
             <div><span class="text-amber-400 font-black uppercase text-[10px] tracking-wider">Performance (P)</span><p class="font-mono font-bold text-white mt-1.5 border-l-2 border-amber-500 pl-2">(Tot Pcs × Cycle) / Op Min</p></div>
             <p class="text-[10px] text-slate-400 mt-4 leading-relaxed border-t border-slate-700 pt-3">Measures <b>Speed Loss</b>. Minor stops and reduced speed vs theoretical targets.</p>
           </div>
-          <div class="bg-slate-800/80 p-4.5 rounded-2xl border border-slate-700 flex flex-col justify-between shadow-lg p-4">
+          <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 flex flex-col justify-between shadow-lg">
             <div><span class="text-purple-400 font-black uppercase text-[10px] tracking-wider">Quality (Q)</span><p class="font-mono font-bold text-white mt-1.5 border-l-2 border-purple-500 pl-2">Good Pcs / Total Pcs</p></div>
             <p class="text-[10px] text-slate-400 mt-4 leading-relaxed border-t border-slate-700 pt-3">Measures <b>Quality Loss</b>. Accounts for rejected profiles (scrap) and rework.</p>
           </div>
@@ -423,7 +437,7 @@
       </div>
 
       <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm space-y-4 border border-slate-200 dark:border-slate-700">
-        <h4 class="text-xs font-black uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 pb-2">Document Details & Routing</h4>
+        <h4 class="text-xs font-black uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 pb-2">Document Details &amp; Routing</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs mt-3">
           <div class="space-y-4">
             <div><label class="block font-bold mb-1">Date</label><input type="date" id="memoDate" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none font-bold"></div>
@@ -463,17 +477,102 @@
       </div>
     </section>
 
-    <!-- 7. REPORTS -->
+    <!-- 7. ENHANCED REPORTS & CUSTOM PDF BUILDER -->
     <section id="view-reports" class="hidden space-y-6">
-      <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 dark:border-slate-700 pb-4">
-          <div><h3 class="text-lg font-black mt-0.5">CNC 5000 Plant Intelligence Reports</h3></div>
-          <div class="flex items-center gap-2">
-            <button onclick="exportReportPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-black shadow-sm transition">Export PDF</button>
-            <button onclick="exportReportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-black shadow-sm transition">Export Excel</button>
+      <div class="bg-slate-900 border border-slate-800 text-white p-6 rounded-3xl flex justify-between items-center shadow-xl">
+        <div>
+          <span class="text-[10px] font-black uppercase text-blue-400 tracking-widest">ADVANCED REPORT BUILDER</span>
+          <h3 class="text-lg font-black mt-0.5">Custom Intelligence &amp; Analytics Export</h3>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Controls Column -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+            <h4 class="text-xs font-black uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 pb-2">1. Filter By Date Range</h4>
+            <select id="repDateFilter" onchange="handleReportDateChange()" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-blue-500 transition-colors">
+              <option value="7">Last 7 Days</option>
+              <option value="30">This Month (Last 30 Days)</option>
+              <option value="all">All Time History</option>
+              <option value="custom">Custom Date Range</option>
+            </select>
+            <div id="repCustomDateRow" class="hidden grid grid-cols-2 gap-3">
+               <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Start Date</label><input type="date" id="repStartDate" onchange="updateReportPreview()" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs outline-none focus:border-blue-500"></div>
+               <div><label class="block text-[10px] font-bold text-slate-500 mb-1">End Date</label><input type="date" id="repEndDate" onchange="updateReportPreview()" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs outline-none focus:border-blue-500"></div>
+            </div>
+
+            <h4 class="text-xs font-black uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 pb-2 pt-2">2. Document Info &amp; Signatures</h4>
+            <div class="space-y-3">
+              <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Report Title</label><input type="text" id="repTitle" value="Weekly OEE &amp; Production Yield Report" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-bold outline-none focus:border-blue-500"></div>
+              <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Prepared By (Name)</label><input type="text" id="repPrepName" value="Poojitha Dilshan" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-bold outline-none focus:border-blue-500"></div>
+              <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Designation / Role</label><input type="text" id="repPrepRole" value="Engineering Intern" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-bold outline-none focus:border-blue-500"></div>
+              <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Reviewed By (Manager Name)</label><input type="text" id="repReviewer" placeholder="e.g. Plant Manager" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-bold outline-none focus:border-blue-500"></div>
+              <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Plant Name (Header)</label><input type="text" id="repPlantName" value="Alumex PLC - Sapugaskanda" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-bold outline-none focus:border-blue-500"></div>
+            </div>
+
+            <h4 class="text-xs font-black uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 pb-2 pt-2">3. Select Report Modules</h4>
+            <div class="grid grid-cols-2 gap-3 text-xs font-bold">
+              <label class="relative cursor-pointer group">
+                <input type="checkbox" id="chkExecSum" checked class="report-checkbox sr-only">
+                <div class="p-3 border border-slate-300 dark:border-slate-600 rounded-xl transition-colors flex items-center justify-between">
+                  <span>Executive Summary</span><span class="check-icon opacity-0 scale-50 transition-all text-blue-600">✓</span>
+                </div>
+              </label>
+              <label class="relative cursor-pointer group">
+                <input type="checkbox" id="chkCharts" checked class="report-checkbox sr-only">
+                <div class="p-3 border border-slate-300 dark:border-slate-600 rounded-xl transition-colors flex items-center justify-between">
+                  <span>Include Graphs</span><span class="check-icon opacity-0 scale-50 transition-all text-blue-600">✓</span>
+                </div>
+              </label>
+              <label class="relative cursor-pointer group">
+                <input type="checkbox" id="chkYield" checked class="report-checkbox sr-only">
+                <div class="p-3 border border-slate-300 dark:border-slate-600 rounded-xl transition-colors flex items-center justify-between">
+                  <span>Yield Analysis</span><span class="check-icon opacity-0 scale-50 transition-all text-blue-600">✓</span>
+                </div>
+              </label>
+              <label class="relative cursor-pointer group">
+                <input type="checkbox" id="chkDown" checked class="report-checkbox sr-only">
+                <div class="p-3 border border-slate-300 dark:border-slate-600 rounded-xl transition-colors flex items-center justify-between">
+                  <span>Downtime Logs</span><span class="check-icon opacity-0 scale-50 transition-all text-blue-600">✓</span>
+                </div>
+              </label>
+              <label class="relative cursor-pointer group col-span-2">
+                <input type="checkbox" id="chkLogs" checked class="report-checkbox sr-only">
+                <div class="p-3 border border-slate-300 dark:border-slate-600 rounded-xl transition-colors flex items-center justify-between">
+                  <span>Raw Shift History Data</span><span class="check-icon opacity-0 scale-50 transition-all text-blue-600">✓</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
+               <button onclick="generateCustomPDF()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-black shadow-md transition text-sm">Generate Professional PDF</button>
+               <button onclick="exportReportExcel()" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl font-bold shadow-sm transition text-xs">Export Filtered Excel Data</button>
+            </div>
           </div>
         </div>
-        <div id="reportPreviewCard" class="space-y-6 pt-2"></div>
+
+        <!-- Preview Column -->
+        <div class="lg:col-span-7">
+          <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm min-h-full space-y-6">
+            <h4 class="text-xs font-black uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 pb-3">Filtered Data Live Preview</h4>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-xs">
+              <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700"><span class="font-bold text-slate-500 tracking-wider">SHIFTS</span><p id="prevShifts" class="text-2xl font-black mt-1">0</p></div>
+              <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-2xl border border-blue-100 dark:border-blue-900"><span class="font-bold text-blue-500 tracking-wider">PRODUCED</span><p id="prevProduced" class="text-2xl font-black text-blue-600 mt-1">0</p></div>
+              <div class="bg-rose-50 dark:bg-rose-900/30 p-4 rounded-2xl border border-rose-100 dark:border-rose-900"><span class="font-bold text-rose-500 tracking-wider">SCRAP</span><p id="prevScrap" class="text-2xl font-black text-rose-600 mt-1">0</p></div>
+              <div class="bg-emerald-50 dark:bg-emerald-900/30 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900"><span class="font-bold text-emerald-500 tracking-wider">AVG OEE</span><p id="prevOee" class="text-2xl font-black text-emerald-600 mt-1">0%</p></div>
+            </div>
+
+            <!-- Preview Canvas that gets converted to image for PDF injection -->
+            <div class="border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+              <h5 class="text-[11px] font-bold text-slate-400 uppercase mb-3">Live OEE Trend for Selected Period</h5>
+              <div class="h-60"><canvas id="chartReportPreviewCanvas"></canvas></div>
+            </div>
+
+            <div id="reportSummaryPreviewContainer" class="space-y-4 pt-2"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -543,6 +642,20 @@
   <datalist id="profileDatalist"></datalist>
 
   <script>
+    // --- CHART.JS WHITE BACKGROUND PLUGIN FOR CRISP PDF EXPORTS ---
+    const whiteBackgroundPlugin = {
+      id: 'customCanvasBackgroundColor',
+      beforeDraw: (chart, args, options) => {
+        const {ctx} = chart;
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = options.color || '#ffffff';
+        ctx.fillRect(0, 0, chart.width, chart.height);
+        ctx.restore();
+      }
+    };
+    Chart.register(whiteBackgroundPlugin);
+
     // --- DATABASE CONFIG ---
     const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_s8wnE3RfwJRQxO2NyPdWTg_YBssVkbM";
@@ -552,7 +665,7 @@
     let shifts=[], trashShifts=[], productionRecords=[], downtimeEvents=[], planningCart=[];
     let memoRecipients = [{ id: 1, name: 'John Doe', role: 'Plant Supervisor', selected: true }];
     let profilesLoaded = false, toolsLoaded = false;
-    let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null, chartProfile30Inst = null, chartOeeTelemetryInst = null;
+    let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null, chartProfile30Inst = null, chartOeeTelemetryInst = null, chartReportPreviewInst = null;
     let profile30CurrentAngle = 'quantity', cardCounter = 0, dtCounter = 0, toastTimeout;
 
     // --- UTILS & SECURITY ---
@@ -635,7 +748,7 @@
       if (tabId === 'production') renderPlanningCart();
       if (tabId === 'tools') applyToolsFiltersAndRender();
       if (tabId === 'toolsreq') renderToolsNoticeList();
-      if (tabId === 'reports') renderReportPreview();
+      if (tabId === 'reports') updateReportPreview();
       if (tabId === 'trash') renderBinArchive();
     }
 
@@ -715,9 +828,9 @@
       
       renderShiftsTable(); 
       renderLatestShiftCard(); 
-      renderReportPreview(); 
       render30DayProfileAnalytics(); 
       renderOeeTelemetryChart();
+      if (document.getElementById('view-reports') && !document.getElementById('view-reports').classList.contains('hidden')) updateReportPreview();
     }
 
     function populateRestockDropdown() {
@@ -963,7 +1076,7 @@
         const actBtn = document.getElementById(`oeeSubBtn-${sub}`);
         if(actBtn) actBtn.className = "px-4 py-2 rounded-xl transition-all duration-200 bg-blue-600 text-white shadow-md";
         
-        if(sub==='alllogs')renderShiftsTable(); if(sub==='latest')renderLatestShiftCard(); 
+        if(sub==='alllogs')renderShiftsTable(); if(sub==='latest')renderLatestShiftCard(); if(sub==='oeeanalysis')renderOeeTelemetryChart();
     }
     
     function renderLatestShiftCard() {
@@ -978,6 +1091,49 @@
       tbody.innerHTML = shifts.length ? shifts.map(s => { const r = calculateShiftOee(s); return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 border-b border-slate-100 dark:border-slate-700/50"><td class="p-3.5 font-bold">${s.shift_date}</td><td class="p-3.5">${s.shift_type}</td><td class="p-3.5">Team ${s.team}</td><td class="p-3.5 text-right font-mono font-bold">${r.produced}</td><td class="p-3.5 text-right font-mono text-emerald-600">${r.good}</td><td class="p-3.5 text-right font-mono text-rose-600">${r.rejected}</td><td class="p-3.5 text-right font-mono">${r.downtimeMin}m</td><td class="p-3.5 text-right font-mono font-black ${r.oee>=0.85?'text-emerald-600':(r.oee>=0.6?'text-amber-600':'text-rose-600')}">${fmtPct(r.oee)}</td><td class="p-3.5 text-center space-x-2"><button onclick="viewShiftDetails('${s.id}')" class="text-blue-600 font-bold hover:underline">View</button><button onclick="editShiftRecord('${s.id}')" class="text-amber-600 font-bold hover:underline">Edit</button><button onclick="deleteShiftRecord('${s.id}')" class="text-rose-600 font-bold hover:underline">Delete</button></td></tr>`; }).join('') : `<tr><td colspan="9" class="text-center p-6 text-slate-500">No records</td></tr>`;
     }
 
+    function viewShiftDetails(id) {
+      const s = shifts.find(x => x.id.toString() === id.toString()); if (!s) return;
+      const r = calculateShiftOee(s);
+      const prods = productionRecords.filter(p => p.shift_id === s.id);
+      const dts = downtimeEvents.filter(d => d.shift_id === s.id);
+
+      document.getElementById('viewShiftTitle').innerText = `${s.shift_date} - ${s.shift_type} Shift (Team ${s.team})`;
+      
+      let html = `
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 text-center">
+          <div><span class="text-slate-400">Produced</span><p class="font-bold text-sm text-blue-600">${r.produced}</p></div>
+          <div><span class="text-slate-400">Good</span><p class="font-bold text-sm text-emerald-600">${r.good}</p></div>
+          <div><span class="text-slate-400">Scrap</span><p class="font-bold text-sm text-rose-600">${r.rejected}</p></div>
+          <div><span class="text-slate-400">OEE Score</span><p class="font-black text-sm text-emerald-600">${fmtPct(r.oee)}</p></div>
+        </div>
+        <div class="pt-2">
+          <h5 class="font-bold uppercase text-[10px] text-slate-400 mb-1 tracking-wider">Profiles Milled</h5>
+          <table class="w-full text-left text-xs border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+            <thead class="bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-500"><tr><th class="p-2">Code</th><th class="p-2 text-right">Target</th><th class="p-2 text-right">Run</th><th class="p-2 text-right">Scrap</th><th class="p-2">Reason</th></tr></thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+              ${prods.map(p => `<tr><td class="p-2 font-bold">${esc(p.profile_code)}</td><td class="p-2 text-right">${p.target||'-'}</td><td class="p-2 text-right">${p.produced}</td><td class="p-2 text-right text-rose-600">${p.rejected}</td><td class="p-2">${esc(p.reject_reason)||'-'}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      if (dts.length > 0) {
+        html += `
+          <div class="pt-2">
+            <h5 class="font-bold uppercase text-[10px] text-rose-500 mb-1 tracking-wider">Downtime Logs (${r.downtimeMin}m)</h5>
+            <div class="space-y-1">
+              ${dts.map(d => `<div class="flex justify-between bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/50 p-2 rounded-lg"><span class="font-bold">${esc(d.reason)}</span><span class="font-mono text-rose-600">${d.duration_min} min</span></div>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      html += `<div class="pt-2 text-slate-400 text-[11px] grid grid-cols-2 gap-2 border-t border-slate-100 dark:border-slate-700 mt-3"><div><b>Operator:</b> ${esc(s.operator_name)||'-'}</div><div><b>EPF No:</b> ${esc(s.epf_no)||'-'}</div><div><b>Supervisor Sign:</b> ${esc(s.supervisor_sign)||'-'}</div><div><b>Quality Sign:</b> ${esc(s.quality_sign)||'-'}</div></div>`;
+
+      document.getElementById('viewShiftBody').innerHTML = html;
+      openModal('modalViewShift');
+    }
+
     window.calcLack = function(inputElement) {
         const card = inputElement.closest('.prof-card-container');
         if (!card) return;
@@ -989,7 +1145,7 @@
         const lack = target - totalProduced;
         
         const lackInput = card.querySelector('.profLackInput');
-        if (lackInput) lackInput.value = lack; // Can be negative indicating over-production
+        if (lackInput) lackInput.value = lack; 
     };
 
     function addProfileCard(p=null) {
@@ -1058,7 +1214,6 @@
         let sid = id;
         const pNodes = document.querySelectorAll('#profileCardsContainer > div');
         const pp = [];
-        
         const newProfilesToInsert = []; 
         const profilesToUpdate = [];
 
@@ -1076,15 +1231,12 @@
             pp.push({ profile_code: c, ideal_cycle_seconds: cy, setup_min: 0, target: tg, produced: total_produced, rejected: rj, reject_reason: rr });
             
             const existingProfile = records.find(r => r.profile.toUpperCase() === c);
-            
             if (!existingProfile) {
-                // Insert new profile if not found
                 if (!newProfilesToInsert.some(x => x.profile === c)) {
                     newProfilesToInsert.push({ profile: c, cycle_seconds: cy, description: 'Auto-added from Shift Log', is_deleted: false, record_date: todayISO() });
                     records.push({ profile: c, cycle_seconds: cy }); 
                 }
             } else if (existingProfile.cycle_seconds !== cy && cy > 0) {
-                // Update profile cycle time if changed
                 if (!profilesToUpdate.some(x => x.id === existingProfile.id)) {
                     profilesToUpdate.push({ id: existingProfile.id, cycle_seconds: cy });
                 }
@@ -1120,13 +1272,11 @@
           if (dErr) throw dErr;
         }
         
-        // Push totally new profiles
         if (newProfilesToInsert.length > 0) {
             const { error: profErr } = await supabaseClient.from('cnc_cycle_times').insert(newProfilesToInsert);
             if (profErr) console.warn("Failed to auto-save new profiles:", profErr);
         }
 
-        // Update cycle times for existing profiles if changed
         if (profilesToUpdate.length > 0) {
             for (const pu of profilesToUpdate) {
                 const { error: updErr } = await supabaseClient.from('cnc_cycle_times').update({ cycle_seconds: pu.cycle_seconds }).eq('id', pu.id);
@@ -1286,64 +1436,386 @@
       doc.save(`Restock_Memo_${d}.pdf`); showToast("Memo Exported to PDF.");
     }
 
-    // --- ENHANCED EXECUTIVE REPORT PDF ---
-    function exportReportPDF() {
-      if (!shifts.length) return alert("No data available to export.");
-      const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', 'a4');
-      
-      doc.setFillColor(37, 99, 235); doc.rect(0, 0, 210, 18, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(16); doc.setFont("helvetica", "bold"); doc.text("CNC 5000 MACHINE", 14, 12); doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.text("EXECUTIVE OPERATIONS REPORT", 196, 11, { align: 'right' });
-      doc.setTextColor(30, 41, 59); doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.text("Plant Intelligence & OEE Summary", 14, 28); doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text(`Generated on: ${todayISO()}`, 14, 34);
+    // ==========================================
+    // ENHANCED REPORT BUILDER & EXPORTS
+    // ==========================================
 
-      const oeeResults = shifts.map(calculateShiftOee), totalShifts = shifts.length;
-      const totalProduced = oeeResults.reduce((sum, r) => sum + r.produced, 0), totalRejects = oeeResults.reduce((sum, r) => sum + r.rejected, 0);
-      const avgA = oeeResults.reduce((sum, r) => sum + r.availability, 0) / totalShifts, avgP = oeeResults.reduce((sum, r) => sum + r.performance, 0) / totalShifts, avgQ = oeeResults.reduce((sum, r) => sum + r.quality, 0) / totalShifts, avgOee = oeeResults.reduce((sum, r) => sum + r.oee, 0) / totalShifts;
+    function handleReportDateChange() {
+      const val = document.getElementById('repDateFilter').value;
+      const customRow = document.getElementById('repCustomDateRow');
+      if (val === 'custom') {
+          customRow.classList.remove('hidden');
+      } else {
+          customRow.classList.add('hidden');
+          updateReportPreview();
+      }
+    }
+
+    function getFilteredReportData() {
+      const filterType = document.getElementById('repDateFilter').value;
+      let startDateStr = '', endDateStr = todayISO();
+
+      if (filterType === '7') {
+          const d = new Date(); d.setDate(d.getDate() - 7);
+          startDateStr = d.toISOString().slice(0, 10);
+      } else if (filterType === '30') {
+          const d = new Date(); d.setDate(d.getDate() - 30);
+          startDateStr = d.toISOString().slice(0, 10);
+      } else if (filterType === 'custom') {
+          startDateStr = document.getElementById('repStartDate').value;
+          endDateStr = document.getElementById('repEndDate').value;
+          if (!startDateStr || !endDateStr) return null;
+      } else {
+          startDateStr = '1970-01-01'; // All time
+      }
+
+      const filteredShifts = shifts.filter(s => s.shift_date >= startDateStr && s.shift_date <= endDateStr);
+      const filteredShiftIds = new Set(filteredShifts.map(s => s.id));
+      
+      const filteredProds = productionRecords.filter(p => filteredShiftIds.has(p.shift_id));
+      const filteredDowntimes = downtimeEvents.filter(d => filteredShiftIds.has(d.shift_id));
+
+      return { fShifts: filteredShifts, fProds: filteredProds, fDowns: filteredDowntimes, startDateStr, endDateStr };
+    }
+
+    function updateReportPreview() {
+      const data = getFilteredReportData();
+      if (!data) return;
+
+      const oeeResults = data.fShifts.map(s => {
+          const prods = data.fProds.filter(p => p.shift_id === s.id);
+          const dts = data.fDowns.filter(d => d.shift_id === s.id);
+          const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
+          const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
+          const good = Math.max(0, produced - rejected);
+          const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
+          const plannedMin = Math.max(0, (parseInt(s.shift_length_min) || 720) - (parseInt(s.planned_break_min) || 90));
+          const operatingMin = Math.max(0, plannedMin - downtimeMin);
+          let idealMin = 0;
+          prods.forEach(p => {
+              let cycleSec = p.ideal_cycle_seconds || (records.find(r => r.profile.toUpperCase() === (p.profile_code||'').toUpperCase())?.cycle_seconds || 0);
+              idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
+          });
+          const a = plannedMin > 0 ? (operatingMin / plannedMin) : 0;
+          const p_rate = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0; 
+          const q = produced > 0 ? (good / produced) : 0;
+          return { produced, rejected, good, downtimeMin, oee: a * p_rate * q };
+      });
+
+      const tp = oeeResults.reduce((s, r)=>s+r.produced,0);
+      const tr = oeeResults.reduce((s, r)=>s+r.rejected,0);
+      const ao = data.fShifts.length ? oeeResults.reduce((s, r)=>s+r.oee,0)/data.fShifts.length : 0;
+
+      document.getElementById('prevShifts').innerText = data.fShifts.length;
+      document.getElementById('prevProduced').innerText = tp;
+      document.getElementById('prevScrap').innerText = tr;
+      document.getElementById('prevOee').innerText = fmtPct(ao);
+
+      // Render Preview Chart
+      const ch = [...data.fShifts].sort((a,b) => a.shift_date.localeCompare(b.shift_date));
+      const lbls = ch.map(s => s.shift_date.slice(5) + (s.shift_type==='Night'?'(N)':'(D)'));
+      
+      const chartOeeRes = ch.map(s => {
+          const prods = data.fProds.filter(p => p.shift_id === s.id);
+          const dts = data.fDowns.filter(d => d.shift_id === s.id);
+          const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
+          const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
+          const good = Math.max(0, produced - rejected);
+          const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
+          const plannedMin = Math.max(0, (parseInt(s.shift_length_min) || 720) - (parseInt(s.planned_break_min) || 90));
+          const operatingMin = Math.max(0, plannedMin - downtimeMin);
+          let idealMin = 0;
+          prods.forEach(p => {
+              let cycleSec = p.ideal_cycle_seconds || (records.find(r => r.profile.toUpperCase() === (p.profile_code||'').toUpperCase())?.cycle_seconds || 0);
+              idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
+          });
+          const a = plannedMin > 0 ? (operatingMin / plannedMin) : 0;
+          const p_rate = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0; 
+          const q = produced > 0 ? (good / produced) : 0;
+          return { oee: a * p_rate * q };
+      });
+
+      if (chartReportPreviewInst) chartReportPreviewInst.destroy();
+      const cv = document.getElementById('chartReportPreviewCanvas');
+      if (cv) {
+          chartReportPreviewInst = new Chart(cv.getContext('2d'), { 
+              type: 'line', 
+              data: { 
+                  labels: lbls.length ? lbls : ['No Data'], 
+                  datasets: [{
+                      label: 'OEE % Trend', 
+                      data: chartOeeRes.length ? chartOeeRes.map(x=>x.oee*100) : [0], 
+                      borderColor: '#2563eb', 
+                      backgroundColor: 'rgba(37, 99, 235, 0.1)', 
+                      fill: true, 
+                      tension: 0.3 
+                  }] 
+              }, 
+              options: { 
+                  responsive: true, 
+                  maintainAspectRatio: false, 
+                  plugins: { 
+                      legend: { display: true },
+                      customCanvasBackgroundColor: { color: 'white' }
+                  }, 
+                  scales: { 
+                      y: { beginAtZero: true, max: 120 } 
+                  } 
+              } 
+          });
+      }
+
+      // Summary preview table
+      const dm = {}; data.fDowns.forEach(d => { dm[d.reason] = (dm[d.reason]||0) + (parseInt(d.duration_min)||0); }); 
+      const da = Object.entries(dm).map(([r,m])=>({r,m})).sort((a,b)=>b.m-a.m);
+      const pm = {}; data.fProds.forEach(p => { pm[p.profile_code] = pm[p.profile_code]||{p:0, r:0}; pm[p.profile_code].p+=parseInt(p.produced)||0; pm[p.profile_code].r+=parseInt(p.rejected)||0; }); 
+      const pa = Object.entries(pm).map(([c,d])=>({c, g:d.p-d.r, r:d.r, rt:d.p>0?((d.r/d.p)*100).toFixed(1):0})).sort((a,b)=>b.g-a.g).slice(0,4);
+      
+      const sc = document.getElementById('reportSummaryPreviewContainer');
+      if(sc) {
+          sc.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div class="border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+                 <h5 class="font-bold text-slate-500 uppercase mb-2">Top Yield Profiles</h5>
+                 ${pa.length ? pa.map(x=>`<div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800"><span class="font-bold text-blue-600">${esc(x.c)}</span><span class="font-mono">${x.g} good (${x.rt}% scrap)</span></div>`).join('') : '<p class="text-slate-400">None</p>'}
+              </div>
+              <div class="border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+                 <h5 class="font-bold text-slate-500 uppercase mb-2">Downtime Causes</h5>
+                 ${da.length ? da.map(x=>`<div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800"><span class="font-bold text-slate-700 dark:text-slate-300">${esc(x.r)}</span><span class="font-mono text-rose-500">${x.m} min</span></div>`).join('') : '<p class="text-slate-400">None</p>'}
+              </div>
+            </div>
+          `;
+      }
+    }
+
+    function generateCustomPDF() {
+      const data = getFilteredReportData();
+      if (!data) return alert("Please select a valid date range.");
+      if (!data.fShifts.length) return alert("No production data available for the chosen date range.");
+
+      const title = document.getElementById('repTitle').value || 'Production Report';
+      const prepName = document.getElementById('repPrepName').value;
+      const prepRole = document.getElementById('repPrepRole').value;
+      const reviewer = document.getElementById('repReviewer').value || '_______________________';
+      const plantName = document.getElementById('repPlantName').value || 'CNC 5000 FACILITY';
+      
+      const chkSum = document.getElementById('chkExecSum').checked;
+      const chkChart = document.getElementById('chkCharts').checked;
+      const chkYield = document.getElementById('chkYield').checked;
+      const chkDown = document.getElementById('chkDown').checked;
+      const chkLogs = document.getElementById('chkLogs').checked;
+
+      const { jsPDF } = window.jspdf; 
+      const doc = new jsPDF('p', 'mm', 'a4');
+      
+      let cy = 0;
+      
+      // BRANDING BANNER
+      doc.setFillColor(30, 64, 175); 
+      doc.rect(0, 0, 210, 20, 'F'); 
+      doc.setTextColor(255, 255, 255); 
+      doc.setFontSize(16); 
+      doc.setFont("helvetica", "bold"); 
+      doc.text(plantName.toUpperCase(), 14, 13); 
+      
+      doc.setFontSize(9); 
+      doc.setFont("helvetica", "normal"); 
+      doc.text("ENGINEERING OPERATIONS & OEE INTELLIGENCE", 196, 13, { align: 'right' });
+
+      // DOCUMENT INFO
+      cy = 32;
+      doc.setTextColor(15, 23, 42); 
+      doc.setFontSize(15); 
+      doc.setFont("helvetica", "bold"); 
+      doc.text(title.toUpperCase(), 14, cy); 
+      
+      cy += 6;
+      doc.setFontSize(9.5); 
+      doc.setFont("helvetica", "normal"); 
+      let dateRangeStr = (data.startDateStr === '1970-01-01') ? 'All Time History' : `From ${data.startDateStr} to ${data.endDateStr}`;
+      doc.text(`Reporting Period: ${dateRangeStr}`, 14, cy);
+      doc.text(`Generated On: ${todayISO()}`, 196, cy, { align: 'right' });
+      cy += 10;
+
+      // Calculate Metrics
+      const oeeResults = data.fShifts.map(s => {
+          const prods = data.fProds.filter(p => p.shift_id === s.id);
+          const dts = data.fDowns.filter(d => d.shift_id === s.id);
+          const produced = prods.reduce((sum, p) => sum + (parseInt(p.produced) || 0), 0);
+          const rejected = prods.reduce((sum, p) => sum + (parseInt(p.rejected) || 0), 0);
+          const good = Math.max(0, produced - rejected);
+          const downtimeMin = dts.reduce((sum, d) => sum + (parseInt(d.duration_min) || 0), 0);
+          const plannedMin = Math.max(0, (parseInt(s.shift_length_min) || 720) - (parseInt(s.planned_break_min) || 90));
+          const operatingMin = Math.max(0, plannedMin - downtimeMin);
+          let idealMin = 0;
+          prods.forEach(p => {
+              let cycleSec = p.ideal_cycle_seconds || (records.find(r => r.profile.toUpperCase() === (p.profile_code||'').toUpperCase())?.cycle_seconds || 0);
+              idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
+          });
+          const a = plannedMin > 0 ? (operatingMin / plannedMin) : 0;
+          const p_rate = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0; 
+          const q = produced > 0 ? (good / produced) : 0;
+          return { produced, rejected, good, downtimeMin, a, p_rate, q, oee: a * p_rate * q };
+      });
+      const totalShifts = data.fShifts.length;
+      const totalProduced = oeeResults.reduce((sum, r) => sum + r.produced, 0);
+      const totalRejects = oeeResults.reduce((sum, r) => sum + r.rejected, 0);
       const totalDowntimeMin = oeeResults.reduce((sum, r) => sum + r.downtimeMin, 0);
+      const avgOee = oeeResults.reduce((sum, r) => sum + r.oee, 0) / totalShifts;
+      const avgA = oeeResults.reduce((sum, r) => sum + r.a, 0) / totalShifts;
+      const avgP = oeeResults.reduce((sum, r) => sum + r.p_rate, 0) / totalShifts;
+      const avgQ = oeeResults.reduce((sum, r) => sum + r.q, 0) / totalShifts;
 
-      doc.autoTable({ head: [['Total Shifts', 'Total Output', 'Scrap', 'Total Downtime', 'Avg OEE']], body: [[totalShifts, totalProduced, totalRejects, `${totalDowntimeMin} min`, fmtPct(avgOee)]], startY: 38, theme: 'grid', headStyles: { fillColor: [30, 41, 59], halign: 'center' }, styles: { halign: 'center', fontStyle: 'bold', fontSize: 11 } });
-      doc.autoTable({ head: [['Availability (A)', 'Performance (P)', 'Quality (Q)']], body: [[fmtPct(avgA), fmtPct(avgP), fmtPct(avgQ)]], startY: doc.lastAutoTable.finalY + 5, theme: 'plain', headStyles: { fillColor: [241, 245, 249], textColor: [100, 116, 139], halign: 'center' }, styles: { halign: 'center', fontStyle: 'bold', fontSize: 10, textColor: [37, 99, 235] } });
+      // 1. EXECUTIVE SUMMARY
+      if (chkSum) {
+          doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.text("1. Executive Summary & Composite OEE", 14, cy); cy += 5;
+          doc.autoTable({ 
+              head: [['Total Shifts', 'Total Output', 'Good Parts', 'Scrap Parts', 'Downtime', 'Plant OEE']], 
+              body: [[totalShifts, `${totalProduced} pcs`, `${totalProduced - totalRejects} pcs`, `${totalRejects} pcs`, `${totalDowntimeMin} min`, fmtPct(avgOee)]], 
+              startY: cy, 
+              theme: 'grid', 
+              headStyles: { fillColor: [30, 64, 175], halign: 'center' }, 
+              styles: { halign: 'center', fontStyle: 'bold', fontSize: 10 } 
+          });
+          cy = doc.lastAutoTable.finalY + 4;
+          
+          doc.autoTable({ 
+              head: [['Availability (A)', 'Performance (P)', 'Quality (Q)']], 
+              body: [[fmtPct(avgA), fmtPct(avgP), fmtPct(avgQ)]], 
+              startY: cy, 
+              theme: 'plain', 
+              headStyles: { fillColor: [241, 245, 249], textColor: [71, 85, 105], halign: 'center' }, 
+              styles: { halign: 'center', fontStyle: 'bold', fontSize: 9.5, textColor: [37, 99, 235] } 
+          });
+          cy = doc.lastAutoTable.finalY + 10;
+      }
 
-      const dtMap = {}; downtimeEvents.forEach(d => { dtMap[d.reason] = (dtMap[d.reason] || 0) + (parseInt(d.duration_min) || 0); });
-      const dtRows = Object.entries(dtMap).sort((a,b) => b[1] - a[1]).map(([r, m]) => [r, `${m} min`, totalDowntimeMin > 0 ? `${((m/totalDowntimeMin)*100).toFixed(1)}%` : '0%']);
-      doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 41, 59); doc.text("Downtime Breakdown", 14, doc.lastAutoTable.finalY + 12);
-      doc.autoTable({ head: [['Reason', 'Total Duration', '% of Total Downtime']], body: dtRows.length ? dtRows : [['No downtime recorded', '-', '-']], startY: doc.lastAutoTable.finalY + 16, theme: 'striped', headStyles: { fillColor: [71, 85, 105] } });
+      // 2. CHARTS (OEE Trend)
+      if (chkChart && chartReportPreviewInst) {
+          if (cy > 190) { doc.addPage(); cy = 20; }
+          doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.setTextColor(15, 23, 42); doc.text("2. Overall Equipment Effectiveness (OEE) Telemetry Graph", 14, cy); cy += 5;
+          try {
+              const imgData = chartReportPreviewInst.toBase64Image();
+              doc.addImage(imgData, 'PNG', 14, cy, 182, 60);
+              cy += 68;
+          } catch(e) { console.warn("Chart injection error", e); cy += 5; }
+      }
 
-      const pMap = {}; productionRecords.forEach(p => { pMap[p.profile_code] = pMap[p.profile_code] || {produced:0, rejected:0}; pMap[p.profile_code].produced += parseInt(p.produced)||0; pMap[p.profile_code].rejected += parseInt(p.rejected)||0; });
-      const pRows = Object.entries(pMap).sort((a,b) => (b[1].produced-b[1].rejected) - (a[1].produced-a[1].rejected)).map(([c, d]) => [c, d.produced, d.produced - d.rejected, d.rejected, d.produced > 0 ? ((d.rejected/d.produced)*100).toFixed(1) + '%' : '0%']);
-      doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.text("Profile Yield & Scrap Rates", 14, doc.lastAutoTable.finalY + 12);
-      doc.autoTable({ head: [['Profile Code', 'Target Achieved', 'Good Parts', 'Scrapped', 'Scrap Rate']], body: pRows.length ? pRows : [['No production recorded', '-', '-', '-', '-']], startY: doc.lastAutoTable.finalY + 16, theme: 'striped', headStyles: { fillColor: [71, 85, 105] }, columnStyles: { 4: { fontStyle: 'bold', textColor: [225, 29, 72] } } });
+      // 3. YIELD ANALYSIS
+      if (chkYield) {
+          if (cy > 230) { doc.addPage(); cy = 20; }
+          const pMap = {}; 
+          data.fProds.forEach(p => { 
+              pMap[p.profile_code] = pMap[p.profile_code] || {produced:0, rejected:0}; 
+              pMap[p.profile_code].produced += parseInt(p.produced)||0; 
+              pMap[p.profile_code].rejected += parseInt(p.rejected)||0; 
+          });
+          const pRows = Object.entries(pMap).sort((a,b) => (b[1].produced-b[1].rejected) - (a[1].produced-a[1].rejected)).map(([c, d]) => [c, d.produced, d.produced - d.rejected, d.rejected, d.produced > 0 ? ((d.rejected/d.produced)*100).toFixed(1) + '%' : '0%']);
+          
+          doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.text("3. Profile Yield & Scrap Analysis", 14, cy); cy += 5;
+          doc.autoTable({ 
+              head: [['Profile Code', 'Total Produced', 'Good Parts', 'Scrapped', 'Scrap Rate (%)']], 
+              body: pRows.length ? pRows : [['No data', '-', '-', '-', '-']], 
+              startY: cy, 
+              theme: 'striped', 
+              headStyles: { fillColor: [71, 85, 105] }, 
+              columnStyles: { 4: { fontStyle: 'bold', textColor: [225, 29, 72] } } 
+          });
+          cy = doc.lastAutoTable.finalY + 10;
+      }
 
-      const shiftRows = shifts.map(s => { const r = calculateShiftOee(s); return [s.shift_date, s.shift_type, s.team, r.produced, r.good, r.rejected, `${r.downtimeMin}m`, fmtPct(r.oee)]; });
-      doc.addPage(); doc.setFillColor(37, 99, 235); doc.rect(0, 0, 210, 18, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(16); doc.text("CNC 5000 MACHINE", 14, 12); doc.setFontSize(9); doc.setFont("helvetica", "normal"); doc.text("DETAILED LOGS", 196, 11, { align: 'right' });
-      doc.setTextColor(30, 41, 59); doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.text("Detailed Shift Logs", 14, 28);
-      doc.autoTable({ head: [['Date', 'Shift', 'Team', 'Produced', 'Good', 'Scrap', 'Downtime', 'OEE']], body: shiftRows, startY: 32, theme: 'grid', headStyles: { fillColor: [37, 99, 235] }, columnStyles: { 7: { fontStyle: 'bold' } } });
-      doc.save(`CNC_5000_Operations_Report_${todayISO()}.pdf`); showToast("Enhanced PDF Report Exported Successfully.");
-    }
+      // 4. DOWNTIME BREAKDOWN
+      if (chkDown) {
+          if (cy > 230) { doc.addPage(); cy = 20; }
+          const dtMap = {}; 
+          data.fDowns.forEach(d => { dtMap[d.reason] = (dtMap[d.reason] || 0) + (parseInt(d.duration_min) || 0); });
+          const dtRows = Object.entries(dtMap).sort((a,b) => b[1] - a[1]).map(([r, m]) => [r, `${m} min`, totalDowntimeMin > 0 ? `${((m/totalDowntimeMin)*100).toFixed(1)}%` : '0%']);
+          
+          doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.text("4. Factory Downtime Breakdown", 14, cy); cy += 5;
+          doc.autoTable({ 
+              head: [['Reason / Cause', 'Total Duration', '% of Downtime']], 
+              body: dtRows.length ? dtRows : [['No downtime recorded', '-', '-']], 
+              startY: cy, 
+              theme: 'striped', 
+              headStyles: { fillColor: [71, 85, 105] } 
+          });
+          cy = doc.lastAutoTable.finalY + 10;
+      }
 
-    function renderReportPreview() {
-      const c = document.getElementById('reportPreviewCard'); if (!c) return;
-      if (!shifts.length) { c.innerHTML = '<p class="text-slate-500">No data.</p>'; return; }
-      const or = shifts.map(calculateShiftOee), tp = or.reduce((s, r)=>s+r.produced,0), tr = or.reduce((s, r)=>s+r.rejected,0), ao = or.reduce((s, r)=>s+r.oee,0)/shifts.length, td = or.reduce((s, r)=>s+r.downtimeMin,0);
-      const dm = {}; downtimeEvents.forEach(d => { dm[d.reason] = (dm[d.reason]||0) + (parseInt(d.duration_min)||0); }); const da = Object.entries(dm).map(([r,m])=>({r,m})).sort((a,b)=>b.m-a.m);
-      const pm = {}; productionRecords.forEach(p => { pm[p.profile_code] = pm[p.profile_code]||{p:0, r:0}; pm[p.profile_code].p+=parseInt(p.produced)||0; pm[p.profile_code].r+=parseInt(p.rejected)||0; }); const pa = Object.entries(pm).map(([c,d])=>({c, g:d.p-d.r, r:d.r, rt:d.p>0?((d.r/d.p)*100).toFixed(1):0})).sort((a,b)=>b.g-a.g).slice(0,5);
+      // 5. SHIFT LOGS
+      if (chkLogs) {
+          if (cy > 230) { doc.addPage(); cy = 20; }
+          const shiftRows = data.fShifts.map((s, idx) => { 
+              const r = oeeResults[idx]; 
+              return [s.shift_date, s.shift_type, s.team, r.produced, r.good, r.rejected, `${r.downtimeMin}m`, fmtPct(r.oee)]; 
+          });
+          
+          doc.setFontSize(11); doc.setFont("helvetica", "bold"); doc.text("5. Detailed Shift Runs", 14, cy); cy += 5;
+          doc.autoTable({ 
+              head: [['Date', 'Shift', 'Team', 'Produced', 'Good', 'Scrap', 'Downtime', 'OEE']], 
+              body: shiftRows, 
+              startY: cy, 
+              theme: 'grid', 
+              headStyles: { fillColor: [15, 23, 42] }, 
+              columnStyles: { 7: { fontStyle: 'bold' } } 
+          });
+          cy = doc.lastAutoTable.finalY + 14;
+      }
+
+      // SIGNATURE BLOCK
+      if (cy > 245) { doc.addPage(); cy = 30; }
+      doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.5); doc.line(14, cy, 196, cy); cy += 12;
       
-      c.innerHTML = `
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-center text-xs"><div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700"><span class="font-bold text-slate-500 tracking-wider">SHIFTS</span><p class="text-2xl font-black mt-1">${shifts.length}</p></div><div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-2xl border border-blue-100 dark:border-blue-900"><span class="font-bold text-blue-500 tracking-wider">PRODUCED</span><p class="text-2xl font-black text-blue-600 mt-1">${tp}</p></div><div class="bg-emerald-50 dark:bg-emerald-900/30 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900"><span class="font-bold text-emerald-500 tracking-wider">GOOD</span><p class="text-2xl font-black text-emerald-600 mt-1">${tp-tr}</p></div><div class="bg-rose-50 dark:bg-rose-900/30 p-4 rounded-2xl border border-rose-100 dark:border-rose-900"><span class="font-bold text-rose-500 tracking-wider">SCRAP</span><p class="text-2xl font-black text-rose-600 mt-1">${tr}</p></div><div class="bg-amber-50 dark:bg-amber-900/30 p-4 rounded-2xl border border-amber-100 dark:border-amber-900"><span class="font-bold text-amber-500 tracking-wider">AVG OEE</span><p class="text-2xl font-black text-amber-600 mt-1">${fmtPct(ao)}</p></div></div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6"><div class="border border-slate-200 dark:border-slate-700 rounded-2xl p-5"><h4 class="text-xs font-black uppercase text-slate-500 mb-4 tracking-wider">Downtime Analysis (${td} min)</h4>${da.length?'<table class="w-full text-xs text-left"><thead class="border-b border-slate-200 dark:border-slate-700 text-slate-400"><tr><th>Reason</th><th class="text-right">Min</th><th class="text-right">%</th></tr></thead><tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">'+da.map(x=>`<tr><td class="py-2.5 font-bold text-slate-700 dark:text-slate-300">${esc(x.r)}</td><td class="py-2.5 text-right font-mono text-rose-500">${x.m}m</td><td class="py-2.5 text-right font-mono text-slate-500">${((x.m/td)*100).toFixed(1)}%</td></tr>`).join('')+'</tbody></table>':'<p class="text-xs text-slate-500">None</p>'}</div><div class="border border-slate-200 dark:border-slate-700 rounded-2xl p-5"><h4 class="text-xs font-black uppercase text-slate-500 mb-4 tracking-wider">Top Yield Profiles</h4>${pa.length?'<table class="w-full text-xs text-left"><thead class="border-b border-slate-200 dark:border-slate-700 text-slate-400"><tr><th>Profile</th><th class="text-right">Good</th><th class="text-right">Scrap Rate</th></tr></thead><tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">'+pa.map(x=>`<tr><td class="py-2.5 font-bold text-blue-600 dark:text-blue-400 text-sm">${esc(x.c)}</td><td class="py-2.5 text-right font-mono text-emerald-600 font-bold">${x.g}</td><td class="py-2.5 text-right font-mono ${x.rt>5?'text-rose-500 font-bold':''}">${x.rt}%</td></tr>`).join('')+'</tbody></table>':'<p class="text-xs text-slate-500">None</p>'}</div></div>
-      `;
+      doc.setFontSize(9.5); doc.setFont("helvetica", "bold"); doc.setTextColor(30, 41, 59);
+      doc.text("Prepared & Verified By:", 14, cy); 
+      doc.text("Reviewed & Approved By:", 120, cy); 
+      cy += 14;
+      
+      doc.line(14, cy, 75, cy); doc.line(120, cy, 180, cy); cy += 5;
+      
+      doc.setFontSize(9.5); doc.setFont("helvetica", "bold");
+      doc.text(prepName, 14, cy); 
+      doc.text(reviewer, 120, cy); cy += 4.5;
+      
+      doc.setFontSize(8.5); doc.setFont("helvetica", "normal"); doc.setTextColor(100, 116, 139);
+      doc.text(prepRole, 14, cy); 
+      doc.text("Authorized Signature", 120, cy);
+
+      doc.save(`CNC_5000_Report_${todayISO()}.pdf`); 
+      showToast("Professional PDF Report Generated.");
     }
-    
+
     function exportReportExcel() {
-      if (!shifts.length) return alert("No data"); const wb = XLSX.utils.book_new();
-      const sr = shifts.map(s => { const r = calculateShiftOee(s); return { Date: s.shift_date, Shift: s.shift_type, Team: s.team, Produced: r.produced, Good: r.good, Reject: r.rejected, Downtime: r.downtimeMin, OEE: fmtPct(r.oee) }; }); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sr), "Logs");
-      const dm = {}; let td = 0; downtimeEvents.forEach(d => { const m = parseInt(d.duration_min)||0; dm[d.reason] = (dm[d.reason]||0) + m; td+=m; }); const dr = Object.entries(dm).sort((a,b)=>b[1]-a[1]).map(([r,m])=>({Reason:r, Min:m, Pct:td>0?((m/td)*100).toFixed(1)+'%':'0%'})); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dr), "Downtime");
-      const pm = {}; productionRecords.forEach(p => { pm[p.profile_code] = pm[p.profile_code]||{p:0, r:0}; pm[p.profile_code].p+=parseInt(p.produced)||0; pm[p.profile_code].r+=parseInt(p.rejected)||0; }); const pr = Object.entries(pm).sort((a,b)=>b[1].p-a[1].p).map(([c,d])=>({Profile:c, Produced:d.p, Good:d.p-d.r, Reject:d.r, ScrapRate:d.p>0?((d.r/d.p)*100).toFixed(1)+'%':'0%'})); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pr), "Yields");
-      XLSX.writeFile(wb, "CNC_Operations_Data.xlsx"); showToast("Excel Exported.");
+      const data = getFilteredReportData();
+      if (!data || !data.fShifts.length) return alert("No data available for Excel export in this range.");
+      
+      const wb = XLSX.utils.book_new();
+      const sr = data.fShifts.map(s => { 
+        const r = calculateShiftOee(s); 
+        return { Date: s.shift_date, Shift: s.shift_type, Team: s.team, Produced: r.produced, Good: r.good, Reject: r.rejected, Downtime: r.downtimeMin, OEE: fmtPct(r.oee) }; 
+      }); 
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sr), "Shift_Logs");
+      
+      const dm = {}; let td = 0; 
+      data.fDowns.forEach(d => { const m = parseInt(d.duration_min)||0; dm[d.reason] = (dm[d.reason]||0) + m; td+=m; }); 
+      const dr = Object.entries(dm).sort((a,b)=>b[1]-a[1]).map(([r,m])=>({Reason:r, Min:m, Pct:td>0?((m/td)*100).toFixed(1)+'%':'0%'})); 
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dr), "Downtime");
+      
+      const pm = {}; 
+      data.fProds.forEach(p => { pm[p.profile_code] = pm[p.profile_code]||{p:0, r:0}; pm[p.profile_code].p+=parseInt(p.produced)||0; pm[p.profile_code].r+=parseInt(p.rejected)||0; }); 
+      const pr = Object.entries(pm).sort((a,b)=>b[1].p-a[1].p).map(([c,d])=>({Profile:c, Produced:d.p, Good:d.p-d.r, Reject:d.r, ScrapRate:d.p>0?((d.r/d.p)*100).toFixed(1)+'%':'0%'})); 
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pr), "Yields");
+      
+      XLSX.writeFile(wb, `CNC_Operations_Data_${todayISO()}.xlsx`); 
+      showToast("Filtered Excel file exported.");
     }
+
     function exportToExcel() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(records), "Profiles"); XLSX.writeFile(wb, "CNC_Profiles.xlsx"); }
     function generateEngineeringReportPDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text("Profile Catalog", 14, 15); doc.autoTable({ head: [['Profile', 'Desc', 'Length', 'Cycle', 'Feed']], body: displayedRecords.map(r => [r.profile, r.description||'', r.length||'', `${r.cycle_seconds}s`, r.feed_speeds||'']), startY: 20 }); doc.save("Catalog.pdf"); }
     function exportToolsToExcel() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(toolsList), "Tools"); XLSX.writeFile(wb, "CNC_Tools.xlsx"); }
     function generateToolsInventoryPDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text("Tools Inventory", 14, 15); doc.autoTable({ head: [['Category', 'Dia', 'Stock', 'Loc']], body: toolsDisplayed.map(t => [t.category, t.diameter, t.stock, t.location||'']), startY: 20 }); doc.save("Inventory.pdf"); }
 
+    // --- VAULT CLEANUP & RESTORATION ---
     async function cleanUpExpiredTrash() {
       try {
         const cutoffDate = new Date();
@@ -1441,7 +1913,7 @@
         await supabaseClient.from('cnc_cycle_times').delete().eq('id', id);
         await fetchAllData();
         renderBinArchive();
-        showToast("Profile permanently deleted from database.");
+        showToast("Profile permanently deleted.");
     }
 
     async function hardDeleteTool(id) {
@@ -1449,7 +1921,7 @@
         await supabaseClient.from('cnc_tool_bits').delete().eq('id', id);
         await fetchToolsData();
         renderBinArchive();
-        showToast("Tool permanently deleted from database.");
+        showToast("Tool permanently deleted.");
     }
 
     async function hardDeleteShift(id) {
@@ -1457,11 +1929,17 @@
         await supabaseClient.from('shifts').delete().eq('id', id);
         await fetchOeeData();
         renderBinArchive();
-        showToast("Shift permanently deleted from database.");
+        showToast("Shift permanently deleted.");
     }
 
     // --- BOOTSTRAP ---
-    document.addEventListener('DOMContentLoaded', () => { document.getElementById('memoDate').value = todayISO(); loadRecipients(); resetShiftLogForm(); fetchAllData(); fetchToolsData(); });
+    document.addEventListener('DOMContentLoaded', () => { 
+        document.getElementById('memoDate').value = todayISO(); 
+        loadRecipients(); 
+        resetShiftLogForm(); 
+        fetchAllData(); 
+        fetchToolsData(); 
+    });
   </script>
 </body>
 </html>
