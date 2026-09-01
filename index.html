@@ -329,7 +329,7 @@
             <div><label class="block font-bold text-slate-500 mb-1">Shift *</label><select id="logShiftType" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-bold outline-none focus:border-blue-500 transition-colors"><option value="Day">Day</option><option value="Night">Night</option></select></div>
             <div><label class="block font-bold text-slate-500 mb-1">Team *</label><select id="logTeam" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-bold outline-none focus:border-blue-500 transition-colors"><option value="A">Team A</option><option value="B">Team B</option></select></div>
             <div><label class="block font-bold text-slate-500 mb-1">EPF No.</label><input type="text" id="logEpf" placeholder="EPF No." class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none focus:border-blue-500 transition-colors"></div>
-            <div><label class="block font-bold text-slate-500 mb-1">Break Time (min)</label><input type="number" id="logPlannedBreak" value="90" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none font-bold focus:border-blue-500 transition-colors"></div>
+            <div><label class="block font-bold text-slate-500 mb-1">Break Time (min)</label><input type="number" id="logPlannedBreak" value="90" min="0" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none font-bold focus:border-blue-500 transition-colors"></div>
           </div>
           
           <div class="border-t border-slate-200 dark:border-slate-700 pt-4 space-y-3">
@@ -448,7 +448,6 @@
           <button onclick="autoPopulateLowStock()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm">+ Load Critical Stock (≤ 3)</button>
         </div>
         
-        <!-- NEW MANUAL ADDITION UI -->
         <div class="flex items-center gap-2 mt-3 pb-3 border-b border-slate-100 dark:border-slate-700">
            <select id="manualRestockSelect" class="flex-grow bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-xs font-bold outline-none focus:border-cyan-500">
                <option value="">-- Manually Add Tool to Requisition --</option>
@@ -501,7 +500,7 @@
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Profile Code *</label><input type="text" id="formProfile" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-bold outline-none focus:border-blue-500 transition-colors"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Description</label><input type="text" id="formDescription" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none focus:border-blue-500 transition-colors"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Length / Dimensions</label><input type="text" id="formLength" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none focus:border-blue-500 transition-colors"></div>
-        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Cycle Time (Seconds) *</label><input type="number" id="formCycleSeconds" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-mono font-bold text-blue-600 outline-none focus:border-blue-500 transition-colors"></div>
+        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Cycle Time (Seconds) *</label><input type="number" id="formCycleSeconds" min="0" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-mono font-bold text-blue-600 outline-none focus:border-blue-500 transition-colors"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Feed Speed</label><input type="text" id="formFeedSpeeds" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none focus:border-blue-500 transition-colors"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Tooling Config</label><input type="text" id="formTooling" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none focus:border-blue-500 transition-colors"></div>
         <div class="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700 mt-2"><button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-md transition">Save Profile</button></div>
@@ -534,7 +533,7 @@
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Sub-Type</label><input type="text" id="toolsFormSubType" placeholder="e.g. End Mill" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none focus:border-cyan-500"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Diameter / Size *</label><input type="text" id="toolsFormDiameter" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none focus:border-cyan-500"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Description</label><input type="text" id="toolsFormDescription" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none focus:border-cyan-500"></div>
-        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Stock Quantity *</label><input type="number" id="toolsFormStock" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-bold outline-none focus:border-cyan-500"></div>
+        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Stock Quantity *</label><input type="number" id="toolsFormStock" min="0" required class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 font-bold outline-none focus:border-cyan-500"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Location / Rack</label><input type="text" id="toolsFormLocation" class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 outline-none focus:border-cyan-500"></div>
         <div class="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700 mt-2"><button type="submit" class="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-md transition">Save Tool</button></div>
       </form>
@@ -584,13 +583,13 @@
     
     function openFormModal(id = null) {
       document.getElementById('recordForm').reset(); document.getElementById('formRowId').value = '';
-      if (id) { const t = records.find(x => x.id === id); if(t){ document.getElementById('formRowId').value = t.id; document.getElementById('formProfile').value = t.profile; document.getElementById('formCycleSeconds').value = t.cycle_seconds; document.getElementById('formDescription').value = t.description||''; document.getElementById('formLength').value = t.length||''; document.getElementById('formFeedSpeeds').value = t.feed_speeds||''; document.getElementById('formTooling').value = t.tooling||''; } }
+      if (id) { const t = records.find(x => x.id.toString() === id.toString()); if(t){ document.getElementById('formRowId').value = t.id; document.getElementById('formProfile').value = t.profile; document.getElementById('formCycleSeconds').value = t.cycle_seconds; document.getElementById('formDescription').value = t.description||''; document.getElementById('formLength').value = t.length||''; document.getElementById('formFeedSpeeds').value = t.feed_speeds||''; document.getElementById('formTooling').value = t.tooling||''; } }
       openModal('modalForm');
     }
 
     function openToolsFormModal(id = null) {
       document.getElementById('toolsToolForm').reset(); document.getElementById('toolsFormId').value = '';
-      if (id) { const t = toolsList.find(x => x.id === id); if(t){ document.getElementById('toolsFormId').value = t.id; document.getElementById('toolsFormCategory').value = t.category; document.getElementById('toolsFormSubType').value = t.sub_type||''; document.getElementById('toolsFormDiameter').value = t.diameter; document.getElementById('toolsFormDescription').value = t.description||''; document.getElementById('toolsFormStock').value = t.stock; document.getElementById('toolsFormLocation').value = t.location||''; } }
+      if (id) { const t = toolsList.find(x => x.id.toString() === id.toString()); if(t){ document.getElementById('toolsFormId').value = t.id; document.getElementById('toolsFormCategory').value = t.category; document.getElementById('toolsFormSubType').value = t.sub_type||''; document.getElementById('toolsFormDiameter').value = t.diameter; document.getElementById('toolsFormDescription').value = t.description||''; document.getElementById('toolsFormStock').value = t.stock; document.getElementById('toolsFormLocation').value = t.location||''; } }
       openModal('toolsModalForm');
     }
 
@@ -725,7 +724,6 @@
         const sel = document.getElementById('manualRestockSelect');
         if(!sel) return;
         let opt = '<option value="">-- Manually Add Tool to Requisition --</option>';
-        // Sort tools alphabetically by category and diameter for easier finding
         const sortedTools = [...toolsList].sort((a,b) => (a.category + a.diameter).localeCompare(b.category + b.diameter));
         sortedTools.forEach(t => {
             opt += `<option value="${t.id}">${esc(t.category)} - ${esc(t.diameter)} (Stock: ${t.stock})</option>`;
@@ -778,7 +776,6 @@
       if (!profilesLoaded || !toolsLoaded) return;
       document.getElementById('dashTotalProfiles').innerText = records.length;
       
-      // FIX: Changed to <= 3
       const lowStockCount = toolsList.filter(t => (parseInt(t.stock) || 0) <= 3).length;
       document.getElementById('dashToolsStock').innerText = `${toolsList.reduce((acc, t) => acc + (parseInt(t.stock) || 0), 0)} pcs`;
       document.getElementById('dashLowStockSummary').innerText = `${lowStockCount} critical stock`;
@@ -892,15 +889,22 @@
     }
 
     function viewProfileDetails(id) {
-      const r = records.find(item => item.id === id); if (!r) return;
+      const r = records.find(item => item.id.toString() === id.toString()); if (!r) return;
       document.getElementById('viewProfTitle').innerText = esc(r.profile);
       document.getElementById('viewProfBody').innerHTML = `<div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600"><div><span class="text-slate-400 font-bold">Cycle:</span> <b class="text-blue-600 font-mono">${r.cycle_seconds}s</b></div><div><span class="text-slate-400 font-bold">Tooling:</span> <b>${esc(r.tooling) || '-'}</b></div><div><span class="text-slate-400 font-bold">Feed:</span> <b>${esc(r.feed_speeds) || '-'}</b></div><div><span class="text-slate-400 font-bold">Length:</span> <b>${esc(r.length) || '-'}</b></div></div><div class="pt-2"><span class="text-slate-400 font-bold">Description:</span> <p>${esc(r.description) || 'None.'}</p></div>`;
       openModal('modalViewProfile');
     }
     
     async function submitForm(e) {
-      e.preventDefault(); const id = document.getElementById('formRowId').value, payload = { profile: document.getElementById('formProfile').value.trim().toUpperCase(), cycle_seconds: parseInt(document.getElementById('formCycleSeconds').value)||0, description: document.getElementById('formDescription').value.trim(), length: document.getElementById('formLength').value.trim(), feed_speeds: document.getElementById('formFeedSpeeds').value.trim(), tooling: document.getElementById('formTooling').value.trim(), is_deleted: false };
-      try { if (id) await supabaseClient.from('cnc_cycle_times').update(payload).eq('id', id).select(); else { payload.record_date = todayISO(); await supabaseClient.from('cnc_cycle_times').insert([payload]).select(); } closeModal('modalForm'); showToast("Saved Profile!"); fetchAllData(); } catch (err) { alert(err.message); }
+      e.preventDefault(); 
+      const id = document.getElementById('formRowId').value;
+      const cyc = Math.max(0, parseInt(document.getElementById('formCycleSeconds').value) || 0);
+      const payload = { profile: document.getElementById('formProfile').value.trim().toUpperCase(), cycle_seconds: cyc, description: document.getElementById('formDescription').value.trim(), length: document.getElementById('formLength').value.trim(), feed_speeds: document.getElementById('formFeedSpeeds').value.trim(), tooling: document.getElementById('formTooling').value.trim(), is_deleted: false };
+      try { 
+          if (id) await supabaseClient.from('cnc_cycle_times').update(payload).eq('id', id).select(); 
+          else { payload.record_date = todayISO(); await supabaseClient.from('cnc_cycle_times').insert([payload]).select(); } 
+          closeModal('modalForm'); showToast("Saved Profile!"); fetchAllData(); 
+      } catch (err) { alert(err.message); }
     }
     
     async function softDeleteRecord(id) { 
@@ -921,15 +925,21 @@
       toolsDisplayed = toolsList.filter(t => ((t.diameter||'').toLowerCase().includes(q) || (t.sub_type||'').toLowerCase().includes(q)) && (cat === 'ALL' || normalizeToolCategory(t.category) === cat));
       const tbody = document.getElementById('inventoryTableBody'); if (!tbody) return;
       tbody.innerHTML = toolsDisplayed.length ? toolsDisplayed.map((t, i) => {
-          // FIX: Limit changed to <= 3
           const isCritical = parseInt(t.stock) <= 3;
           return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700/50"><td class="p-3.5 font-bold">${esc(t.category)}</td><td class="p-3.5">${esc(t.sub_type)||'-'}</td><td class="p-3.5 font-mono">${esc(t.diameter)}</td><td class="p-3.5 font-mono text-center font-bold ${isCritical ? 'text-rose-600' : 'text-blue-600'}">${t.stock}</td><td class="p-3.5 text-center space-x-2"><button onclick="openToolsFormModal('${t.id}')" class="text-amber-600 font-bold hover:underline">Edit</button><button onclick="deleteTool('${t.id}')" class="text-rose-600 font-bold hover:underline">Delete</button></td></tr>`;
       }).join('') : `<tr><td colspan="5" class="text-center p-6 text-slate-500">No tools</td></tr>`;
     }
     
     async function submitToolForm(e) {
-      e.preventDefault(); const id = document.getElementById('toolsFormId').value, payload = { category: document.getElementById('toolsFormCategory').value, sub_type: document.getElementById('toolsFormSubType').value.trim(), diameter: document.getElementById('toolsFormDiameter').value.trim(), description: document.getElementById('toolsFormDescription').value.trim(), location: document.getElementById('toolsFormLocation').value.trim(), stock: parseInt(document.getElementById('toolsFormStock').value)||0, is_deleted: false };
-      try { if (id) await supabaseClient.from('cnc_tool_bits').update(payload).eq('id', id).select(); else await supabaseClient.from('cnc_tool_bits').insert([payload]).select(); closeModal('toolsModalForm'); showToast("Saved Tool!"); fetchToolsData(); } catch (err) { alert(err.message); }
+      e.preventDefault(); 
+      const id = document.getElementById('toolsFormId').value;
+      const stockQty = Math.max(0, parseInt(document.getElementById('toolsFormStock').value) || 0);
+      const payload = { category: document.getElementById('toolsFormCategory').value, sub_type: document.getElementById('toolsFormSubType').value.trim(), diameter: document.getElementById('toolsFormDiameter').value.trim(), description: document.getElementById('toolsFormDescription').value.trim(), location: document.getElementById('toolsFormLocation').value.trim(), stock: stockQty, is_deleted: false };
+      try { 
+          if (id) await supabaseClient.from('cnc_tool_bits').update(payload).eq('id', id).select(); 
+          else await supabaseClient.from('cnc_tool_bits').insert([payload]).select(); 
+          closeModal('toolsModalForm'); showToast("Saved Tool!"); fetchToolsData(); 
+      } catch (err) { alert(err.message); }
     }
     async function deleteTool(id) { 
         if(!confirm('Move tool to Vault?')) return; 
@@ -979,7 +989,7 @@
         const lack = target - totalProduced;
         
         const lackInput = card.querySelector('.profLackInput');
-        if (lackInput) lackInput.value = lack;
+        if (lackInput) lackInput.value = lack; // Can be negative indicating over-production
     };
 
     function addProfileCard(p=null) {
@@ -994,10 +1004,10 @@
 
       d.innerHTML = `
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Profile Code</label><input type="text" list="profileDatalist" onchange="window.autoFillCycleTime(this)" class="profCodeInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${esc(profVal)}" placeholder="Type or Select"></div>
-        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Cycle (s)</label><input type="number" class="profCycleInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-mono text-blue-600 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${pcy}"></div>
-        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Target</label><input type="number" oninput="window.calcLack(this)" class="profTargetInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?p.target:'0'}"></div>
-        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Good Pcs</label><input type="number" oninput="window.calcLack(this)" class="profGoodInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-emerald-600 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${dbGood}"></div>
-        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Scrap</label><input type="number" oninput="window.calcLack(this)" class="profRejectedInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-rose-600 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?p.rejected:'0'}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Cycle (s)</label><input type="number" min="0" class="profCycleInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-mono text-blue-600 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${pcy}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Target</label><input type="number" min="0" oninput="window.calcLack(this)" class="profTargetInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?p.target:'0'}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Good Pcs</label><input type="number" min="0" oninput="window.calcLack(this)" class="profGoodInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-emerald-600 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${dbGood}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Scrap</label><input type="number" min="0" oninput="window.calcLack(this)" class="profRejectedInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-rose-600 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?p.rejected:'0'}"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Lack</label><input type="number" readonly class="profLackInput w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2 font-bold text-amber-600 bg-slate-100 dark:bg-slate-900 outline-none cursor-not-allowed" value="0"></div>
         <div class="col-span-2"><label class="block text-[10px] font-bold text-slate-500 mb-1">Reject Reason</label><div class="flex gap-1"><input type="text" class="profRejectReasonInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${esc(p?.reject_reason)||''}"><button type="button" onclick="document.getElementById('profCard-${cardCounter}').remove()" class="text-rose-500 font-bold px-2 py-1 text-base hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg">×</button></div></div>
       `;
@@ -1018,7 +1028,7 @@
     
     function addDowntimeCard(p=null) {
       dtCounter++; const d = document.createElement('div'); d.className="p-3 border border-slate-200 dark:border-slate-600 rounded-xl flex flex-wrap items-center gap-2 bg-white dark:bg-slate-800 shadow-sm"; d.id=`dtCard-${dtCounter}`;
-      d.innerHTML = `<select class="dtReasonSelect border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors">${['Breakdown','Setup','Tool Change','Material Waiting','Power Outage','Other'].map(r=>`<option value="${r}" ${p?.reason===r?'selected':''}>${r}</option>`).join('')}</select><input type="number" class="dtDurationInput border border-slate-300 dark:border-slate-600 rounded-xl p-2 w-24 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" placeholder="Min" value="${p?p.duration_min:'15'}"><button type="button" onclick="document.getElementById('dtCard-${dtCounter}').remove()" class="text-rose-500 font-bold px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-rose-900/30 transition">×</button>`;
+      d.innerHTML = `<select class="dtReasonSelect border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors">${['Breakdown','Setup','Tool Change','Material Waiting','Power Outage','Other'].map(r=>`<option value="${r}" ${p?.reason===r?'selected':''}>${r}</option>`).join('')}</select><input type="number" min="0" class="dtDurationInput border border-slate-300 dark:border-slate-600 rounded-xl p-2 w-24 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" placeholder="Min" value="${p?p.duration_min:'15'}"><button type="button" onclick="document.getElementById('dtCard-${dtCounter}').remove()" class="text-rose-500 font-bold px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-rose-900/30 transition">×</button>`;
       document.getElementById('downtimeCardsContainer').appendChild(d);
     }
     
@@ -1034,7 +1044,7 @@
         team: document.getElementById('logTeam').value, 
         epf_no: document.getElementById('logEpf').value.trim(), 
         operator_name: document.getElementById('logOperator').value.trim(), 
-        planned_break_min: parseInt(document.getElementById('logPlannedBreak').value)||90, 
+        planned_break_min: Math.max(0, parseInt(document.getElementById('logPlannedBreak').value)||90), 
         was_planned: document.getElementById('logWasPlanned').value==='yes', 
         other_dept_used: document.getElementById('logOtherDept').value==='yes', 
         other_dept_period: document.getElementById('logOtherDeptPeriod').value.trim(), 
@@ -1046,32 +1056,44 @@
       
       try {
         let sid = id;
-        
         const pNodes = document.querySelectorAll('#profileCardsContainer > div');
         const pp = [];
+        
         const newProfilesToInsert = []; 
+        const profilesToUpdate = [];
 
         pNodes.forEach(el => {
           const c = el.querySelector('.profCodeInput').value.trim().toUpperCase(), 
-                cy = parseInt(el.querySelector('.profCycleInput').value)||0, 
-                tg = parseInt(el.querySelector('.profTargetInput').value)||0, 
-                gd = parseInt(el.querySelector('.profGoodInput').value)||0, 
-                rj = parseInt(el.querySelector('.profRejectedInput').value)||0, 
+                cy = Math.max(0, parseInt(el.querySelector('.profCycleInput').value)||0), 
+                tg = Math.max(0, parseInt(el.querySelector('.profTargetInput').value)||0), 
+                gd = Math.max(0, parseInt(el.querySelector('.profGoodInput').value)||0), 
+                rj = Math.max(0, parseInt(el.querySelector('.profRejectedInput').value)||0), 
                 rr = el.querySelector('.profRejectReasonInput').value.trim();
           
           const total_produced = gd + rj; 
           
           if (c) {
             pp.push({ profile_code: c, ideal_cycle_seconds: cy, setup_min: 0, target: tg, produced: total_produced, rejected: rj, reject_reason: rr });
-            if (!records.some(r => r.profile.toUpperCase() === c)) {
-                newProfilesToInsert.push({ profile: c, cycle_seconds: cy, description: 'Auto-added from Shift Log', is_deleted: false, record_date: todayISO() });
-                records.push({ profile: c, cycle_seconds: cy });
+            
+            const existingProfile = records.find(r => r.profile.toUpperCase() === c);
+            
+            if (!existingProfile) {
+                // Insert new profile if not found
+                if (!newProfilesToInsert.some(x => x.profile === c)) {
+                    newProfilesToInsert.push({ profile: c, cycle_seconds: cy, description: 'Auto-added from Shift Log', is_deleted: false, record_date: todayISO() });
+                    records.push({ profile: c, cycle_seconds: cy }); 
+                }
+            } else if (existingProfile.cycle_seconds !== cy && cy > 0) {
+                // Update profile cycle time if changed
+                if (!profilesToUpdate.some(x => x.id === existingProfile.id)) {
+                    profilesToUpdate.push({ id: existingProfile.id, cycle_seconds: cy });
+                }
             }
           }
         });
         
         const dNodes = document.querySelectorAll('#downtimeCardsContainer > div'), dp = [];
-        dNodes.forEach(el => { const r = el.querySelector('.dtReasonSelect').value, m = parseInt(el.querySelector('.dtDurationInput').value)||0; if (m > 0) dp.push({ reason: r, duration_min: m }); });
+        dNodes.forEach(el => { const r = el.querySelector('.dtReasonSelect').value, m = Math.max(0, parseInt(el.querySelector('.dtDurationInput').value)||0); if (m > 0) dp.push({ reason: r, duration_min: m }); });
         
         if (id) { 
           const { error: shiftErr } = await supabaseClient.from('shifts').update(sp).eq('id', id); 
@@ -1091,14 +1113,25 @@
           const { error: pErr } = await supabaseClient.from('production_records').insert(ppWithIds);
           if (pErr) throw pErr;
         }
+        
         if (dp.length > 0) {
           const dpWithIds = dp.map(d => ({ ...d, shift_id: sid }));
           const { error: dErr } = await supabaseClient.from('downtime_events').insert(dpWithIds);
           if (dErr) throw dErr;
         }
+        
+        // Push totally new profiles
         if (newProfilesToInsert.length > 0) {
             const { error: profErr } = await supabaseClient.from('cnc_cycle_times').insert(newProfilesToInsert);
             if (profErr) console.warn("Failed to auto-save new profiles:", profErr);
+        }
+
+        // Update cycle times for existing profiles if changed
+        if (profilesToUpdate.length > 0) {
+            for (const pu of profilesToUpdate) {
+                const { error: updErr } = await supabaseClient.from('cnc_cycle_times').update({ cycle_seconds: pu.cycle_seconds }).eq('id', pu.id);
+                if (updErr) console.warn("Failed to update profile cycle time:", updErr);
+            }
         }
 
         showToast("Shift Saved Successfully!"); 
@@ -1111,7 +1144,7 @@
     }
 
     function editShiftRecord(id) {
-      const s = shifts.find(x => x.id === id); if (!s) return;
+      const s = shifts.find(x => x.id.toString() === id.toString()); if (!s) return;
       document.getElementById('shiftFormId').value = s.id; document.getElementById('logDate').value = s.shift_date; document.getElementById('logShiftType').value = s.shift_type; document.getElementById('logTeam').value = s.team; document.getElementById('logEpf').value = s.epf_no||''; document.getElementById('logOperator').value = s.operator_name||''; document.getElementById('logPlannedBreak').value = s.planned_break_min||90; document.getElementById('logWasPlanned').value = s.was_planned===false?'no':'yes'; document.getElementById('logOtherDept').value = s.other_dept_used===true?'yes':'no'; document.getElementById('logOtherDeptPeriod').value = s.other_dept_period||''; document.getElementById('logOtherNotes').value = s.other_notes||''; document.getElementById('logSupervisorSign').value = s.supervisor_sign||''; document.getElementById('logQualitySign').value = s.quality_sign||'';
       document.getElementById('shiftLogFormTitle').innerText = `Edit Shift Record`; document.getElementById('shiftLogEditingBadge').classList.remove('hidden');
       document.getElementById('profileCardsContainer').innerHTML = ''; document.getElementById('downtimeCardsContainer').innerHTML = '';
@@ -1140,8 +1173,8 @@
     }
     function addProfileToPlanningCart() {
       const id = document.getElementById('planProfileSelect').value; if (!id) return alert('Select profile');
-      const r = records.find(x => x.id === id); if (!r) return;
-      const h = parseInt(document.getElementById('planHandlingSec').value)||0, q = parseInt(document.getElementById('planBatchQty').value)||1;
+      const r = records.find(x => x.id.toString() === id.toString()); if (!r) return;
+      const h = Math.max(0, parseInt(document.getElementById('planHandlingSec').value)||0), q = Math.max(1, parseInt(document.getElementById('planBatchQty').value)||1);
       planningCart.push({ id: r.id, profile: r.profile, cycle_seconds: r.cycle_seconds, handling_seconds: h, qty: q }); renderPlanningCart();
     }
     function clearPlanningCart() { planningCart = []; renderPlanningCart(); }
@@ -1173,12 +1206,10 @@
     }
 
     // --- RESTOCK MEMO ---
-    
-    // FIX: Auto-load limits changed to <= 3 and avoids duplicating manual entries
     function autoPopulateLowStock() { 
         const criticalTools = toolsList.filter(t => (parseInt(t.stock) || 0) <= 3);
         criticalTools.forEach(t => {
-            if(!toolsNoticeList.some(x => x.id === t.id)) {
+            if(!toolsNoticeList.some(x => x.id.toString() === t.id.toString())) {
                 toolsNoticeList.push({...t, req_qty: 5});
             }
         });
@@ -1186,27 +1217,24 @@
         showToast("Loaded critical stock tools (≤ 3)."); 
     }
 
-    // FIX: Manual Tool Addition Function
     function addManualToolToRestock() {
         const id = document.getElementById('manualRestockSelect').value;
         if (!id) return alert("Please select a tool first.");
         
-        const tool = toolsList.find(x => x.id === id);
+        const tool = toolsList.find(x => x.id.toString() === id.toString());
         if (!tool) return;
         
-        if (toolsNoticeList.some(x => x.id === id)) {
+        if (toolsNoticeList.some(x => x.id.toString() === id.toString())) {
             return showToast("Tool is already in the Requisition List.", true);
         }
         
         toolsNoticeList.push({...tool, req_qty: 5});
         renderToolsNoticeList();
         
-        // Reset dropdown to default after adding
         document.getElementById('manualRestockSelect').value = '';
         showToast(`${tool.category} added to requisition.`);
     }
 
-    // FIX: Styling update in restock list (Highlighting critical ones)
     function renderToolsNoticeList() {
       const c = document.getElementById('requisitionItemsContainer'); if (!c) return;
       c.innerHTML = toolsNoticeList.length ? toolsNoticeList.map((t, i) => {
@@ -1222,7 +1250,7 @@
               </div>
               <div class="flex items-center gap-3">
                   <label class="text-[10px] font-bold text-slate-500 tracking-wider">REQ QTY:</label>
-                  <input type="number" min="1" value="${t.req_qty}" onchange="toolsNoticeList[${i}].req_qty=parseInt(this.value)||1" class="w-16 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-center font-bold outline-none focus:border-cyan-500 transition">
+                  <input type="number" min="1" value="${t.req_qty}" onchange="toolsNoticeList[${i}].req_qty=Math.max(1,parseInt(this.value)||1)" class="w-16 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-center font-bold outline-none focus:border-cyan-500 transition">
                   <button onclick="toolsNoticeList.splice(${i},1); renderToolsNoticeList();" class="text-rose-500 font-bold px-2 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition shadow-sm ml-2">×</button>
               </div>
           </div>`;
@@ -1326,15 +1354,15 @@
         const expiredTools = toolsTrash.filter(t => t.deleted_at && t.deleted_at < cutoffIso);
         const expiredShifts = trashShifts.filter(s => s.deleted_at && s.deleted_at < cutoffIso);
 
-        if (expiredProfiles.length) { 
+        if (expiredProfiles.length > 0) { 
             await supabaseClient.from('cnc_cycle_times').delete().in('id', expiredProfiles.map(x=>x.id)); 
             trashRecords = trashRecords.filter(r => !expiredProfiles.includes(r)); 
         }
-        if (expiredTools.length) { 
+        if (expiredTools.length > 0) { 
             await supabaseClient.from('cnc_tool_bits').delete().in('id', expiredTools.map(x=>x.id)); 
             toolsTrash = toolsTrash.filter(t => !expiredTools.includes(t)); 
         }
-        if (expiredShifts.length) { 
+        if (expiredShifts.length > 0) { 
             await supabaseClient.from('shifts').delete().in('id', expiredShifts.map(x=>x.id)); 
             trashShifts = trashShifts.filter(s => !expiredShifts.includes(s)); 
         }
