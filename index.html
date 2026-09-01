@@ -270,7 +270,6 @@
       
       <!-- ENHANCED EDUCATIONAL OEE THEORY SECTION -->
       <div class="bg-[#0f172a] relative overflow-hidden text-white p-6 rounded-3xl shadow-xl border border-slate-700">
-        <!-- Background accents -->
         <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-blue-600/20 blur-3xl"></div>
         <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-emerald-600/20 blur-3xl"></div>
         
@@ -531,6 +530,9 @@
     </div>
   </div>
 
+  <!-- DATALIST FOR PROFILES -->
+  <datalist id="profileDatalist"></datalist>
+
   <script>
     // --- DATABASE CONFIG ---
     const SUPABASE_URL = "https://ohraoadfdegjfwckrqcz.supabase.co";
@@ -544,7 +546,7 @@
     let chartDashOeeInst = null, chartDashProductionInst = null, chartDashCycleTimeInst = null, chartDashToolsInst = null, chartProfile30Inst = null, chartOeeTelemetryInst = null;
     let profile30CurrentAngle = 'quantity', cardCounter = 0, dtCounter = 0, toastTimeout;
 
-    // --- FIX 1: TIMEZONE BUG ---
+    // --- TIMEZONE FIX ---
     const fmtPct = v => (v == null || isNaN(v)) ? '-' : (v * 100).toFixed(1) + '%';
     const fmtDateISO = d => (!d ? '' : ((d instanceof Date) ? d : new Date(d)).toISOString().slice(0, 10));
     const todayISO = () => {
@@ -606,12 +608,10 @@
       if (tabId === 'trash') renderBinArchive();
     }
 
-    // --- FIX 5: DOUBLE RENDER BUG ---
     function toggleDarkMode() {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
       document.querySelectorAll('.themeIcon').forEach(el => el.innerText = isDark ? '☀' : '🌙');
-      
       const currentTab = localStorage.getItem('activeCncTab') || 'dashboard';
       switchTab(currentTab);
     }
@@ -646,14 +646,19 @@
     }
 
     // --- DATA FETCHING ---
-    // --- FIX 3: RACE CONDITION ---
+    function updateDatalist() {
+      const dl = document.getElementById('profileDatalist');
+      if (dl) dl.innerHTML = records.map(r => `<option value="${r.profile}">`).join('');
+    }
+
     async function fetchAllData() {
       const { data, error } = await supabaseClient.from('cnc_cycle_times').select('*');
       document.getElementById('syncStatus').innerText = error ? 'Offline' : 'Online';
       records = (data || []).filter(r => !r.is_deleted);
       trashRecords = (data || []).filter(r => r.is_deleted);
-      profilesLoaded = true; // Set to true before fetchOeeData is called
+      profilesLoaded = true; 
       
+      updateDatalist(); // UPDATE DATALIST BEFORE LOADING OEE
       await fetchOeeData(); 
       
       applyFiltersAndRender();
@@ -661,8 +666,7 @@
       
       const activeTab = localStorage.getItem('activeCncTab') || 'dashboard';
       switchTab(activeTab);
-      
-      cleanUpExpiredTrash(); // Cleanup trash in background
+      cleanUpExpiredTrash(); 
     }
 
     async function fetchOeeData() {
@@ -935,6 +939,7 @@
         if (lackInput) lackInput.value = lack;
     };
 
+    // --- FIX: USE DATALIST INPUT INSTEAD OF SELECT ---
     function addProfileCard(p=null) {
       cardCounter++; 
       const d = document.createElement('div'); 
@@ -942,33 +947,14 @@
       d.id=`profCard-${cardCounter}`;
       
       let pcy = p?.ideal_cycle_seconds || (p?.profile_code ? records.find(x=>x.profile.toUpperCase()===p.profile_code.toUpperCase())?.cycle_seconds : '');
-      
-      let dbGood = '0';
-      if(p) {
-        let tot = parseInt(p.produced) || 0;
-        let rej = parseInt(p.rejected) || 0;
-        dbGood = Math.max(0, tot - rej).toString();
-      } else {
-        dbGood = '';
-      }
-
-      let profileOptions = '<option value="">-- Select Profile --</option>';
-      let foundInRecords = false;
-      records.forEach(r => {
-          const selected = (p && p.profile_code.toUpperCase() === r.profile.toUpperCase()) ? 'selected' : '';
-          if (selected) foundInRecords = true;
-          profileOptions += `<option value="${r.profile}" ${selected}>${r.profile}</option>`;
-      });
-
-      if (p && p.profile_code && !foundInRecords) {
-          profileOptions += `<option value="${p.profile_code}" selected>${p.profile_code} (Archived/Unknown)</option>`;
-      }
+      let profVal = p ? p.profile_code : '';
+      let dbGood = p ? Math.max(0, (parseInt(p.produced) || 0) - (parseInt(p.rejected) || 0)).toString() : '0';
 
       d.innerHTML = `
-        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Profile Code</label><select onchange="window.autoFillCycleTime(this)" class="profCodeInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors">${profileOptions}</select></div>
+        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Profile Code</label><input type="text" list="profileDatalist" onchange="window.autoFillCycleTime(this)" class="profCodeInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${profVal}" placeholder="Type or Select"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Cycle (s)</label><input type="number" class="profCycleInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-mono text-blue-600 font-bold bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${pcy}"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Target</label><input type="number" oninput="window.calcLack(this)" class="profTargetInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?p.target:'0'}"></div>
-        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Good Pcs</label><input type="number" oninput="window.calcLack(this)" class="profGoodInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-emerald-600 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?dbGood:'0'}"></div>
+        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Good Pcs</label><input type="number" oninput="window.calcLack(this)" class="profGoodInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-emerald-600 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${dbGood}"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Scrap</label><input type="number" oninput="window.calcLack(this)" class="profRejectedInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 font-bold text-rose-600 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?p.rejected:'0'}"></div>
         <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Lack</label><input type="number" readonly class="profLackInput w-full border border-slate-200 dark:border-slate-700 rounded-xl p-2 font-bold text-amber-600 bg-slate-100 dark:bg-slate-900 outline-none cursor-not-allowed" value="0"></div>
         <div class="col-span-2"><label class="block text-[10px] font-bold text-slate-500 mb-1">Reject Reason</label><div class="flex gap-1"><input type="text" class="profRejectReasonInput w-full border border-slate-300 dark:border-slate-600 rounded-xl p-2 bg-slate-50 dark:bg-slate-900/50 outline-none focus:border-blue-500 transition-colors" value="${p?.reject_reason||''}"><button type="button" onclick="document.getElementById('profCard-${cardCounter}').remove()" class="text-rose-500 font-bold px-2 py-1 text-base hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg">×</button></div></div>
@@ -981,7 +967,13 @@
       if (targetInput) window.calcLack(targetInput);
     }
     
-    window.autoFillCycleTime = function(input) { const c = input.value.trim().toUpperCase(), r = records.find(x => x.profile.toUpperCase() === c), ci = input.closest('div').parentElement.querySelector('.profCycleInput'); if (r && ci) ci.value = r.cycle_seconds; };
+    // Auto-fill works exactly the same with <input> as it did with <select>
+    window.autoFillCycleTime = function(input) { 
+        const c = input.value.trim().toUpperCase();
+        const r = records.find(x => x.profile.toUpperCase() === c); 
+        const ci = input.closest('div').parentElement.querySelector('.profCycleInput'); 
+        if (r && ci) ci.value = r.cycle_seconds; 
+    };
     
     function addDowntimeCard(p=null) {
       dtCounter++; const d = document.createElement('div'); d.className="p-3 border border-slate-200 dark:border-slate-600 rounded-xl flex flex-wrap items-center gap-2 bg-white dark:bg-slate-800 shadow-sm"; d.id=`dtCard-${dtCounter}`;
@@ -991,7 +983,6 @@
     
     function resetShiftLogForm() { document.getElementById('shiftLogForm').reset(); document.getElementById('shiftFormId').value=''; document.getElementById('shiftLogEditingBadge').classList.add('hidden'); document.getElementById('shiftLogFormTitle').innerText='Shift Production Slip'; document.getElementById('profileCardsContainer').innerHTML=''; document.getElementById('downtimeCardsContainer').innerHTML=''; document.getElementById('logDate').value=todayISO(); addProfileCard(); addProfileCard(); }
     
-    // --- FIX 2: SAFE UPDATE / PREVENT DATA LOSS ---
     async function submitShiftLog(e) {
       e.preventDefault(); 
       const id = document.getElementById('shiftFormId').value;
@@ -1015,8 +1006,10 @@
       try {
         let sid = id;
         
-        // Extract all data from UI first
-        const pNodes = document.querySelectorAll('#profileCardsContainer > div'), pp = [];
+        const pNodes = document.querySelectorAll('#profileCardsContainer > div');
+        const pp = [];
+        const newProfilesToInsert = []; // Store custom profiles to insert
+
         pNodes.forEach(el => {
           const c = el.querySelector('.profCodeInput').value.trim().toUpperCase(), 
                 cy = parseInt(el.querySelector('.profCycleInput').value)||0, 
@@ -1026,20 +1019,32 @@
                 rr = el.querySelector('.profRejectReasonInput').value.trim();
           
           const total_produced = gd + rj; 
+          
           if (c) {
             pp.push({ profile_code: c, ideal_cycle_seconds: cy, setup_min: 0, target: tg, produced: total_produced, rejected: rj, reject_reason: rr });
+            
+            // --- FIX: DETECT & AUTO-SAVE NEW PROFILES ---
+            // If the typed profile is NOT in our records array, add it!
+            if (!records.some(r => r.profile.toUpperCase() === c)) {
+                newProfilesToInsert.push({
+                    profile: c,
+                    cycle_seconds: cy,
+                    description: 'Auto-added from Shift Log',
+                    is_deleted: false,
+                    record_date: todayISO()
+                });
+                // Temporarily push to records to prevent duplicates in the same loop
+                records.push({ profile: c, cycle_seconds: cy });
+            }
           }
         });
         
         const dNodes = document.querySelectorAll('#downtimeCardsContainer > div'), dp = [];
         dNodes.forEach(el => { const r = el.querySelector('.dtReasonSelect').value, m = parseInt(el.querySelector('.dtDurationInput').value)||0; if (m > 0) dp.push({ reason: r, duration_min: m }); });
         
-        // Save to Database safely
         if (id) { 
           const { error: shiftErr } = await supabaseClient.from('shifts').update(sp).eq('id', id); 
           if(shiftErr) throw shiftErr;
-          
-          // Delete old related records ONLY after Shift updates correctly
           await supabaseClient.from('production_records').delete().eq('shift_id', id); 
           await supabaseClient.from('downtime_events').delete().eq('shift_id', id); 
         } 
@@ -1059,6 +1064,12 @@
           const dpWithIds = dp.map(d => ({ ...d, shift_id: sid }));
           const { error: dErr } = await supabaseClient.from('downtime_events').insert(dpWithIds);
           if (dErr) throw dErr;
+        }
+
+        // --- EXECUTE AUTO-SAVE TO CNC_CYCLE_TIMES ---
+        if (newProfilesToInsert.length > 0) {
+            const { error: profErr } = await supabaseClient.from('cnc_cycle_times').insert(newProfilesToInsert);
+            if (profErr) console.warn("Failed to auto-save new profiles:", profErr);
         }
 
         showToast("Shift Saved Successfully!"); 
@@ -1107,7 +1118,6 @@
     function clearPlanningCart() { planningCart = []; renderPlanningCart(); }
     function removeCartItem(idx) { planningCart.splice(idx, 1); renderPlanningCart(); }
     
-    // --- FIX 7: PLANNER ESTIMATED SHIFTS REAL-WORLD OEE ---
     function renderPlanningCart() {
       const c = document.getElementById('planningCartList'); if (!c) return;
       
@@ -1124,7 +1134,6 @@
       document.getElementById('calcTotalQty').innerText = `${tQ} pcs`; 
       document.getElementById('calcTheorTime').innerText = `${Math.floor(tS/3600)}h ${Math.floor((tS%3600)/60)}m`; 
       
-      // Calculate shifts considering actual OEE
       const requiredShifts = (tS / (10.5*3600)) / avgOee;
       document.getElementById('calcShiftRequirement').innerText = requiredShifts.toFixed(1);
     }
@@ -1142,7 +1151,6 @@
       c.innerHTML = toolsNoticeList.length ? toolsNoticeList.map((t, i) => `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600"><div><b class="text-slate-800 dark:text-slate-100 text-sm">${t.category} - ${t.diameter}</b><p class="text-[10px] text-slate-500 mt-0.5">Stock: <span class="text-rose-500 font-bold">${t.stock}</span></p></div><div class="flex items-center gap-3"><label class="text-[10px] font-bold text-slate-500 tracking-wider">REQ QTY:</label><input type="number" min="1" value="${t.req_qty}" onchange="toolsNoticeList[${i}].req_qty=parseInt(this.value)||1" class="w-16 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded p-1.5 text-center font-bold outline-none focus:border-cyan-500"><button onclick="toolsNoticeList.splice(${i},1); renderToolsNoticeList();" class="text-rose-500 font-bold px-2 py-1 rounded bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition ml-2">×</button></div></div>`).join('') : '<p class="text-xs text-slate-400 italic">No tools selected.</p>';
     }
 
-    // --- FIX 6: MEMO PDF SIGNATURE OVERFLOW ---
     function generateFormalSupervisorLetterPDF() {
       if (!toolsNoticeList.length) return alert("Load tools first!");
       const recs = memoRecipients.filter(r => r.selected); if (!recs.length) return alert("Select recipient!");
@@ -1230,7 +1238,6 @@
     function exportToolsToExcel() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(toolsList), "Tools"); XLSX.writeFile(wb, "CNC_Tools.xlsx"); }
     function generateToolsInventoryPDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text("Tools Inventory", 14, 15); doc.autoTable({ head: [['Category', 'Dia', 'Stock', 'Loc']], body: toolsDisplayed.map(t => [t.category, t.diameter, t.stock, t.location||'']), startY: 20 }); doc.save("Inventory.pdf"); }
 
-    // --- FIX 4: BACKGROUND TRASH CLEANUP ---
     async function cleanUpExpiredTrash() {
       try {
         const cutoffDate = new Date();
@@ -1254,7 +1261,6 @@
             trashShifts = trashShifts.filter(s => !expiredShifts.includes(s)); 
         }
         
-        // Refresh vault UI if active
         if(document.getElementById('view-trash') && !document.getElementById('view-trash').classList.contains('hidden')){
             renderBinArchive();
         }
