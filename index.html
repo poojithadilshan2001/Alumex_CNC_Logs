@@ -270,10 +270,25 @@
             </div>
             <div id="planningCartList" class="space-y-2 max-h-56 overflow-y-auto pr-1"><p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p></div>
           </div>
-          <div class="mt-6 p-5 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-4 text-center">
-            <div><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Parts</p><p id="calcTotalQty" class="text-xl font-black">0 pcs</p></div>
-            <div><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Time</p><p id="calcTheorTime" class="text-xl font-black text-blue-600">0h 0m</p></div>
-            <div><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Est Shifts</p><p id="calcShiftRequirement" class="text-xl font-black text-emerald-600">0.0</p></div>
+          
+          <div class="mt-6 p-5 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+            <!-- Dynamic Shift Requirements Input Setup -->
+            <div class="grid grid-cols-2 gap-4 border-b border-slate-200 dark:border-slate-600 pb-4">
+              <div>
+                  <label class="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">Shift Length (Hrs)</label>
+                  <input type="number" id="planShiftHrs" value="12" oninput="renderPlanningCart()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-bold outline-none focus:border-blue-500 shadow-sm">
+              </div>
+              <div>
+                  <label class="block text-[10px] font-bold text-slate-400 uppercase mb-0.5">Planned Break (Mins)</label>
+                  <input type="number" id="planBreakMins" value="90" oninput="renderPlanningCart()" class="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-2 text-xs font-bold outline-none focus:border-blue-500 shadow-sm">
+              </div>
+            </div>
+            <!-- Calculated Estimates -->
+            <div class="grid grid-cols-3 gap-4 text-center">
+              <div><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Parts</p><p id="calcTotalQty" class="text-xl font-black">0 pcs</p></div>
+              <div><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Time</p><p id="calcTheorTime" class="text-xl font-black text-blue-600">0h 0m</p></div>
+              <div><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Est Shifts</p><p id="calcShiftRequirement" class="text-xl font-black text-emerald-600">0.0</p></div>
+            </div>
           </div>
         </div>
       </div>
@@ -898,26 +913,30 @@
       return total;
     }
 
+    // Triggered when Shift Length or Planned Breaks change
     function onShiftTimeInputsChanged() {
-      const length = Math.max(0, parseInt(document.getElementById('logShiftLength').value) || 0);
-      const breakMin = Math.max(0, parseInt(document.getElementById('logPlannedBreak').value) || 0);
-      const plannedTime = Math.max(0, length - breakMin);
+      const length = Math.max(0, parseInt(document.getElementById('logShiftLength').value) || 720);
+      const breakMin = Math.max(0, parseInt(document.getElementById('logPlannedBreak').value) || 90);
       
+      // Calculate new baseline Planned Time
+      const plannedTime = Math.max(0, length - breakMin);
       document.getElementById('logPlannedTime').value = plannedTime;
-      const totalDowntime = getFormDowntimeMinutes();
-      document.getElementById('logOperatingTime').value = Math.max(0, plannedTime - totalDowntime);
+      
+      recalcOperatingTime();
     }
 
+    // Triggered when a user manually overrides the Planned Time
     function onPlannedTimeManuallyChanged() {
-      const plannedTime = Math.max(0, parseInt(document.getElementById('logPlannedTime').value) || 0);
-      const totalDowntime = getFormDowntimeMinutes();
-      document.getElementById('logOperatingTime').value = Math.max(0, plannedTime - totalDowntime);
+      recalcOperatingTime();
     }
 
+    // Cascades the current Planned Time down to Operating Time, factoring in events
     function recalcOperatingTime() {
-      const plannedTime = Math.max(0, parseInt(document.getElementById('logPlannedTime').value) || 0);
+      // Always base operating time on whatever is currently in the Planned Time field
+      const currentPlannedTime = Math.max(0, parseInt(document.getElementById('logPlannedTime').value) || 0);
       const totalDowntime = getFormDowntimeMinutes();
-      document.getElementById('logOperatingTime').value = Math.max(0, plannedTime - totalDowntime);
+      
+      document.getElementById('logOperatingTime').value = Math.max(0, currentPlannedTime - totalDowntime);
     }
 
     // --- CORE OEE LOGIC ---
@@ -933,18 +952,27 @@
       const shiftLengthMin = parseInt(shift.shift_length_min) || 720;
       const plannedBreakMin = parseInt(shift.planned_break_min) || 90;
       
-      // Use stored planned_time_min and operating_time_min if available, otherwise compute standard defaults
-      const plannedMin = shift.planned_time_min != null ? Math.max(0, parseInt(shift.planned_time_min)) : Math.max(0, shiftLengthMin - plannedBreakMin);
-      const operatingMin = shift.operating_time_min != null ? Math.max(0, parseInt(shift.operating_time_min)) : Math.max(0, plannedMin - downtimeMin);
+      // 1. Establish Planned Time (Respect database override, fallback to standard math)
+      const defaultPlannedMin = Math.max(0, shiftLengthMin - plannedBreakMin);
+      const plannedMin = shift.planned_time_min != null ? Math.max(0, parseInt(shift.planned_time_min)) : defaultPlannedMin;
       
+      // 2. Establish Operating Time (Respect database override, fallback to Planned - Downtime)
+      const defaultOperatingMin = Math.max(0, plannedMin - downtimeMin);
+      const operatingMin = shift.operating_time_min != null ? Math.max(0, parseInt(shift.operating_time_min)) : defaultOperatingMin;
+      
+      // 3. Calculate Ideal Operating Minutes based on produced parts
       let idealMin = 0;
       prods.forEach(p => {
         let cycleSec = p.ideal_cycle_seconds || (records.find(r => r.profile.toUpperCase() === (p.profile_code||'').toUpperCase())?.cycle_seconds || 0);
         idealMin += ((parseInt(p.produced) || 0) * cycleSec) / 60;
       });
       
+      // 4. Final OEE TPM Metrics
       const availability = plannedMin > 0 ? (operatingMin / plannedMin) : 0;
-      const performance = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.5) : 0; 
+      
+      // Cap performance at 1.0 (100%) to prevent minor cycle time variances from inflating total OEE
+      const performance = operatingMin > 0 ? Math.min(idealMin / operatingMin, 1.0) : 0; 
+      
       const quality = produced > 0 ? (good / produced) : 0;
       const oee = availability * performance * quality;
       
@@ -1487,13 +1515,33 @@
         if(avgOee === 0) avgOee = 0.75;
       }
 
-      if (!planningCart.length) { c.innerHTML = '<p class="text-xs text-slate-400 italic">No profiles in queue.</p>'; document.getElementById('calcTotalQty').innerText='0 pcs'; document.getElementById('calcTheorTime').innerText='0h 0m'; document.getElementById('calcShiftRequirement').innerText='0.0'; return; }
+      if (!planningCart.length) { 
+          c.innerHTML = '<p class="text-xs text-slate-400 italic">No profiles in the job assembly queue.</p>'; 
+          document.getElementById('calcTotalQty').innerText = '0 pcs'; 
+          document.getElementById('calcTheorTime').innerText = '0h 0m'; 
+          document.getElementById('calcShiftRequirement').innerText = '0.0'; 
+          return; 
+      }
+      
       let tQ = 0, tS = 0;
-      c.innerHTML = planningCart.map((x, i) => { const s = (x.cycle_seconds + x.handling_seconds) * x.qty; tQ += x.qty; tS += s; return `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600"><div><b class="text-blue-600 dark:text-blue-400 text-sm">${esc(x.profile)}</b><span class="ml-3 text-slate-500 font-bold">Qty: ${x.qty}</span></div><div class="flex gap-3 items-center"><span class="font-mono font-bold">${formatDuration(s)}</span><button onclick="removeCartItem(${i})" class="text-rose-500 font-bold px-2 py-1 rounded bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition">×</button></div></div>`; }).join('');
+      c.innerHTML = planningCart.map((x, i) => { 
+          const s = (x.cycle_seconds + x.handling_seconds) * x.qty; 
+          tQ += x.qty; 
+          tS += s; 
+          return `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-600"><div><b class="text-blue-600 dark:text-blue-400 text-sm">${esc(x.profile)}</b><span class="ml-3 text-slate-500 font-bold">Qty: ${x.qty}</span></div><div class="flex gap-3 items-center"><span class="font-mono font-bold">${formatDuration(s)}</span><button onclick="removeCartItem(${i})" class="text-rose-500 font-bold px-2 py-1 rounded bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition">×</button></div></div>`; 
+      }).join('');
+      
       document.getElementById('calcTotalQty').innerText = `${tQ} pcs`; 
       document.getElementById('calcTheorTime').innerText = `${Math.floor(tS/3600)}h ${Math.floor((tS%3600)/60)}m`; 
       
-      const requiredShifts = (tS / (10.5*3600)) / avgOee;
+      const shiftHrs = parseFloat(document.getElementById('planShiftHrs').value) || 12;
+      const breakMins = parseFloat(document.getElementById('planBreakMins').value) || 90;
+      
+      // Calculate net available seconds per shift
+      const netShiftSeconds = (shiftHrs * 3600) - (breakMins * 60);
+      
+      // Estimate shifts by factoring in the plant's average OEE
+      const requiredShifts = netShiftSeconds > 0 ? (tS / netShiftSeconds) / avgOee : 0;
       document.getElementById('calcShiftRequirement').innerText = requiredShifts.toFixed(1);
     }
 
